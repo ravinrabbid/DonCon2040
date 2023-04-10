@@ -13,7 +13,8 @@ add_compile_options(-Wall -Wextra -Werror)
 
 add_subdirectory(libs)
 
-file(GLOB ${PROJECT_NAME}_SOURCES src/*.cpp)
+file(GLOB ${PROJECT_NAME}_SOURCES src/*.cpp src/utils/*.cpp
+     src/peripherals/*.cpp)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 
