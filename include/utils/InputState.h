@@ -2,6 +2,7 @@
 #define _UTILS_INPUTSTATE_H_
 
 #include "usb/usb_driver.h"
+#include "usb/xinput_driver.h"
 
 #include <stdint.h>
 #include <string>
@@ -18,8 +19,10 @@ struct InputState {
     Drum drum;
 
   private:
+    xinput_report_t m_xinput_report;
     std::string m_debug_report;
 
+    usb_report_t getXinputReport();
     usb_report_t getDebugReport();
 
   public:

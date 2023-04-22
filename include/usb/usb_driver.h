@@ -19,7 +19,7 @@ typedef enum {
     // USB_MODE_SWITCH_HORIPAD,
     // USB_MODE_DUALSHOCK3,
     // USB_MODE_DUALSHOCK4,
-    // USB_MODE_XBOX360,
+    USB_MODE_XBOX360,
     USB_MODE_DEBUG,
 } usb_mode_t;
 
