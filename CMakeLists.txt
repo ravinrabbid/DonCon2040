@@ -21,7 +21,8 @@ add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC pico_stdlib pio_ws2812)
+target_link_libraries(${PROJECT_NAME} PUBLIC pico_stdlib pico_multicore
+                                             pio_ws2812)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
