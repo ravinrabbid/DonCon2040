@@ -1,5 +1,6 @@
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
+#include "usb/usb_driver.h"
 
 #include "GlobalConfiguration.h"
 
@@ -35,6 +36,9 @@ int main() {
 
     Utils::InputState input_state;
     Peripherals::Drum drum(Config::Default::drum_config);
+    usb_mode_t mode = USB_MODE_DEBUG;
+
+    usb_driver_init(mode);
 
     stdio_init_all();
 
@@ -43,18 +47,8 @@ int main() {
     while (true) {
         drum.updateInputState(input_state);
 
-        if (input_state.drum.don_left) {
-            printf("DON LEFT\n");
-        }
-        if (input_state.drum.don_right) {
-            printf("DON RIGHT\n");
-        }
-        if (input_state.drum.ka_left) {
-            printf("KA LEFT\n");
-        }
-        if (input_state.drum.ka_right) {
-            printf("KA RIGHT\n");
-        }
+        usb_driver_send_and_receive_report(input_state.getReport(mode));
+        usb_driver_task();
 
         queue_try_add(&input_queue, &input_state);
     }
