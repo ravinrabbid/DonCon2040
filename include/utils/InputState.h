@@ -12,7 +12,12 @@ namespace Doncon::Utils {
 struct InputState {
   public:
     struct Drum {
-        bool don_left, ka_left, don_right, ka_right;
+        struct Pad {
+            bool triggered;
+            uint16_t raw;
+        };
+
+        Pad don_left, ka_left, don_right, ka_right;
     };
 
   public:

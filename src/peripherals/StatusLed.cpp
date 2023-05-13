@@ -24,25 +24,25 @@ void StatusLed::update() {
 
     uint8_t num_colors = 0;
 
-    if (m_input_state.drum.don_left) {
+    if (m_input_state.drum.don_left.triggered) {
         mixed_red += m_config.don_left_color.r;
         mixed_green += m_config.don_left_color.g;
         mixed_blue += m_config.don_left_color.b;
         num_colors++;
     }
-    if (m_input_state.drum.ka_left) {
+    if (m_input_state.drum.ka_left.triggered) {
         mixed_red += m_config.ka_left_color.r;
         mixed_green += m_config.ka_left_color.g;
         mixed_blue += m_config.ka_left_color.b;
         num_colors++;
     }
-    if (m_input_state.drum.don_right) {
+    if (m_input_state.drum.don_right.triggered) {
         mixed_red += m_config.don_right_color.r;
         mixed_green += m_config.don_right_color.g;
         mixed_blue += m_config.don_right_color.b;
         num_colors++;
     }
-    if (m_input_state.drum.ka_right) {
+    if (m_input_state.drum.ka_right.triggered) {
         mixed_red += m_config.ka_right_color.r;
         mixed_green += m_config.ka_right_color.g;
         mixed_blue += m_config.ka_right_color.b;

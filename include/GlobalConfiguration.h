@@ -9,17 +9,14 @@ namespace Doncon::Config::Default {
 const Peripherals::Drum::Config drum_config = {
     // Pin config
     {
-        4, // Don Left Weak
-        3, // Ka Left Weak
-        2, // Don Right Weak
-        1, // Ka Right Weak
-
-        6,  // Don Left Strong
-        29, // Ka Left Strong
-        7,  // Don Right Strong
-        0,  // Ka Right Strong
+        0, // Don Left
+        1, // Ka Left
+        2, // Don Right
+        3, // Ka Right
     },
-    10, // Debounce delay in milliseconds
+    400, // Trigger threshold
+    100,  // Double hit threshold
+    17,  // Debounce delay in milliseconds
 };
 
 const Peripherals::StatusLed::Config led_config = {

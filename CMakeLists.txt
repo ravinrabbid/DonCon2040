@@ -22,7 +22,7 @@ target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_CURRENT_LIST_DIR}/include)
 
 target_link_libraries(
-  ${PROJECT_NAME} PUBLIC tinyusb_device tinyusb_board pico_stdlib
+  ${PROJECT_NAME} PUBLIC tinyusb_device tinyusb_board pico_stdlib hardware_adc
                          pico_multicore pio_ws2812)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)

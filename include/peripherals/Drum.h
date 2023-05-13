@@ -12,52 +12,45 @@ class Drum {
   public:
     struct Config {
         struct {
-            uint8_t don_left_weak;
-            uint8_t ka_left_weak;
-            uint8_t don_right_weak;
-            uint8_t ka_right_weak;
-
-            uint8_t don_left_strong;
-            uint8_t ka_left_strong;
-            uint8_t don_right_strong;
-            uint8_t ka_right_strong;
+            uint8_t don_left;
+            uint8_t ka_left;
+            uint8_t don_right;
+            uint8_t ka_right;
         } pins;
 
-        uint8_t debounce_delay_ms;
+        uint16_t trigger_threshold;
+        uint16_t double_hit_threshold;
+
+        uint16_t debounce_delay_ms;
     };
 
   private:
     enum class Id {
-        DON_LEFT_WEAK,
-        KA_LEFT_WEAK,
-        DON_RIGHT_WEAK,
-        KA_RIGHT_WEAK,
-        DON_LEFT_STRONG,
-        KA_LEFT_STRONG,
-        DON_RIGHT_STRONG,
-        KA_RIGHT_STRONG,
+        DON_LEFT,
+        KA_LEFT,
+        DON_RIGHT,
+        KA_RIGHT,
     };
 
     class Pad {
       private:
-        uint8_t gpio_pin;
-        uint32_t gpio_mask;
-
+        uint8_t pin;
         uint32_t last_change;
         bool active;
 
       public:
         Pad(uint8_t pin);
 
-        uint8_t getGpioPin() const { return gpio_pin; };
-        uint32_t getGpioMask() const { return gpio_mask; };
-
+        uint8_t getPin() const { return pin; };
         bool getState() const { return active; };
-        void setState(bool state, uint8_t debounce_delay);
+        void setState(bool state, uint16_t debounce_delay);
     };
 
     Config m_config;
     std::map<Id, Pad> m_pads;
+
+  private:
+    std::map<Id, uint16_t> sampleInputs(uint8_t count, uint16_t delay_us);
 
   public:
     Drum(const Config &config);
