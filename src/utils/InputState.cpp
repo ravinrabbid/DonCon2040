@@ -6,7 +6,8 @@
 namespace Doncon::Utils {
 
 InputState::InputState()
-    : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}}),
+    : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}}), dpad({false, false, false, false}),
+      buttons({false, false, false, false, false, false, false, false, false, false}),
       m_xinput_report({0x00, sizeof(xinput_report_t), 0, 0, 0, 0, 0, 0, 0, 0, {}}) {}
 
 usb_report_t InputState::getReport(usb_mode_t mode) {
@@ -28,24 +29,24 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
 }
 
 usb_report_t InputState::getXinputReport() {
-    m_xinput_report.buttons1 = 0                                          //
-                               | (false ? (1 << 0) : 0)                   // Dpad Up
-                               | (drum.don_left.triggered ? (1 << 1) : 0) // Dpad Down
-                               | (drum.ka_left.triggered ? (1 << 2) : 0)  // Dpad Left
-                               | (false ? (1 << 3) : 0)                   // Dpad Right
-                               | (false ? (1 << 4) : 0)                   // Start
-                               | (false ? (1 << 5) : 0)                   // Select
-                               | (false ? (1 << 6) : 0)                   // L3
-                               | (false ? (1 << 7) : 0);                  // R3
+    m_xinput_report.buttons1 = 0                                                         //
+                               | (dpad.up ? (1 << 0) : 0)                                // Dpad Up
+                               | ((dpad.down || drum.don_left.triggered) ? (1 << 1) : 0) // Dpad Down
+                               | ((dpad.left || drum.ka_left.triggered) ? (1 << 2) : 0)  // Dpad Left
+                               | (dpad.right ? (1 << 3) : 0)                             // Dpad Right
+                               | (buttons.start ? (1 << 4) : 0)                          // Start
+                               | (buttons.select ? (1 << 5) : 0)                         // Select
+                               | (false ? (1 << 6) : 0)                                  // L3
+                               | (false ? (1 << 7) : 0);                                 // R3
 
-    m_xinput_report.buttons2 = 0                                           //
-                               | (false ? (1 << 0) : 0)                    // L1
-                               | (false ? (1 << 1) : 0)                    // R1
-                               | (false ? (1 << 2) : 0)                    // Guide
-                               | (drum.don_right.triggered ? (1 << 4) : 0) // A
-                               | (drum.ka_right.triggered ? (1 << 5) : 0)  // B
-                               | (false ? (1 << 6) : 0)                    // X
-                               | (false ? (1 << 7) : 0);                   // Y
+    m_xinput_report.buttons2 = 0                                                              //
+                               | (buttons.l ? (1 << 0) : 0)                                   // L1
+                               | (buttons.r ? (1 << 1) : 0)                                   // R1
+                               | (buttons.home ? (1 << 2) : 0)                                // Guide
+                               | ((buttons.south || drum.don_right.triggered) ? (1 << 4) : 0) // A
+                               | ((buttons.east || drum.ka_right.triggered) ? (1 << 5) : 0)   // B
+                               | (buttons.west ? (1 << 6) : 0)                                // X
+                               | (buttons.north ? (1 << 7) : 0);                              // Y
 
     m_xinput_report.lt = 0;
     m_xinput_report.rt = 0;

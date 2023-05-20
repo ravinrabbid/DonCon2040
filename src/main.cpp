@@ -1,3 +1,4 @@
+#include "peripherals/Buttons.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 #include "usb/usb_driver.h"
@@ -36,6 +37,7 @@ int main() {
 
     Utils::InputState input_state;
     Peripherals::Drum drum(Config::Default::drum_config);
+    Peripherals::Buttons buttons(Config::Default::button_config); // Move to core 1?
     usb_mode_t mode = USB_MODE_XBOX360;
 
     usb_driver_init(mode);
@@ -46,6 +48,7 @@ int main() {
 
     while (true) {
         drum.updateInputState(input_state);
+        buttons.updateInputState(input_state);
 
         usb_driver_send_and_receive_report(input_state.getReport(mode));
         usb_driver_task();
