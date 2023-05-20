@@ -100,6 +100,53 @@ void Mcp23017::setPullup(uint8_t pin, Mcp23017::Port port, bool enable) {
     }
 }
 
+void Mcp23017::setReversePolarity(uint16_t reverse_mask) { writeRegister16(Register::IPOLA, reverse_mask); }
+
+void Mcp23017::setReversePolarity(Port port, uint8_t reverse_mask) {
+    switch (port) {
+    case Port::A:
+        return writeRegister8(Register::IPOLA, reverse_mask);
+    case Port::B:
+        return writeRegister8(Register::IPOLB, reverse_mask);
+    }
+}
+
+void Mcp23017::setReversePolarity(uint8_t pin, bool reverse) {
+    if (pin > 15) {
+        return;
+    }
+
+    if (pin > 7) {
+        return setReversePolarity(pin - 8, Port::B, reverse);
+    }
+    return setReversePolarity(pin, Port::A, reverse);
+}
+
+void Mcp23017::setReversePolarity(uint8_t pin, Port port, bool reverse) {
+    if (pin > 7) {
+        return;
+    }
+
+    Register target_register = Register::IPOLA;
+
+    switch (port) {
+    case Port::A:
+        target_register = Register::IPOLA;
+        break;
+    case Port::B:
+        target_register = Register::IPOLB;
+        break;
+    }
+
+    uint8_t reversed = readRegister8(target_register);
+
+    if (reverse) {
+        return writeRegister8(target_register, reversed | (1 << pin));
+    } else {
+        return writeRegister8(target_register, reversed & ~(1 << pin));
+    }
+}
+
 uint16_t Mcp23017::read() { return readRegister16(Register::GPIOA); }
 
 uint8_t Mcp23017::read(Port port) {

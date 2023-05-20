@@ -56,8 +56,9 @@ Buttons::Buttons(const Config &config) : m_config(config), m_socd_state{Id::DOWN
     gpio_pull_up(m_config.i2c.scl_pin);
 
     m_mcp23017 = std::make_unique<Mcp23017>(m_config.i2c.address, m_config.i2c.block);
-    m_mcp23017->setDirection(0xFFFF); // All inputs
-    m_mcp23017->setPullup(0xFFFF);    // All on
+    m_mcp23017->setDirection(0xFFFF);       // All inputs
+    m_mcp23017->setPullup(0xFFFF);          // All on
+    m_mcp23017->setReversePolarity(0xFFFF); // All reversed
 
     m_buttons.emplace(Id::UP, config.pins.dpad.up);
     m_buttons.emplace(Id::DOWN, config.pins.dpad.down);
@@ -76,7 +77,7 @@ Buttons::Buttons(const Config &config) : m_config(config), m_socd_state{Id::DOWN
 }
 
 void Buttons::updateInputState(Utils::InputState &input_state) {
-    uint16_t gpio_state = ~m_mcp23017->read();
+    uint16_t gpio_state = m_mcp23017->read();
 
     for (auto &button : m_buttons) {
         button.second.setState(gpio_state & button.second.getGpioMask(), m_config.debounce_delay_ms);

@@ -51,6 +51,11 @@ class Mcp23017 {
     void setPullup(uint8_t pin, bool enable);
     void setPullup(uint8_t pin, Port port, bool enable);
 
+    void setReversePolarity(uint16_t reverse_mask);
+    void setReversePolarity(Port port, uint8_t reverse_mask);
+    void setReversePolarity(uint8_t pin, bool reverse);
+    void setReversePolarity(uint8_t pin, Port port, bool reverse);
+
     uint16_t read();
     uint8_t read(Port port);
     bool read(uint8_t pin);
