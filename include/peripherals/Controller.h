@@ -1,5 +1,5 @@
-#ifndef _PERIPHERALS_BUTTONS_H_
-#define _PERIPHERALS_BUTTONS_H_
+#ifndef _PERIPHERALS_CONTROLLER_H_
+#define _PERIPHERALS_CONTROLLER_H_
 
 #include "utils/InputState.h"
 
@@ -107,4 +107,4 @@ class Buttons {
 
 } // namespace Doncon::Peripherals
 
-#endif // _PERIPHERALS_BUTTONS_H_
+#endif // _PERIPHERALS_CONTROLLER_H_

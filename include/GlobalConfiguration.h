@@ -1,7 +1,7 @@
 #ifndef _GLOBALCONFIGURATION_H_
 #define _GLOBALCONFIGURATION_H_
 
-#include "peripherals/Buttons.h"
+#include "peripherals/Controller.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 

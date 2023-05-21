@@ -1,4 +1,4 @@
-#include "peripherals/Buttons.h"
+#include "peripherals/Controller.h"
 
 #include "hardware/gpio.h"
 #include "pico/time.h"
@@ -23,25 +23,25 @@ void Buttons::Button::setState(bool state, uint8_t debounce_delay) {
 void Buttons::socdClean(Utils::InputState &input_state) {
 
     // Last input has priority
-    if (input_state.dpad.up && input_state.dpad.down) {
+    if (input_state.controller.dpad.up && input_state.controller.dpad.down) {
         if (m_socd_state.lastVertical == Id::DOWN) {
-            input_state.dpad.down = false;
+            input_state.controller.dpad.down = false;
         } else if (m_socd_state.lastVertical == Id::UP) {
-            input_state.dpad.up = false;
+            input_state.controller.dpad.up = false;
         }
-    } else if (input_state.dpad.up) {
+    } else if (input_state.controller.dpad.up) {
         m_socd_state.lastVertical = Id::UP;
     } else {
         m_socd_state.lastVertical = Id::DOWN;
     }
 
-    if (input_state.dpad.left && input_state.dpad.right) {
+    if (input_state.controller.dpad.left && input_state.controller.dpad.right) {
         if (m_socd_state.lastHorizontal == Id::RIGHT) {
-            input_state.dpad.right = false;
+            input_state.controller.dpad.right = false;
         } else if (m_socd_state.lastHorizontal == Id::LEFT) {
-            input_state.dpad.left = false;
+            input_state.controller.dpad.left = false;
         }
-    } else if (input_state.dpad.left) {
+    } else if (input_state.controller.dpad.left) {
         m_socd_state.lastHorizontal = Id::LEFT;
     } else {
         m_socd_state.lastHorizontal = Id::RIGHT;
@@ -83,20 +83,20 @@ void Buttons::updateInputState(Utils::InputState &input_state) {
         button.second.setState(gpio_state & button.second.getGpioMask(), m_config.debounce_delay_ms);
     }
 
-    input_state.dpad.up = m_buttons.at(Id::UP).getState();
-    input_state.dpad.down = m_buttons.at(Id::DOWN).getState();
-    input_state.dpad.left = m_buttons.at(Id::LEFT).getState();
-    input_state.dpad.right = m_buttons.at(Id::RIGHT).getState();
-    input_state.buttons.north = m_buttons.at(Id::NORTH).getState();
-    input_state.buttons.east = m_buttons.at(Id::EAST).getState();
-    input_state.buttons.south = m_buttons.at(Id::SOUTH).getState();
-    input_state.buttons.west = m_buttons.at(Id::WEST).getState();
-    input_state.buttons.l = m_buttons.at(Id::L).getState();
-    input_state.buttons.r = m_buttons.at(Id::R).getState();
-    input_state.buttons.start = m_buttons.at(Id::START).getState();
-    input_state.buttons.select = m_buttons.at(Id::SELECT).getState();
-    input_state.buttons.home = m_buttons.at(Id::HOME).getState();
-    input_state.buttons.share = m_buttons.at(Id::SHARE).getState();
+    input_state.controller.dpad.up = m_buttons.at(Id::UP).getState();
+    input_state.controller.dpad.down = m_buttons.at(Id::DOWN).getState();
+    input_state.controller.dpad.left = m_buttons.at(Id::LEFT).getState();
+    input_state.controller.dpad.right = m_buttons.at(Id::RIGHT).getState();
+    input_state.controller.buttons.north = m_buttons.at(Id::NORTH).getState();
+    input_state.controller.buttons.east = m_buttons.at(Id::EAST).getState();
+    input_state.controller.buttons.south = m_buttons.at(Id::SOUTH).getState();
+    input_state.controller.buttons.west = m_buttons.at(Id::WEST).getState();
+    input_state.controller.buttons.l = m_buttons.at(Id::L).getState();
+    input_state.controller.buttons.r = m_buttons.at(Id::R).getState();
+    input_state.controller.buttons.start = m_buttons.at(Id::START).getState();
+    input_state.controller.buttons.select = m_buttons.at(Id::SELECT).getState();
+    input_state.controller.buttons.home = m_buttons.at(Id::HOME).getState();
+    input_state.controller.buttons.share = m_buttons.at(Id::SHARE).getState();
 
     socdClean(input_state);
 }
