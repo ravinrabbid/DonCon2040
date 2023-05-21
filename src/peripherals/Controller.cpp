@@ -1,6 +1,5 @@
 #include "peripherals/Controller.h"
 
-#include "hardware/gpio.h"
 #include "pico/time.h"
 
 namespace Doncon::Peripherals {
@@ -49,12 +48,6 @@ void Buttons::socdClean(Utils::InputState &input_state) {
 }
 
 Buttons::Buttons(const Config &config) : m_config(config), m_socd_state{Id::DOWN, Id::RIGHT} {
-    i2c_init(m_config.i2c.block, m_config.i2c.speed_hz);
-    gpio_set_function(m_config.i2c.sda_pin, GPIO_FUNC_I2C);
-    gpio_set_function(m_config.i2c.scl_pin, GPIO_FUNC_I2C);
-    gpio_pull_up(m_config.i2c.sda_pin);
-    gpio_pull_up(m_config.i2c.scl_pin);
-
     m_mcp23017 = std::make_unique<Mcp23017>(m_config.i2c.address, m_config.i2c.block);
     m_mcp23017->setDirection(0xFFFF);       // All inputs
     m_mcp23017->setPullup(0xFFFF);          // All on

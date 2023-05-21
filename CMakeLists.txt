@@ -29,6 +29,7 @@ target_link_libraries(
          hardware_adc
          pico_multicore
          pio_ws2812
+         pico_ssd1306
          mcp23017)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)

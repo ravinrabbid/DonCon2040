@@ -1,4 +1,5 @@
 #include "peripherals/Controller.h"
+#include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 #include "usb/usb_driver.h"
@@ -19,9 +20,16 @@ queue_t controller_input_queue;
 void core1_task() {
     multicore_lockout_victim_init();
 
+    gpio_set_function(Config::Default::i2c_config.sda_pin, GPIO_FUNC_I2C);
+    gpio_set_function(Config::Default::i2c_config.scl_pin, GPIO_FUNC_I2C);
+    gpio_pull_up(Config::Default::i2c_config.sda_pin);
+    gpio_pull_up(Config::Default::i2c_config.scl_pin);
+    i2c_init(Config::Default::i2c_config.block, Config::Default::i2c_config.speed_hz);
+
     Utils::InputState input_state;
     Peripherals::Buttons buttons(Config::Default::button_config);
     Peripherals::StatusLed led(Config::Default::led_config);
+    Peripherals::Display display(Config::Default::display_config);
 
     while (true) {
         buttons.updateInputState(input_state);
@@ -33,6 +41,7 @@ void core1_task() {
         }
 
         led.update();
+        display.update();
 
         // sleep_ms(1);
     }

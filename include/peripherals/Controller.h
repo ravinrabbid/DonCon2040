@@ -3,6 +3,7 @@
 
 #include "utils/InputState.h"
 
+#include "hardware/i2c.h"
 #include <mcp23017/Mcp23017.h>
 
 #include <map>
@@ -14,12 +15,8 @@ namespace Doncon::Peripherals {
 class Buttons {
   public:
     struct Config {
-
         struct {
-            uint8_t sda_pin;
-            uint8_t scl_pin;
             i2c_inst_t *block;
-            uint speed_hz;
             uint8_t address;
         } i2c;
 

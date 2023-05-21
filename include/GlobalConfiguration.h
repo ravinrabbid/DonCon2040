@@ -2,12 +2,29 @@
 #define _GLOBALCONFIGURATION_H_
 
 #include "peripherals/Controller.h"
+#include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 
 #include "hardware/i2c.h"
 
-namespace Doncon::Config::Default {
+namespace Doncon::Config {
+
+struct I2c {
+    uint8_t sda_pin;
+    uint8_t scl_pin;
+    i2c_inst_t *block;
+    uint speed_hz;
+};
+
+namespace Default {
+
+const I2c i2c_config = {
+    6,       // SDA Pin
+    7,       // SCL Pin
+    i2c1,    // Block
+    1000000, // Speed
+};
 
 const Peripherals::Drum::Config drum_config = {
     // Pin config
@@ -23,13 +40,10 @@ const Peripherals::Drum::Config drum_config = {
 };
 
 const Peripherals::Buttons::Config button_config = {
-    // I2C config
+    // I2c config
     {
-        6,       // SDA Pin
-        7,       // SCL Pin
-        i2c1,    // Block
-        1000000, // Speed
-        0x20,    // Address
+        i2c_config.block, // Block
+        0x20,             // Address
     },
 
     // Pins
@@ -69,6 +83,12 @@ const Peripherals::StatusLed::Config led_config = {
     255,   // Brightness
 };
 
-} // namespace Doncon::Config::Default
+const Peripherals::Display::Config display_config = {
+    i2c_config.block, // Block
+    0x3C,             // Address
+};
+
+} // namespace Default
+} // namespace Doncon::Config
 
 #endif // _GLOBALCONFIGURATION_H_
