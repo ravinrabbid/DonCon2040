@@ -18,9 +18,14 @@ class Drum {
             uint8_t ka_right;
         } pins;
 
-        uint16_t trigger_threshold;
-        uint16_t double_hit_threshold;
+        struct {
+            uint16_t don_left;
+            uint16_t ka_left;
+            uint16_t don_right;
+            uint16_t ka_right;
+        } trigger_thresholds;
 
+        uint8_t sample_count;
         uint16_t debounce_delay_ms;
     };
 
@@ -50,7 +55,7 @@ class Drum {
     std::map<Id, Pad> m_pads;
 
   private:
-    std::map<Id, uint16_t> sampleInputs(uint8_t count, uint16_t delay_us);
+    std::map<Id, uint16_t> sampleInputs();
 
   public:
     Drum(const Config &config);

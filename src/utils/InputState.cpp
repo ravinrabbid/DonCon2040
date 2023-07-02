@@ -72,7 +72,7 @@ usb_report_t InputState::getDebugReport() {
             << std::setw(4) << drum.don_left.raw << "[" << std::setw(8) << bar(drum.don_left.raw) << "]"        //
             << "|" << (drum.don_right.triggered ? "*" : " ") << ") "                                            //
             << std::setw(4) << drum.don_right.raw << "[" << std::setw(8) << bar(drum.don_right.raw) << "]"      //
-            << "(" << (drum.ka_right.triggered ? "*" : " ") << "( " << std::setw(4) << drum.ka_right.raw << "[" //
+            << ")" << (drum.ka_right.triggered ? "*" : " ") << ") " << std::setw(4) << drum.ka_right.raw << "[" //
             << std::setw(8) << bar(drum.ka_right.raw) << "]"                                                    //
             << "\n";
     }

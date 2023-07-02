@@ -35,10 +35,10 @@ void core1_task() {
         buttons.updateInputState(input_state);
 
         queue_try_add(&controller_input_queue, &input_state.controller);
+        queue_try_remove(&drum_input_queue, &input_state.drum);
 
-        if (queue_try_remove(&drum_input_queue, &input_state.drum)) {
-            led.setInputState(input_state);
-        }
+        led.setInputState(input_state);
+        display.setInputState(input_state);
 
         led.update();
         display.update();

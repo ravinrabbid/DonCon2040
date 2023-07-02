@@ -29,14 +29,20 @@ const I2c i2c_config = {
 const Peripherals::Drum::Config drum_config = {
     // Pin config
     {
-        0, // Don Left
-        1, // Ka Left
-        2, // Don Right
-        3, // Ka Right
+        2, // Don Left
+        3, // Ka Left
+        1, // Don Right
+        0, // Ka Right
     },
-    400, // Trigger threshold
-    100, // Double hit threshold
-    17,  // Debounce delay in milliseconds
+    // Trigger thresholds soft
+    {
+        80, // Don Left
+        50,  // Ka Left
+        80, // Don Right
+        50,  // Ka Right
+    },
+    50, // ADC sample count
+    18, // Debounce delay in milliseconds
 };
 
 const Peripherals::Buttons::Config button_config = {
@@ -54,9 +60,9 @@ const Peripherals::Buttons::Config button_config = {
          3, // Right
      },
      {
-         8,  // North
+         10, // North
          9,  // East
-         10, // South
+         8,  // South
          11, // West
 
          4,  // L
