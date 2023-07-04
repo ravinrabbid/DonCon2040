@@ -111,10 +111,34 @@ static bool xinput_control_xfer_callback(uint8_t rhport, uint8_t stage, tusb_con
 
 static bool xinput_xfer_callback(uint8_t rhport, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes) {
     (void)rhport;
-    (void)ep_addr;
-    (void)result;
     (void)xferred_bytes;
 
+    if (result == XFER_RESULT_SUCCESS && ep_addr == endpoint_out) {
+        if (xinput_out_buffer[0] == 0x01) { // 0x00 is rumble, 0x01 is led
+            usb_player_led_t player_led = {.type = USB_PLAYER_LED_ID, .id = 0};
+
+            switch (xinput_out_buffer[2]) {
+            case 0x02:
+            case 0x06:
+                player_led.id = 0x01;
+                break;
+            case 0x03:
+            case 0x07:
+                player_led.id = 0x02;
+                break;
+            case 0x04:
+            case 0x08:
+                player_led.id = 0x04;
+                break;
+            case 0x05:
+            case 0x09:
+                player_led.id = 0x08;
+                break;
+            default:
+            }
+            usb_driver_get_player_led_cb()(player_led);
+        }
+    }
     return true;
 }
 

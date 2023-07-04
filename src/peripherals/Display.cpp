@@ -176,6 +176,16 @@ void Display::showMenu() { m_state = State::Menu; }
 
 static std::string modeToString(usb_mode_t mode) {
     switch (mode) {
+    case USB_MODE_SWITCH_TATACON:
+        return "Switch Tatacon";
+    case USB_MODE_SWITCH_HORIPAD:
+        return "Switch Horipad";
+    case USB_MODE_DUALSHOCK3:
+        return "Dualshock 3";
+    case USB_MODE_PS4_TATACON:
+        return "PS4 Tatacon";
+    case USB_MODE_DUALSHOCK4:
+        return "Dualshock 4";
     case USB_MODE_XBOX360:
         return "Xbox 360";
     case USB_MODE_DEBUG:

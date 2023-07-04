@@ -1,6 +1,7 @@
 #ifndef _UTILS_INPUTSTATE_H_
 #define _UTILS_INPUTSTATE_H_
 
+#include "usb/hid_driver.h"
 #include "usb/usb_driver.h"
 #include "usb/xinput_driver.h"
 
@@ -40,9 +41,15 @@ struct InputState {
     Controller controller;
 
   private:
+    hid_switch_report_t m_switch_report;
+    hid_ps3_report_t m_ps3_report;
+    hid_ps4_report_t m_ps4_report;
     xinput_report_t m_xinput_report;
     std::string m_debug_report;
 
+    usb_report_t getSwitchReport();
+    usb_report_t getPS3InputReport();
+    usb_report_t getPS4InputReport();
     usb_report_t getXinputReport();
     usb_report_t getDebugReport();
 

@@ -15,10 +15,11 @@ extern "C" {
 #endif
 
 typedef enum {
-    // USB_MODE_SWITCH_TATACON,
-    // USB_MODE_SWITCH_HORIPAD,
-    // USB_MODE_DUALSHOCK3,
-    // USB_MODE_DUALSHOCK4,
+    USB_MODE_SWITCH_TATACON,
+    USB_MODE_SWITCH_HORIPAD,
+    USB_MODE_DUALSHOCK3,
+    USB_MODE_PS4_TATACON,
+    USB_MODE_DUALSHOCK4,
     USB_MODE_XBOX360,
     USB_MODE_DEBUG,
 } usb_mode_t;
@@ -41,7 +42,26 @@ typedef struct {
     uint16_t size;
 } usb_report_t;
 
+typedef enum {
+    USB_PLAYER_LED_ID,
+    USB_PLAYER_LED_COLOR,
+} usb_player_led_type_t;
+
+typedef struct {
+    usb_player_led_type_t type;
+    union {
+        uint8_t id;
+        struct {
+            uint8_t red;
+            uint8_t green;
+            uint8_t blue;
+        };
+    };
+} usb_player_led_t;
+
 extern char *const usbd_desc_str[];
+
+typedef void (*usbd_player_led_cb_t)(usb_player_led_t);
 
 void usb_driver_init(usb_mode_t mode);
 void usb_driver_task();
@@ -49,6 +69,9 @@ void usb_driver_task();
 usb_mode_t usb_driver_get_mode();
 
 void usb_driver_send_and_receive_report(usb_report_t report);
+
+void usb_driver_set_player_led_cb(usbd_player_led_cb_t cb);
+usbd_player_led_cb_t usb_driver_get_player_led_cb();
 
 #ifdef __cplusplus
 }
