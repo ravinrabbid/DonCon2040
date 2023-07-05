@@ -19,6 +19,8 @@ struct I2c {
 
 namespace Default {
 
+const usb_mode_t usb_mode = USB_MODE_XBOX360;
+
 const I2c i2c_config = {
     6,       // SDA Pin
     7,       // SCL Pin

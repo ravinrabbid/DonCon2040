@@ -53,7 +53,7 @@ int main() {
 
     Utils::InputState input_state;
     Peripherals::Drum drum(Config::Default::drum_config);
-    usb_mode_t mode = USB_MODE_XBOX360;
+    usb_mode_t mode = Config::Default::usb_mode;
 
     usb_driver_init(mode);
 
