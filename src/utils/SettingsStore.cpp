@@ -11,7 +11,11 @@ namespace Doncon::Utils {
 static uint8_t read_byte(uint32_t offset) { return *(reinterpret_cast<uint8_t *>(XIP_BASE + offset)); }
 
 SettingsStore::SettingsStore()
-    : m_store_cache({m_magic_byte, Config::Default::usb_mode, Config::Default::drum_config.trigger_thresholds, {}}),
+    : m_store_cache({m_magic_byte,
+                     Config::Default::usb_mode,
+                     Config::Default::drum_config.trigger_thresholds,
+                     Config::Default::led_config.brightness,
+                     {}}),
       m_dirty(true), m_scheduled_reboot(RebootType::None) {
     uint32_t current_page = m_flash_offset + m_flash_size - m_store_size;
     bool found_valid = false;
@@ -52,6 +56,14 @@ void SettingsStore::setTriggerThresholds(Peripherals::Drum::Config::Thresholds t
     }
 }
 Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() { return m_store_cache.trigger_thresholds; }
+
+void SettingsStore::setLedBrightness(uint8_t brightness) {
+    if (m_store_cache.led_brightness != brightness) {
+        m_store_cache.led_brightness = brightness;
+        m_dirty = true;
+    }
+}
+uint8_t SettingsStore::getLedBrightness() { return m_store_cache.led_brightness; }
 
 void SettingsStore::store() {
     if (m_dirty) {

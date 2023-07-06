@@ -57,6 +57,8 @@ struct InputState {
     InputState();
 
     usb_report_t getReport(usb_mode_t mode);
+
+    bool checkHotkey();
 };
 
 } // namespace Doncon::Utils

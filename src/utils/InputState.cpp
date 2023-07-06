@@ -257,4 +257,24 @@ usb_report_t InputState::getDebugReport() {
     return {(uint8_t *)m_debug_report.c_str(), static_cast<uint16_t>(m_debug_report.size() + 1)};
 }
 
+bool InputState::checkHotkey() {
+    static uint32_t hold_since = 0;
+    static bool hold_active = false;
+    static const uint32_t hold_timeout = 2000;
+
+    if (controller.buttons.start && controller.buttons.select) {
+        uint32_t now = to_ms_since_boot(get_absolute_time());
+        if (!hold_active) {
+            hold_active = true;
+            hold_since = now;
+        } else if ((now - hold_since) > hold_timeout) {
+            hold_active = false;
+            return true;
+        }
+    } else {
+        hold_active = false;
+    }
+    return false;
+}
+
 } // namespace Doncon::Utils

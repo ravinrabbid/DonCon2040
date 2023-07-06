@@ -36,6 +36,7 @@ class StatusLed {
     StatusLed(const Config &config);
 
     void setInputState(const Utils::InputState input_state);
+    void setBrightness(const uint8_t brightness);
 
     void update();
 };

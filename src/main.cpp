@@ -3,6 +3,7 @@
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 #include "usb/usb_driver.h"
+#include "utils/Menu.h"
 #include "utils/SettingsStore.h"
 
 #include "GlobalConfiguration.h"
@@ -22,6 +23,7 @@ queue_t controller_input_queue;
 enum class ControlCommand {
     SetUsbMode,
     SetPlayerLed,
+    SetLedBrightness,
 };
 
 struct ControlMessage {
@@ -29,6 +31,7 @@ struct ControlMessage {
     union {
         usb_mode_t usb_mode;
         usb_player_led_t player_led;
+        uint8_t brightness;
     } data;
 };
 
@@ -60,6 +63,9 @@ void core1_task() {
                 } else if (control_msg.data.player_led.type == USB_PLAYER_LED_COLOR) {
                 }
                 break;
+            case ControlCommand::SetLedBrightness:
+                led.setBrightness(control_msg.data.brightness);
+                break;
             }
         }
 
@@ -87,6 +93,7 @@ int main() {
     Utils::InputState input_state;
 
     auto settings_store = std::make_shared<Utils::SettingsStore>();
+    Utils::Menu menu(settings_store);
 
     Peripherals::Drum drum(Config::Default::drum_config);
 
@@ -104,16 +111,40 @@ int main() {
 
         ctrl_message = {ControlCommand::SetUsbMode, {.usb_mode = mode}};
         queue_add_blocking(&control_queue, &ctrl_message);
+
+        ctrl_message = {ControlCommand::SetLedBrightness, {.brightness = settings_store->getLedBrightness()}};
+        queue_add_blocking(&control_queue, &ctrl_message);
     };
 
     readSettings();
 
     while (true) {
         drum.updateInputState(input_state);
-
         queue_try_remove(&controller_input_queue, &input_state.controller);
 
-        usb_driver_send_and_receive_report(input_state.getReport(mode));
+        if (menu.active()) {
+            menu.update(input_state.controller);
+            if (menu.active()) {
+                // auto display_msg = menu.getState();
+                // queue_add_blocking(&menu_display_queue, &display_msg);
+            } else {
+                settings_store->store();
+
+                // ControlMessage ctrl_message = {ControlCommand::ExitMenu, {}};
+                // queue_add_blocking(&control_queue, &ctrl_message);
+            }
+
+            readSettings();
+
+        } else if (input_state.checkHotkey()) {
+            menu.activate();
+
+            // ControlMessage ctrl_message{ControlCommand::EnterMenu, {}};
+            // queue_add_blocking(&control_queue, &ctrl_message);
+        } else {
+            usb_driver_send_and_receive_report(input_state.getReport(mode));
+        }
+
         usb_driver_task();
 
         queue_try_add(&drum_input_queue, &input_state);
