@@ -1,6 +1,9 @@
 #ifndef _PERIPHERALS_DISPLAY_H_
 #define _PERIPHERALS_DISPLAY_H_
 
+#include "usb/usb_driver.h"
+#include "utils/InputState.h"
+
 #include <ssd1306/ssd1306.h>
 
 #include "hardware/i2c.h"
@@ -26,6 +29,10 @@ class Display {
     Config m_config;
     State m_state;
 
+    Utils::InputState m_input_state;
+    usb_mode_t m_usb_mode;
+    uint8_t m_player_id;
+
     ssd1306_t m_display;
 
     void drawIdleScreen();
@@ -33,6 +40,10 @@ class Display {
 
   public:
     Display(const Config &config);
+
+    void setInputState(const Utils::InputState &state);
+    void setUsbMode(usb_mode_t mode);
+    void setPlayerId(uint8_t player_id);
 
     void showIdle();
     void showMenu();

@@ -165,11 +165,16 @@ static const std::array<uint8_t, 546> ka_r_bmp = {
     0x00, 0xff, 0xff, 0xff, 0xc0, 0x07, 0xff, 0xf0, 0x00, 0xff, 0xff, 0xff, 0xc0, 0x1f, 0xff, 0xf0, 0x00, 0xff, 0xff,
     0xff, 0xc1, 0xff, 0xff, 0xf0, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xf0, 0x00};
 
-Display::Display(const Config &config) : m_config(config), m_state(State::Idle) {
+Display::Display(const Config &config)
+    : m_config(config), m_state(State::Idle), m_input_state({}), m_usb_mode(USB_MODE_DEBUG), m_player_id(0) {
     m_display.external_vcc = false;
     ssd1306_init(&m_display, 128, 64, m_config.i2c_address, m_config.i2c_block);
     ssd1306_clear(&m_display);
 }
+
+void Display::setInputState(const Utils::InputState &state) { m_input_state = state; }
+void Display::setUsbMode(usb_mode_t mode) { m_usb_mode = mode; };
+void Display::setPlayerId(uint8_t player_id) { m_player_id = player_id; };
 
 void Display::showIdle() { m_state = State::Idle; }
 void Display::showMenu() { m_state = State::Menu; }

@@ -11,6 +11,13 @@ namespace Doncon::Peripherals {
 class Drum {
   public:
     struct Config {
+        struct Thresholds {
+            uint16_t don_left;
+            uint16_t ka_left;
+            uint16_t don_right;
+            uint16_t ka_right;
+        };
+
         struct {
             uint8_t don_left;
             uint8_t ka_left;
@@ -18,13 +25,7 @@ class Drum {
             uint8_t ka_right;
         } pins;
 
-        struct {
-            uint16_t don_left;
-            uint16_t ka_left;
-            uint16_t don_right;
-            uint16_t ka_right;
-        } trigger_thresholds;
-
+        Thresholds trigger_thresholds;
         uint8_t sample_count;
         uint16_t debounce_delay_ms;
     };

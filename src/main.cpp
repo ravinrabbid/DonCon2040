@@ -3,6 +3,7 @@
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
 #include "usb/usb_driver.h"
+#include "utils/SettingsStore.h"
 
 #include "GlobalConfiguration.h"
 
@@ -14,8 +15,22 @@
 
 using namespace Doncon;
 
+queue_t control_queue;
 queue_t drum_input_queue;
 queue_t controller_input_queue;
+
+enum class ControlCommand {
+    SetUsbMode,
+    SetPlayerLed,
+};
+
+struct ControlMessage {
+    ControlCommand command;
+    union {
+        usb_mode_t usb_mode;
+        usb_player_led_t player_led;
+    } data;
+};
 
 void core1_task() {
     multicore_lockout_victim_init();
@@ -26,12 +41,28 @@ void core1_task() {
     gpio_pull_up(Config::Default::i2c_config.scl_pin);
     i2c_init(Config::Default::i2c_config.block, Config::Default::i2c_config.speed_hz);
 
-    Utils::InputState input_state;
     Peripherals::Buttons buttons(Config::Default::button_config);
     Peripherals::StatusLed led(Config::Default::led_config);
     Peripherals::Display display(Config::Default::display_config);
 
+    Utils::InputState input_state;
+    ControlMessage control_msg;
+
     while (true) {
+        if (queue_try_remove(&control_queue, &control_msg)) {
+            switch (control_msg.command) {
+            case ControlCommand::SetUsbMode:
+                display.setUsbMode(control_msg.data.usb_mode);
+                break;
+            case ControlCommand::SetPlayerLed:
+                if (control_msg.data.player_led.type == USB_PLAYER_LED_ID) {
+                    display.setPlayerId(control_msg.data.player_led.id);
+                } else if (control_msg.data.player_led.type == USB_PLAYER_LED_COLOR) {
+                }
+                break;
+            }
+        }
+
         buttons.updateInputState(input_state);
 
         queue_try_add(&controller_input_queue, &input_state.controller);
@@ -48,18 +79,34 @@ void core1_task() {
 }
 
 int main() {
+    queue_init(&control_queue, sizeof(ControlMessage), 1);
     queue_init(&drum_input_queue, sizeof(Utils::InputState::Drum), 1);
     queue_init(&controller_input_queue, sizeof(Utils::InputState::Controller), 1);
+    multicore_launch_core1(core1_task);
 
     Utils::InputState input_state;
-    Peripherals::Drum drum(Config::Default::drum_config);
-    usb_mode_t mode = Config::Default::usb_mode;
 
+    auto settings_store = std::make_shared<Utils::SettingsStore>();
+
+    Peripherals::Drum drum(Config::Default::drum_config);
+
+    auto mode = settings_store->getUsbMode();
     usb_driver_init(mode);
+    usb_driver_set_player_led_cb([](usb_player_led_t player_led) {
+        auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
+        queue_add_blocking(&control_queue, &ctrl_message);
+    });
 
     stdio_init_all();
 
-    multicore_launch_core1(core1_task);
+    auto readSettings = [&]() {
+        ControlMessage ctrl_message;
+
+        ctrl_message = {ControlCommand::SetUsbMode, {.usb_mode = mode}};
+        queue_add_blocking(&control_queue, &ctrl_message);
+    };
+
+    readSettings();
 
     while (true) {
         drum.updateInputState(input_state);
