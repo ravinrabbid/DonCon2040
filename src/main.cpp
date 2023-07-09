@@ -17,6 +17,7 @@
 using namespace Doncon;
 
 queue_t control_queue;
+queue_t menu_display_queue;
 queue_t drum_input_queue;
 queue_t controller_input_queue;
 
@@ -24,6 +25,8 @@ enum class ControlCommand {
     SetUsbMode,
     SetPlayerLed,
     SetLedBrightness,
+    EnterMenu,
+    ExitMenu,
 };
 
 struct ControlMessage {
@@ -49,9 +52,15 @@ void core1_task() {
     Peripherals::Display display(Config::Default::display_config);
 
     Utils::InputState input_state;
+    Utils::Menu::State menu_display_msg;
     ControlMessage control_msg;
 
     while (true) {
+        buttons.updateInputState(input_state);
+
+        queue_try_add(&controller_input_queue, &input_state.controller);
+        queue_try_remove(&drum_input_queue, &input_state.drum);
+
         if (queue_try_remove(&control_queue, &control_msg)) {
             switch (control_msg.command) {
             case ControlCommand::SetUsbMode:
@@ -66,13 +75,17 @@ void core1_task() {
             case ControlCommand::SetLedBrightness:
                 led.setBrightness(control_msg.data.brightness);
                 break;
+            case ControlCommand::EnterMenu:
+                display.showMenu();
+                break;
+            case ControlCommand::ExitMenu:
+                display.showIdle();
+                break;
             }
         }
-
-        buttons.updateInputState(input_state);
-
-        queue_try_add(&controller_input_queue, &input_state.controller);
-        queue_try_remove(&drum_input_queue, &input_state.drum);
+        if (queue_try_remove(&menu_display_queue, &menu_display_msg)) {
+            display.setMenuState(menu_display_msg);
+        }
 
         led.setInputState(input_state);
         display.setInputState(input_state);
@@ -86,6 +99,7 @@ void core1_task() {
 
 int main() {
     queue_init(&control_queue, sizeof(ControlMessage), 1);
+    queue_init(&menu_display_queue, sizeof(Utils::Menu::State), 1);
     queue_init(&drum_input_queue, sizeof(Utils::InputState::Drum), 1);
     queue_init(&controller_input_queue, sizeof(Utils::InputState::Controller), 1);
     multicore_launch_core1(core1_task);
@@ -125,13 +139,13 @@ int main() {
         if (menu.active()) {
             menu.update(input_state.controller);
             if (menu.active()) {
-                // auto display_msg = menu.getState();
-                // queue_add_blocking(&menu_display_queue, &display_msg);
+                auto display_msg = menu.getState();
+                queue_add_blocking(&menu_display_queue, &display_msg);
             } else {
                 settings_store->store();
 
-                // ControlMessage ctrl_message = {ControlCommand::ExitMenu, {}};
-                // queue_add_blocking(&control_queue, &ctrl_message);
+                ControlMessage ctrl_message = {ControlCommand::ExitMenu, {}};
+                queue_add_blocking(&control_queue, &ctrl_message);
             }
 
             readSettings();
@@ -139,8 +153,8 @@ int main() {
         } else if (input_state.checkHotkey()) {
             menu.activate();
 
-            // ControlMessage ctrl_message{ControlCommand::EnterMenu, {}};
-            // queue_add_blocking(&control_queue, &ctrl_message);
+            ControlMessage ctrl_message{ControlCommand::EnterMenu, {}};
+            queue_add_blocking(&control_queue, &ctrl_message);
         } else {
             usb_driver_send_and_receive_report(input_state.getReport(mode));
         }

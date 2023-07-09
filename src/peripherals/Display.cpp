@@ -176,6 +176,8 @@ void Display::setInputState(const Utils::InputState &state) { m_input_state = st
 void Display::setUsbMode(usb_mode_t mode) { m_usb_mode = mode; };
 void Display::setPlayerId(uint8_t player_id) { m_player_id = player_id; };
 
+void Display::setMenuState(const Utils::Menu::State &menu_state) { m_menu_state = menu_state; }
+
 void Display::showIdle() { m_state = State::Idle; }
 void Display::showMenu() { m_state = State::Menu; }
 
@@ -220,9 +222,77 @@ void Display::drawIdleScreen() {
     if (m_input_state.drum.ka_right.triggered) {
         ssd1306_bmp_show_image_with_offset(&m_display, ka_r_bmp.data(), ka_r_bmp.size(), 64 - 26, 12);
     }
+    // Player "LEDs"
+    if (m_player_id != 0) {
+        for (uint8_t i = 0; i < 4; ++i) {
+            if (m_player_id & (1 << i)) {
+                ssd1306_draw_square(&m_display, ((127) - ((4 - i) * 6)) - 1, 2, 4, 4);
+            } else {
+                ssd1306_draw_square(&m_display, (127) - ((4 - i) * 6), 3, 2, 2);
+            }
+        }
+    }
+
+    // Menu hint
+    ssd1306_draw_line(&m_display, 0, 54, 128, 54);
+    ssd1306_draw_string(&m_display, 0, 56, 1, "Hold STA+SEL for Menu");
 }
 
-void Display::drawMenuScreen() {}
+void Display::drawMenuScreen() {
+    auto descriptor_it = Utils::Menu::descriptors.find(m_menu_state.page);
+    if (descriptor_it == Utils::Menu::descriptors.end()) {
+        return;
+    }
+
+    // Background
+    switch (descriptor_it->second.type) {
+    case Utils::Menu::Descriptor::Type::Root:
+        // ssd1306_bmp_show_image(&m_display, menu_screen_top.data(), menu_screen_top.size());
+        break;
+    case Utils::Menu::Descriptor::Type::Selection:
+    case Utils::Menu::Descriptor::Type::Value:
+        // ssd1306_bmp_show_image(&m_display, menu_screen_sub.data(), menu_screen_sub.size());
+        break;
+    case Utils::Menu::Descriptor::Type::RebootInfo:
+        break;
+    }
+
+    // Heading
+    ssd1306_draw_string(&m_display, 0, 0, 1, descriptor_it->second.name.c_str());
+
+    // Current Selection
+    std::string selection;
+    switch (descriptor_it->second.type) {
+    case Utils::Menu::Descriptor::Type::Root:
+    case Utils::Menu::Descriptor::Type::Selection:
+    case Utils::Menu::Descriptor::Type::RebootInfo:
+        selection = descriptor_it->second.items.at(m_menu_state.selection).first;
+        break;
+    case Utils::Menu::Descriptor::Type::Value:
+        selection = std::to_string(m_menu_state.selection);
+        break;
+    }
+    ssd1306_draw_string(&m_display, (127 - (selection.length() * 12)) / 2, 15, 2, selection.c_str());
+
+    // Breadcrumbs
+    switch (descriptor_it->second.type) {
+    case Utils::Menu::Descriptor::Type::Root:
+    case Utils::Menu::Descriptor::Type::Selection: {
+        auto selection_count = descriptor_it->second.items.size();
+        for (uint8_t i = 0; i < selection_count; ++i) {
+            if (i == m_menu_state.selection) {
+                ssd1306_draw_square(&m_display, ((127) - ((selection_count - i) * 6)) - 1, 2, 4, 4);
+            } else {
+                ssd1306_draw_square(&m_display, (127) - ((selection_count - i) * 6), 3, 2, 2);
+            }
+        }
+    } break;
+    case Utils::Menu::Descriptor::Type::RebootInfo:
+        break;
+    case Utils::Menu::Descriptor::Type::Value:
+        break;
+    }
+}
 
 void Display::update() {
     static const uint32_t interval_ms = 17; // Limit to ~60fps

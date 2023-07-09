@@ -3,6 +3,7 @@
 
 #include "usb/usb_driver.h"
 #include "utils/InputState.h"
+#include "utils/Menu.h"
 
 #include <ssd1306/ssd1306.h>
 
@@ -33,6 +34,8 @@ class Display {
     usb_mode_t m_usb_mode;
     uint8_t m_player_id;
 
+    Utils::Menu::State m_menu_state;
+
     ssd1306_t m_display;
 
     void drawIdleScreen();
@@ -44,6 +47,8 @@ class Display {
     void setInputState(const Utils::InputState &state);
     void setUsbMode(usb_mode_t mode);
     void setPlayerId(uint8_t player_id);
+
+    void setMenuState(const Utils::Menu::State &menu_state);
 
     void showIdle();
     void showMenu();
