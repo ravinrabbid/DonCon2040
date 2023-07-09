@@ -50,7 +50,7 @@ void Menu::activate() {
     m_active = true;
 }
 
-static InputState::Controller::Buttons checkPressed(const InputState::Controller &controller_state) {
+static InputState::Controller checkPressed(const InputState::Controller &controller_state) {
     struct ButtonState {
         enum State {
             Idle,
@@ -70,7 +70,13 @@ static InputState::Controller::Buttons checkPressed(const InputState::Controller
     static ButtonState state_south = {ButtonState::State::Idle, 0, 0};
     static ButtonState state_west = {ButtonState::State::Idle, 0, 0};
 
-    InputState::Controller::Buttons result{false, false, false, false, false, false, false, false, false, false};
+    static ButtonState state_up = {ButtonState::State::Idle, 0, 0};
+    static ButtonState state_down = {ButtonState::State::Idle, 0, 0};
+    static ButtonState state_left = {ButtonState::State::Idle, 0, 0};
+    static ButtonState state_right = {ButtonState::State::Idle, 0, 0};
+
+    InputState::Controller result{{false, false, false, false},
+                                  {false, false, false, false, false, false, false, false, false, false}};
 
     auto handle_button = [](ButtonState &button_state, bool input_state) {
         bool result = false;
@@ -108,10 +114,15 @@ static InputState::Controller::Buttons checkPressed(const InputState::Controller
         return result;
     };
 
-    result.north = handle_button(state_north, controller_state.buttons.north);
-    result.east = handle_button(state_east, controller_state.buttons.east);
-    result.south = handle_button(state_south, controller_state.buttons.south);
-    result.west = handle_button(state_west, controller_state.buttons.west);
+    result.buttons.north = handle_button(state_north, controller_state.buttons.north);
+    result.buttons.east = handle_button(state_east, controller_state.buttons.east);
+    result.buttons.south = handle_button(state_south, controller_state.buttons.south);
+    result.buttons.west = handle_button(state_west, controller_state.buttons.west);
+
+    result.dpad.up = handle_button(state_up, controller_state.dpad.up);
+    result.dpad.down = handle_button(state_down, controller_state.dpad.down);
+    result.dpad.left = handle_button(state_left, controller_state.dpad.left);
+    result.dpad.right = handle_button(state_right, controller_state.dpad.right);
 
     return result;
 }
@@ -213,7 +224,7 @@ void Menu::performValueAction(Menu::Descriptor::Action action, uint8_t value) {
 }
 
 void Menu::update(const InputState::Controller &controller_state) {
-    InputState::Controller::Buttons pressed = checkPressed(controller_state);
+    InputState::Controller pressed = checkPressed(controller_state);
 
     auto descriptor_it = descriptors.find(m_state.page);
     if (descriptor_it == descriptors.end()) {
@@ -223,7 +234,7 @@ void Menu::update(const InputState::Controller &controller_state) {
 
     if (descriptor_it->second.type == Descriptor::Type::RebootInfo) {
         m_active = false;
-    } else if (pressed.north) {
+    } else if (pressed.dpad.left) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             if (m_state.selection > 0) {
@@ -242,7 +253,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.west) {
+    } else if (pressed.dpad.right) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             if (m_state.selection < UINT8_MAX) {
@@ -261,7 +272,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.south) {
+    } else if (pressed.buttons.east) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Selection:
@@ -273,7 +284,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.east) {
+    } else if (pressed.buttons.south) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             performSelectionAction(descriptor_it->second.items.at(0).second);
