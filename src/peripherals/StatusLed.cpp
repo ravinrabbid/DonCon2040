@@ -18,7 +18,7 @@ void StatusLed::setInputState(const Utils::InputState input_state) { m_input_sta
 void StatusLed::setBrightness(const uint8_t brightness) { m_config.brightness = brightness; }
 
 void StatusLed::update() {
-    static float brightness_factor = m_config.brightness / static_cast<float>(UINT8_MAX);
+    float brightness_factor = m_config.brightness / static_cast<float>(UINT8_MAX);
 
     uint16_t mixed_red = 0;
     uint16_t mixed_green = 0;
