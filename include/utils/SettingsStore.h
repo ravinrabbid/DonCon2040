@@ -20,10 +20,11 @@ class SettingsStore {
         uint8_t in_use;
         usb_mode_t usb_mode;
         Peripherals::Drum::Config::Thresholds trigger_thresholds;
+        uint8_t trigger_threshold_scale_level;
         uint8_t led_brightness;
 
         uint8_t _padding[m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
-                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t)];
+                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(uint8_t)];
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
@@ -49,6 +50,9 @@ class SettingsStore {
 
     void setTriggerThresholds(Peripherals::Drum::Config::Thresholds thresholds);
     Peripherals::Drum::Config::Thresholds getTriggerThresholds();
+
+    void setTriggerThresholdScaleLevel(uint8_t threshold_scale_level);
+    uint8_t getTriggerThresholdScaleLevel();
 
     void setLedBrightness(uint8_t brightness);
     uint8_t getLedBrightness();
