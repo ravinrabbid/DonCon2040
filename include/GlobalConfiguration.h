@@ -94,6 +94,8 @@ const Peripherals::StatusLed::Config led_config = {
 const Peripherals::Display::Config display_config = {
     i2c_config.block, // Block
     0x3C,             // Address
+
+    500, // Roll Counter Timeout in Milliseconds
 };
 
 } // namespace Default
