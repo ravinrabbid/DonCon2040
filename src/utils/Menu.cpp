@@ -9,6 +9,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
        {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
+       {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0,                                                                  //
       Menu::Page::None}},                                                 //
@@ -78,6 +79,14 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"", Menu::Descriptor::Action::SetLedBrightness}}, //
       UINT8_MAX,                                          //
       Menu::Page::Main}},                                 //
+
+    {Menu::Page::Reset,                              //
+     {Menu::Descriptor::Type::Selection,             //
+      "Reset all Settings?",                         //
+      {{"No", Menu::Descriptor::Action::GotoParent}, //
+       {"Yes", Menu::Descriptor::Action::DoReset}},  //
+      0,                                             //
+      Menu::Page::Main}},                            //
 
     {Menu::Page::Bootsel,                                         //
      {Menu::Descriptor::Type::Selection,                          //
@@ -204,6 +213,7 @@ uint16_t Menu::getCurrentSelection(Menu::Page page) {
         break;
     case Page::Main:
     case Page::TriggerThreshold:
+    case Page::Reset:
     case Page::Bootsel:
     case Page::BootselMsg:
     case Page::None:
@@ -250,6 +260,9 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::GotoPageLedBrightness:
         gotoPage(Page::LedBrightness);
         break;
+    case Descriptor::Action::GotoPageReset:
+        gotoPage(Page::Reset);
+        break;
     case Descriptor::Action::GotoPageBootsel:
         gotoPage(Page::Bootsel);
         break;
@@ -291,9 +304,15 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::SetLedBrightness:
         gotoPage(descriptor_it->second.parent);
         break;
+    case Descriptor::Action::DoReset:
+        m_store->reset();
+        break;
     case Descriptor::Action::DoRebootToBootsel:
         m_store->scheduleReboot(true);
         gotoPage(Page::BootselMsg);
+        break;
+    case Descriptor::Action::GotoParent:
+        gotoPage(descriptor_it->second.parent);
         break;
     case Descriptor::Action::None:
         break;

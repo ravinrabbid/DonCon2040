@@ -118,6 +118,21 @@ void SettingsStore::store() {
     }
 }
 
+void SettingsStore::reset() {
+    multicore_lockout_start_blocking();
+    uint32_t interrupts = save_and_disable_interrupts();
+
+    flash_range_erase(m_flash_offset, m_flash_size);
+
+    restore_interrupts(interrupts);
+    multicore_lockout_end_blocking();
+
+    m_dirty = false;
+
+    scheduleReboot();
+    store();
+}
+
 void SettingsStore::scheduleReboot(const bool bootsel) {
     if (m_scheduled_reboot != RebootType::Bootsel) {
         m_scheduled_reboot = (bootsel ? RebootType::Bootsel : RebootType::Normal);

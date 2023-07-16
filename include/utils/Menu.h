@@ -25,6 +25,7 @@ class Menu {
         TriggerThresholdKaRight,
         TriggerThresholdScaleLevel,
         LedBrightness,
+        Reset,
         Bootsel,
         BootselMsg,
     };
@@ -44,6 +45,7 @@ class Menu {
 
         enum class Action {
             None,
+            GotoParent,
 
             GotoPageDeviceMode,
             GotoPageTriggerThreshold,
@@ -53,6 +55,7 @@ class Menu {
             GotoPageTriggerThresholdKaRight,
             GotoPageTriggerThresholdScaleLevel,
             GotoPageLedBrightness,
+            GotoPageReset,
             GotoPageBootsel,
 
             ChangeUsbModeSwitchTatacon,
@@ -71,6 +74,7 @@ class Menu {
             SetLedBrightness,
 
             DoRebootToBootsel,
+            DoReset,
         };
 
         Type type;

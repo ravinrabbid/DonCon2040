@@ -60,6 +60,7 @@ class SettingsStore {
     void scheduleReboot(const bool bootsel = false);
 
     void store();
+    void reset();
 };
 } // namespace Doncon::Utils
 
