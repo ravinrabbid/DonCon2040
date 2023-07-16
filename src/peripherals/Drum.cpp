@@ -35,6 +35,25 @@ Drum::Drum(const Config &config) : m_config(config) {
     }
 }
 
+std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
+    std::map<Id, uint32_t> values;
+
+    for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
+        for (const auto &pad : m_pads) {
+            adc_select_input(pad.second.getPin());
+            values[pad.first] += adc_read();
+        }
+    }
+
+    // Take average of all samples
+    std::map<Id, uint16_t> result;
+    for (auto &value : values) {
+        result[value.first] = value.second / m_config.sample_count;
+    }
+
+    return result;
+}
+
 void Drum::updateInputState(Utils::InputState &input_state) {
     // Oversample ADC inputs to get rid of ADC noise
     const auto raw_values = sampleInputs();
@@ -73,23 +92,10 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     input_state.drum.ka_right.triggered = m_pads.at(Id::KA_RIGHT).getState();
 }
 
-std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
-    std::map<Id, uint32_t> values;
+void Drum::setThresholds(const Config::Thresholds &thresholds) { m_config.trigger_thresholds = thresholds; }
 
-    for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
-        for (const auto &pad : m_pads) {
-            adc_select_input(pad.second.getPin());
-            values[pad.first] += adc_read();
-        }
-    }
-
-    // Take average of all samples
-    std::map<Id, uint16_t> result;
-    for (auto &value : values) {
-        result[value.first] = value.second / m_config.sample_count;
-    }
-
-    return result;
+void Drum::setThresholdScaleLevel(const uint8_t threshold_scale_level) {
+    m_config.trigger_threshold_scale_level = threshold_scale_level;
 }
 
 } // namespace Doncon::Peripherals

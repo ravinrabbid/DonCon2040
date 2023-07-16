@@ -64,6 +64,9 @@ class Drum {
     Drum(const Config &config);
 
     void updateInputState(Utils::InputState &input_state);
+
+    void setThresholds(const Config::Thresholds& thresholds);
+    void setThresholdScaleLevel(const uint8_t threshold_scale_level);
 };
 
 } // namespace Doncon::Peripherals

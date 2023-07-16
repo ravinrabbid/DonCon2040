@@ -45,19 +45,19 @@ class SettingsStore {
   public:
     SettingsStore();
 
-    void setUsbMode(usb_mode_t mode);
+    void setUsbMode(const usb_mode_t mode);
     usb_mode_t getUsbMode();
 
-    void setTriggerThresholds(Peripherals::Drum::Config::Thresholds thresholds);
+    void setTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds);
     Peripherals::Drum::Config::Thresholds getTriggerThresholds();
 
-    void setTriggerThresholdScaleLevel(uint8_t threshold_scale_level);
+    void setTriggerThresholdScaleLevel(const uint8_t threshold_scale_level);
     uint8_t getTriggerThresholdScaleLevel();
 
-    void setLedBrightness(uint8_t brightness);
+    void setLedBrightness(const uint8_t brightness);
     uint8_t getLedBrightness();
 
-    void scheduleReboot(bool bootsel = false);
+    void scheduleReboot(const bool bootsel = false);
 
     void store();
 };

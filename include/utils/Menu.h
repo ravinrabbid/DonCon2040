@@ -18,6 +18,12 @@ class Menu {
         None,
         Main,
         DeviceMode,
+        TriggerThreshold,
+        TriggerThresholdKaLeft,
+        TriggerThresholdDonLeft,
+        TriggerThresholdDonRight,
+        TriggerThresholdKaRight,
+        TriggerThresholdScaleLevel,
         LedBrightness,
         Bootsel,
         BootselMsg,
@@ -25,7 +31,7 @@ class Menu {
 
     struct State {
         Page page;
-        uint8_t selection;
+        uint16_t selection;
     };
 
     struct Descriptor {
@@ -40,6 +46,12 @@ class Menu {
             None,
 
             GotoPageDeviceMode,
+            GotoPageTriggerThreshold,
+            GotoPageTriggerThresholdKaLeft,
+            GotoPageTriggerThresholdDonLeft,
+            GotoPageTriggerThresholdDonRight,
+            GotoPageTriggerThresholdKaRight,
+            GotoPageTriggerThresholdScaleLevel,
             GotoPageLedBrightness,
             GotoPageBootsel,
 
@@ -51,6 +63,11 @@ class Menu {
             ChangeUsbModeXbox360,
             ChangeUsbModeDebug,
 
+            SetTriggerThresholdKaLeft,
+            SetTriggerThresholdDonLeft,
+            SetTriggerThresholdDonRight,
+            SetTriggerThresholdKaRight,
+            SetTriggerThresholdScaleLevel,
             SetLedBrightness,
 
             DoRebootToBootsel,
@@ -59,6 +76,7 @@ class Menu {
         Type type;
         std::string name;
         std::vector<std::pair<std::string, Action>> items;
+        uint16_t max_value;
         Page parent;
     };
 
@@ -69,10 +87,10 @@ class Menu {
     bool m_active;
     State m_state;
 
-    uint8_t getCurrentSelection(Page page);
+    uint16_t getCurrentSelection(Page page);
     void gotoPage(Page page);
     void performSelectionAction(Descriptor::Action action);
-    void performValueAction(Descriptor::Action action, uint8_t value);
+    void performValueAction(Descriptor::Action action, uint16_t value);
 
   public:
     Menu(std::shared_ptr<SettingsStore> settings_store);

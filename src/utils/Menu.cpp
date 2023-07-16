@@ -3,13 +3,15 @@
 namespace Doncon::Utils {
 
 const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
-    {Menu::Page::Main,                                                  //
-     {Menu::Descriptor::Type::Root,                                     //
-      "Settings",                                                       //
-      {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},          //
-       {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness}, //
-       {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},         //
-      Menu::Page::None}},                                               //
+    {Menu::Page::Main,                                                    //
+     {Menu::Descriptor::Type::Root,                                       //
+      "Settings",                                                         //
+      {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
+       {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
+       {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
+       {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
+      0,                                                                  //
+      Menu::Page::None}},                                                 //
 
     {Menu::Page::DeviceMode,                                                 //
      {Menu::Descriptor::Type::Selection,                                     //
@@ -21,24 +23,74 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},           //
        {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},         //
        {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},             //
+      0,                                                                     //
       Menu::Page::Main}},                                                    //
+
+    {Menu::Page::TriggerThreshold,                                                   //
+     {Menu::Descriptor::Type::Selection,                                             //
+      "Sensitivity",                                                                 //
+      {{"Ka Left", Menu::Descriptor::Action::GotoPageTriggerThresholdKaLeft},        //
+       {"Don Left", Menu::Descriptor::Action::GotoPageTriggerThresholdDonLeft},      //
+       {"Don Right", Menu::Descriptor::Action::GotoPageTriggerThresholdDonRight},    //
+       {"Ka Right", Menu::Descriptor::Action::GotoPageTriggerThresholdKaRight},      //
+       {"Scale Lvl", Menu::Descriptor::Action::GotoPageTriggerThresholdScaleLevel}}, //
+      0,                                                                             //
+      Menu::Page::Main}},                                                            //
+
+    {Menu::Page::TriggerThresholdKaLeft,                           //
+     {Menu::Descriptor::Type::Value,                               //
+      "Trg Level Ka Left",                                         //
+      {{"", Menu::Descriptor::Action::SetTriggerThresholdKaLeft}}, //
+      4095,                                                        //
+      Menu::Page::TriggerThreshold}},
+
+    {Menu::Page::TriggerThresholdDonLeft,                           //
+     {Menu::Descriptor::Type::Value,                                //
+      "Trg Level Don Left",                                         //
+      {{"", Menu::Descriptor::Action::SetTriggerThresholdDonLeft}}, //
+      4095,                                                         //
+      Menu::Page::TriggerThreshold}},
+
+    {Menu::Page::TriggerThresholdDonRight,                           //
+     {Menu::Descriptor::Type::Value,                                 //
+      "Trg Level Don Right",                                         //
+      {{"", Menu::Descriptor::Action::SetTriggerThresholdDonRight}}, //
+      4095,                                                          //
+      Menu::Page::TriggerThreshold}},
+
+    {Menu::Page::TriggerThresholdKaRight,                           //
+     {Menu::Descriptor::Type::Value,                                //
+      "Trg Level Ka Right",                                         //
+      {{"", Menu::Descriptor::Action::SetTriggerThresholdKaRight}}, //
+      4095,                                                         //
+      Menu::Page::TriggerThreshold}},
+
+    {Menu::Page::TriggerThresholdScaleLevel,                           //
+     {Menu::Descriptor::Type::Value,                                   //
+      "Sensitivity Scale Lvl",                                         //
+      {{"", Menu::Descriptor::Action::SetTriggerThresholdScaleLevel}}, //
+      UINT8_MAX,                                                       //
+      Menu::Page::TriggerThreshold}},
 
     {Menu::Page::LedBrightness,                           //
      {Menu::Descriptor::Type::Value,                      //
       "LED Brightness",                                   //
       {{"", Menu::Descriptor::Action::SetLedBrightness}}, //
+      UINT8_MAX,                                          //
       Menu::Page::Main}},                                 //
 
     {Menu::Page::Bootsel,                                         //
      {Menu::Descriptor::Type::Selection,                          //
       "Reboot to BOOTSEL",                                        //
       {{"Reboot?", Menu::Descriptor::Action::DoRebootToBootsel}}, //
+      0,                                                          //
       Menu::Page::Main}},                                         //
 
     {Menu::Page::BootselMsg,                         //
      {Menu::Descriptor::Type::RebootInfo,            //
       "Ready to Flash...",                           //
       {{"BOOTSEL", Menu::Descriptor::Action::None}}, //
+      0,                                             //
       Menu::Page::Main}},                            //
 };
 
@@ -127,15 +179,31 @@ static InputState::Controller checkPressed(const InputState::Controller &control
     return result;
 }
 
-uint8_t Menu::getCurrentSelection(Menu::Page page) {
+uint16_t Menu::getCurrentSelection(Menu::Page page) {
     switch (page) {
     case Page::DeviceMode:
-        return static_cast<uint8_t>(m_store->getUsbMode());
+        return static_cast<uint16_t>(m_store->getUsbMode());
+        break;
+    case Page::TriggerThresholdKaLeft:
+        return m_store->getTriggerThresholds().ka_left;
+        break;
+    case Page::TriggerThresholdDonLeft:
+        return m_store->getTriggerThresholds().don_left;
+        break;
+    case Page::TriggerThresholdDonRight:
+        return m_store->getTriggerThresholds().don_right;
+        break;
+    case Page::TriggerThresholdKaRight:
+        return m_store->getTriggerThresholds().ka_right;
+        break;
+    case Page::TriggerThresholdScaleLevel:
+        return m_store->getTriggerThresholdScaleLevel();
         break;
     case Page::LedBrightness:
         return m_store->getLedBrightness();
         break;
     case Page::Main:
+    case Page::TriggerThreshold:
     case Page::Bootsel:
     case Page::BootselMsg:
     case Page::None:
@@ -160,6 +228,24 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     switch (action) {
     case Descriptor::Action::GotoPageDeviceMode:
         gotoPage(Page::DeviceMode);
+        break;
+    case Descriptor::Action::GotoPageTriggerThreshold:
+        gotoPage(Page::TriggerThreshold);
+        break;
+    case Descriptor::Action::GotoPageTriggerThresholdKaLeft:
+        gotoPage(Page::TriggerThresholdKaLeft);
+        break;
+    case Descriptor::Action::GotoPageTriggerThresholdDonLeft:
+        gotoPage(Page::TriggerThresholdDonLeft);
+        break;
+    case Descriptor::Action::GotoPageTriggerThresholdDonRight:
+        gotoPage(Page::TriggerThresholdDonRight);
+        break;
+    case Descriptor::Action::GotoPageTriggerThresholdKaRight:
+        gotoPage(Page::TriggerThresholdKaRight);
+        break;
+    case Descriptor::Action::GotoPageTriggerThresholdScaleLevel:
+        gotoPage(Page::TriggerThresholdScaleLevel);
         break;
     case Descriptor::Action::GotoPageLedBrightness:
         gotoPage(Page::LedBrightness);
@@ -195,6 +281,13 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         m_store->setUsbMode(USB_MODE_DEBUG);
         gotoPage(descriptor_it->second.parent);
         break;
+    case Descriptor::Action::SetTriggerThresholdKaLeft:
+    case Descriptor::Action::SetTriggerThresholdDonLeft:
+    case Descriptor::Action::SetTriggerThresholdDonRight:
+    case Descriptor::Action::SetTriggerThresholdKaRight:
+    case Descriptor::Action::SetTriggerThresholdScaleLevel:
+        gotoPage(descriptor_it->second.parent);
+        break;
     case Descriptor::Action::SetLedBrightness:
         gotoPage(descriptor_it->second.parent);
         break;
@@ -202,12 +295,12 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         m_store->scheduleReboot(true);
         gotoPage(Page::BootselMsg);
         break;
-    default:
+    case Descriptor::Action::None:
         break;
     }
 }
 
-void Menu::performValueAction(Menu::Descriptor::Action action, uint8_t value) {
+void Menu::performValueAction(Menu::Descriptor::Action action, uint16_t value) {
     auto descriptor_it = descriptors.find(m_state.page);
     if (descriptor_it == descriptors.end()) {
         assert(false);
@@ -215,6 +308,29 @@ void Menu::performValueAction(Menu::Descriptor::Action action, uint8_t value) {
     }
 
     switch (action) {
+    case Descriptor::Action::SetTriggerThresholdKaLeft: {
+        auto thresholds = m_store->getTriggerThresholds();
+        thresholds.ka_left = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetTriggerThresholdDonLeft: {
+        auto thresholds = m_store->getTriggerThresholds();
+        thresholds.don_left = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetTriggerThresholdDonRight: {
+        auto thresholds = m_store->getTriggerThresholds();
+        thresholds.don_right = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetTriggerThresholdKaRight: {
+        auto thresholds = m_store->getTriggerThresholds();
+        thresholds.don_right = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetTriggerThresholdScaleLevel:
+        m_store->setTriggerThresholdScaleLevel(value);
+        break;
     case Descriptor::Action::SetLedBrightness:
         m_store->setLedBrightness(value);
         break;
@@ -267,7 +383,7 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.up) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (m_state.selection < UINT8_MAX) {
+            if (m_state.selection < descriptor_it->second.max_value) {
                 m_state.selection++;
                 performValueAction(descriptor_it->second.items.at(0).second, m_state.selection);
             }

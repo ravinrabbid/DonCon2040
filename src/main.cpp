@@ -128,6 +128,9 @@ int main() {
 
         ctrl_message = {ControlCommand::SetLedBrightness, {.brightness = settings_store->getLedBrightness()}};
         queue_add_blocking(&control_queue, &ctrl_message);
+
+        drum.setThresholds(settings_store->getTriggerThresholds());
+        drum.setThresholdScaleLevel(settings_store->getTriggerThresholdScaleLevel());
     };
 
     readSettings();

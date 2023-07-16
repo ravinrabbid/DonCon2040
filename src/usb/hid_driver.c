@@ -13,7 +13,7 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t
         return hid_switch_get_report_cb(itf, report_id, report_type, buffer, reqlen);
     case USB_MODE_DUALSHOCK3:
         return hid_ps3_get_report_cb(itf, report_id, report_type, buffer, reqlen);
-    // case USB_MODE_PS4_TATACON:
+    case USB_MODE_PS4_TATACON:
     case USB_MODE_DUALSHOCK4:
         return hid_ps4_get_report_cb(itf, report_id, report_type, buffer, reqlen);
     default:
@@ -32,7 +32,7 @@ void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
     case USB_MODE_DUALSHOCK3:
         hid_ps3_set_report_cb(itf, report_id, report_type, buffer, bufsize);
         break;
-    // case USB_MODE_PS4_TATACON:
+    case USB_MODE_PS4_TATACON:
     case USB_MODE_DUALSHOCK4:
         hid_ps4_set_report_cb(itf, report_id, report_type, buffer, bufsize);
         break;

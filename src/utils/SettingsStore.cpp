@@ -35,7 +35,7 @@ SettingsStore::SettingsStore()
     }
 }
 
-void SettingsStore::setUsbMode(usb_mode_t mode) {
+void SettingsStore::setUsbMode(const usb_mode_t mode) {
     if (mode != m_store_cache.usb_mode) {
         m_store_cache.usb_mode = mode;
         m_dirty = true;
@@ -46,7 +46,7 @@ void SettingsStore::setUsbMode(usb_mode_t mode) {
 
 usb_mode_t SettingsStore::getUsbMode() { return m_store_cache.usb_mode; }
 
-void SettingsStore::setTriggerThresholds(Peripherals::Drum::Config::Thresholds thresholds) {
+void SettingsStore::setTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds) {
     if (m_store_cache.trigger_thresholds.don_left != thresholds.don_left ||
         m_store_cache.trigger_thresholds.don_right != thresholds.don_right ||
         m_store_cache.trigger_thresholds.ka_left != thresholds.ka_left ||
@@ -58,7 +58,7 @@ void SettingsStore::setTriggerThresholds(Peripherals::Drum::Config::Thresholds t
 }
 Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() { return m_store_cache.trigger_thresholds; }
 
-void SettingsStore::setTriggerThresholdScaleLevel(uint8_t threshold_scale_level) {
+void SettingsStore::setTriggerThresholdScaleLevel(const uint8_t threshold_scale_level) {
     if (threshold_scale_level != m_store_cache.trigger_threshold_scale_level) {
         m_store_cache.trigger_threshold_scale_level = threshold_scale_level;
         m_dirty = true;
@@ -66,7 +66,7 @@ void SettingsStore::setTriggerThresholdScaleLevel(uint8_t threshold_scale_level)
 }
 uint8_t SettingsStore::getTriggerThresholdScaleLevel() { return m_store_cache.trigger_threshold_scale_level; }
 
-void SettingsStore::setLedBrightness(uint8_t brightness) {
+void SettingsStore::setLedBrightness(const uint8_t brightness) {
     if (m_store_cache.led_brightness != brightness) {
         m_store_cache.led_brightness = brightness;
         m_dirty = true;
@@ -118,7 +118,7 @@ void SettingsStore::store() {
     }
 }
 
-void SettingsStore::scheduleReboot(bool bootsel) {
+void SettingsStore::scheduleReboot(const bool bootsel) {
     if (m_scheduled_reboot != RebootType::Bootsel) {
         m_scheduled_reboot = (bootsel ? RebootType::Bootsel : RebootType::Normal);
     }
