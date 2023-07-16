@@ -26,6 +26,8 @@ class Drum {
         } pins;
 
         Thresholds trigger_thresholds;
+        uint8_t trigger_threshold_scale_level;
+
         uint8_t sample_count;
         uint16_t debounce_delay_ms;
     };

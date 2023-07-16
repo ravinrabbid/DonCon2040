@@ -39,42 +39,33 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     // Oversample ADC inputs to get rid of ADC noise
     const auto raw_values = sampleInputs();
 
-    for (const auto &val : raw_values) {
-        switch (val.first) {
-        case Id::DON_LEFT:
-            input_state.drum.don_left.raw = val.second;
-            if (val.second > m_config.trigger_thresholds.don_left) {
-                m_pads.at(Id::DON_LEFT).setState(true, m_config.debounce_delay_ms);
-            } else {
-                m_pads.at(Id::DON_LEFT).setState(false, m_config.debounce_delay_ms);
-            }
-            break;
-        case Id::KA_LEFT:
-            input_state.drum.ka_left.raw = val.second;
-            if (val.second > m_config.trigger_thresholds.ka_left) {
-                m_pads.at(Id::KA_LEFT).setState(true, m_config.debounce_delay_ms);
-            } else {
-                m_pads.at(Id::KA_LEFT).setState(false, m_config.debounce_delay_ms);
-            }
-            break;
-        case Id::DON_RIGHT:
-            input_state.drum.don_right.raw = val.second;
-            if (val.second > m_config.trigger_thresholds.don_right) {
-                m_pads.at(Id::DON_RIGHT).setState(true, m_config.debounce_delay_ms);
-            } else {
-                m_pads.at(Id::DON_RIGHT).setState(false, m_config.debounce_delay_ms);
-            }
-            break;
-        case Id::KA_RIGHT:
-            input_state.drum.ka_right.raw = val.second;
-            if (val.second > m_config.trigger_thresholds.ka_right) {
-                m_pads.at(Id::KA_RIGHT).setState(true, m_config.debounce_delay_ms);
-            } else {
-                m_pads.at(Id::KA_RIGHT).setState(false, m_config.debounce_delay_ms);
-            }
-            break;
+    const auto max_value = std::max_element(raw_values.cbegin(), raw_values.cend(),
+                                            [](const auto a, const auto b) { return a.second < b.second; });
+
+    auto do_set_state = [&](const auto &id, const auto &threshold) {
+        // Increase threshold for very hard hits to avoid false inputs on neighboring pads
+        float mult = 1.0;
+        if (id != max_value->first && m_config.trigger_threshold_scale_level > 0) {
+            mult = float(max_value->second) / (((UINT8_MAX * 16) - (m_config.trigger_threshold_scale_level * 16)) + 1);
+            mult = mult < 1.0 ? 1.0 : mult;
         }
-    }
+
+        if (raw_values.at(id) > (threshold * mult)) {
+            m_pads.at(id).setState(true, m_config.debounce_delay_ms);
+        } else {
+            m_pads.at(id).setState(false, m_config.debounce_delay_ms);
+        }
+    };
+
+    do_set_state(Id::DON_LEFT, m_config.trigger_thresholds.don_left);
+    do_set_state(Id::KA_LEFT, m_config.trigger_thresholds.ka_left);
+    do_set_state(Id::DON_RIGHT, m_config.trigger_thresholds.don_right);
+    do_set_state(Id::KA_RIGHT, m_config.trigger_thresholds.ka_right);
+
+    input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
+    input_state.drum.ka_left.raw = raw_values.at(Id::KA_LEFT);
+    input_state.drum.don_right.raw = raw_values.at(Id::DON_RIGHT);
+    input_state.drum.ka_right.raw = raw_values.at(Id::KA_RIGHT);
 
     input_state.drum.don_left.triggered = m_pads.at(Id::DON_LEFT).getState();
     input_state.drum.ka_left.triggered = m_pads.at(Id::KA_LEFT).getState();
