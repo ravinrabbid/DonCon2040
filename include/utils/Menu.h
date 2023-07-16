@@ -82,6 +82,6 @@ class Menu {
     bool active();
     State getState();
 };
-} // namespace Divacon::Utils
+} // namespace Doncon::Utils
 
 #endif // _UTILS_MENU_H_

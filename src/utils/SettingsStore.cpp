@@ -110,6 +110,7 @@ void SettingsStore::store() {
             ;
         break;
     case RebootType::Bootsel:
+        sleep_ms(100);
         reset_usb_boot(0, 0);
         break;
     case RebootType::None:

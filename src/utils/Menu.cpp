@@ -237,10 +237,6 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.left) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (m_state.selection > 0) {
-                m_state.selection--;
-                performValueAction(descriptor_it->second.items.at(0).second, m_state.selection);
-            }
             break;
         case Descriptor::Type::Selection:
         case Descriptor::Type::Root:
@@ -256,10 +252,6 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.right) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (m_state.selection < UINT8_MAX) {
-                m_state.selection++;
-                performValueAction(descriptor_it->second.items.at(0).second, m_state.selection);
-            }
             break;
         case Descriptor::Type::Selection:
         case Descriptor::Type::Root:
@@ -272,7 +264,33 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.east) {
+    } else if (pressed.dpad.up) {
+        switch (descriptor_it->second.type) {
+        case Descriptor::Type::Value:
+            if (m_state.selection < UINT8_MAX) {
+                m_state.selection++;
+                performValueAction(descriptor_it->second.items.at(0).second, m_state.selection);
+            }
+            break;
+        case Descriptor::Type::Selection:
+        case Descriptor::Type::Root:
+        case Descriptor::Type::RebootInfo:
+            break;
+        }
+    } else if (pressed.dpad.down) {
+        switch (descriptor_it->second.type) {
+        case Descriptor::Type::Value:
+            if (m_state.selection > 0) {
+                m_state.selection--;
+                performValueAction(descriptor_it->second.items.at(0).second, m_state.selection);
+            }
+            break;
+        case Descriptor::Type::Selection:
+        case Descriptor::Type::Root:
+        case Descriptor::Type::RebootInfo:
+            break;
+        }
+    } else if (pressed.buttons.south) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Selection:
@@ -284,7 +302,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.south) {
+    } else if (pressed.buttons.east) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             performSelectionAction(descriptor_it->second.items.at(0).second);
