@@ -64,6 +64,7 @@ class Menu {
             ChangeUsbModePS4Tatacon,
             ChangeUsbModeDS4,
             ChangeUsbModeXbox360,
+            ChangeUsbModeMidi,
             ChangeUsbModeDebug,
 
             SetTriggerThresholdKaLeft,

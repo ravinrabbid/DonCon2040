@@ -10,7 +10,8 @@ InputState::InputState()
       controller(
           {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}}),
       m_switch_report({}), m_ps3_report({}), m_ps4_report({}),
-      m_xinput_report({0x00, sizeof(xinput_report_t), 0, 0, 0, 0, 0, 0, 0, 0, {}}) {}
+      m_xinput_report({0x00, sizeof(xinput_report_t), 0, 0, 0, 0, 0, 0, 0, 0, {}}),
+      m_midi_report({{false, false, false, false}, {0, 0, 0, 0}}) {}
 
 usb_report_t InputState::getReport(usb_mode_t mode) {
     switch (mode) {
@@ -24,10 +25,13 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
         return getPS4InputReport();
     case USB_MODE_XBOX360:
         return getXinputReport();
+    case USB_MODE_MIDI:
+        return getMidiReport();
     case USB_MODE_DEBUG:
-    default:
         return getDebugReport();
     }
+
+    return getDebugReport();
 }
 
 static uint8_t getHidHat(const InputState::Controller::DPad dpad) {
@@ -233,6 +237,58 @@ usb_report_t InputState::getXinputReport() {
     m_xinput_report.ry = 0;
 
     return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+}
+
+usb_report_t InputState::getMidiReport() {
+    struct state {
+        bool last_triggered;
+        bool on;
+        uint16_t velocity;
+    };
+
+    static state acoustic_bass_drum = {};
+    static state electric_bass_drum = {};
+    static state drumsticks = {};
+    static state side_stick = {};
+
+    auto set_state = [](state &target, const Drum::Pad &new_state) {
+        if (new_state.triggered && !target.last_triggered) {
+            target.velocity = 0;
+            target.on = false;
+        } else if (!new_state.triggered && target.last_triggered) {
+            target.on = true;
+        } else if (!new_state.triggered && !target.last_triggered) {
+            target.on = false;
+        }
+
+        if (new_state.triggered && new_state.raw > target.velocity) {
+            target.velocity = new_state.raw;
+        }
+
+        target.last_triggered = new_state.triggered;
+    };
+
+    set_state(acoustic_bass_drum, drum.don_left);
+    set_state(electric_bass_drum, drum.don_right);
+    set_state(drumsticks, drum.ka_left);
+    set_state(side_stick, drum.ka_right);
+
+    m_midi_report.status.acoustic_bass_drum = acoustic_bass_drum.on;
+    m_midi_report.status.electric_bass_drum = electric_bass_drum.on;
+    m_midi_report.status.drumsticks = drumsticks.on;
+    m_midi_report.status.side_stick = side_stick.on;
+
+    auto convert_range = [](uint16_t in) {
+        uint16_t out = in / 16;
+        return uint8_t(out > 127 ? 127 : out);
+    };
+
+    m_midi_report.velocity.acoustic_bass_drum = convert_range(acoustic_bass_drum.velocity);
+    m_midi_report.velocity.electric_bass_drum = convert_range(electric_bass_drum.velocity);
+    m_midi_report.velocity.drumsticks = convert_range(drumsticks.velocity);
+    m_midi_report.velocity.side_stick = convert_range(side_stick.velocity);
+
+    return {(uint8_t *)&m_midi_report, sizeof(midi_report_t)};
 }
 
 usb_report_t InputState::getDebugReport() {
