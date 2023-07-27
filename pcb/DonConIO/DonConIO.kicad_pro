@@ -34,9 +34,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.8,
-          "height": 1.6,
-          "width": 1.6
+          "drill": 0.0,
+          "height": 1.45,
+          "width": 1.175
         },
         "silk_line_width": 0.15,
         "silk_text_italic": false,
@@ -55,38 +55,7 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [
-        "silk_edge_clearance|100070000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|9957743e-f115-4e92-8b84-2daf0b537ed0",
-        "silk_edge_clearance|100570000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|b8f3ea17-aa2e-4b9f-9134-f398a288f72f",
-        "silk_edge_clearance|101370000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|d635176a-77bd-4deb-b6ce-6662b10db538",
-        "silk_edge_clearance|102370000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|d1f98846-bee0-4b53-82a4-36ed0574a577",
-        "silk_edge_clearance|104930000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|b7a7f050-ff76-486b-8c3f-c294d1083967",
-        "silk_edge_clearance|123575000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|7f5d6dd0-cd09-45af-8fae-ec17daa0dc09",
-        "silk_edge_clearance|124835000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|2910e45a-b01b-49cd-8274-61db10753f5c",
-        "silk_edge_clearance|125335000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|837e4774-41be-4d57-81d2-2e5f1a4e01db",
-        "silk_edge_clearance|126135000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|b13b3f48-3276-4bb4-8a8b-e152e132568e",
-        "silk_edge_clearance|127135000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|9afec725-39ce-475b-b36c-e8786240fa32",
-        "silk_edge_clearance|129695000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|18c5acf4-3ae6-4b19-ae77-c82d648d6700",
-        "silk_edge_clearance|168660000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|9918c338-483d-49d4-90a1-c37e07158597",
-        "silk_edge_clearance|169920000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|c8c337bf-f019-42d3-b361-dd60bfd6a9f1",
-        "silk_edge_clearance|170420000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|ef8a3ed6-6fc6-45f4-96d6-0d4eef429ab0",
-        "silk_edge_clearance|171220000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|2d3e6297-6ae9-498e-ab25-5b193231abc3",
-        "silk_edge_clearance|172220000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|d558daf4-639f-420b-b1d0-5e63e97713f8",
-        "silk_edge_clearance|174780000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|ca7f034b-6945-45fe-beb0-684bc90c6251",
-        "silk_edge_clearance|179360000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|649bf64e-3973-4b55-b343-39430263f7d9",
-        "silk_edge_clearance|181920000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|c7d13eed-fd9a-4020-b98b-bf677caeeffd",
-        "silk_edge_clearance|188920000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|d2d420fe-cebe-4f8f-8a35-11c0ff3c5e31",
-        "silk_edge_clearance|189720000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|25ebe5de-1c86-4c25-bbb7-03cbaf672097",
-        "silk_edge_clearance|190220000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|e53ae8f6-912c-4741-9b1b-1c460e3e65b2",
-        "silk_edge_clearance|191480000|67330000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|c5b69205-7e2c-4703-9f8e-10027e82be1b",
-        "silk_edge_clearance|193425000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|5611f57e-3d8a-4b67-988f-538ea548e152",
-        "silk_edge_clearance|194685000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|8f35a871-06d0-4af4-8b8c-0b74beea6cc1",
-        "silk_edge_clearance|195185000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|84293a27-c44b-438b-b65d-0ef6dc002bc7",
-        "silk_edge_clearance|195985000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|94034c5f-a904-4f67-9927-1397675188e2",
-        "silk_edge_clearance|196985000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|9364b66e-7304-4bbd-86b7-b80a734ceb41",
-        "silk_edge_clearance|199545000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|1cb68f69-3440-4052-8063-94166ecae64e",
-        "silk_edge_clearance|98810000|125750000|af01cab3-3f9c-4a06-b4c3-19454cd3fa66|30e62ee0-9912-4df5-81cf-b4a96c79187c"
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
@@ -479,8 +448,11 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
+      "plot": "",
+      "pos_files": "",
       "specctra_dsn": "",
       "step": "",
+      "svg": "",
       "vrml": ""
     },
     "page_layout_descr_file": ""
