@@ -30,7 +30,8 @@ target_link_libraries(
          pico_multicore
          pio_ws2812
          pico_ssd1306
-         mcp23017)
+         mcp23017
+         mcp3204)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
