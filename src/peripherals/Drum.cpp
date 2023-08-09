@@ -7,7 +7,49 @@
 
 namespace Doncon::Peripherals {
 
-Drum::Pad::Pad(uint8_t pin) : pin(pin), last_change(0), active(false) {}
+Drum::InternalAdc::InternalAdc(const Drum::Config::AdcInputs &adc_inputs) {
+    adc_gpio_init(adc_inputs.don_left + 26);
+    adc_gpio_init(adc_inputs.don_right + 26);
+    adc_gpio_init(adc_inputs.ka_left + 26);
+    adc_gpio_init(adc_inputs.ka_right + 26);
+
+    adc_init();
+}
+
+uint16_t Drum::InternalAdc::read(uint8_t channel) {
+    adc_select_input(channel);
+    return adc_read();
+}
+
+Drum::ExternalAdc::ExternalAdc(const Drum::Config::Spi &spi_config) : m_mcp3204(spi_config.block, spi_config.scsn_pin) {
+    // Enable level shifter
+    gpio_init(0);
+    gpio_set_dir(0, GPIO_OUT);
+    gpio_put(0, true);
+
+    gpio_set_function(spi_config.miso_pin, GPIO_FUNC_SPI);
+    gpio_set_function(spi_config.mosi_pin, GPIO_FUNC_SPI);
+    gpio_set_function(spi_config.sclk_pin, GPIO_FUNC_SPI);
+    // gpio_set_function(spi_config.scsn_pin, GPIO_FUNC_SPI);
+
+    spi_init(spi_config.block, spi_config.speed_hz);
+
+    // Theoretically the ADC should work in SPI 1,1 mode.
+    // In this mode date will be clocked out on
+    // a falling edge and latched from the ADC on a rising edge.
+    // Also the CS will be held low in-between bytes as required
+    // by the mcp3204.
+    // However this mode causes glitches during continuous reading,
+    // so we need to use default mode and set CS manually.
+    // spi_set_format(m_spi, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
+    gpio_init(spi_config.scsn_pin);
+    gpio_set_dir(spi_config.scsn_pin, GPIO_OUT);
+    gpio_put(spi_config.scsn_pin, true);
+}
+
+uint16_t Drum::ExternalAdc::read(uint8_t channel) { return m_mcp3204.read(channel); }
+
+Drum::Pad::Pad(uint8_t channel) : channel(channel), last_change(0), active(false) {}
 
 void Drum::Pad::setState(bool state, uint16_t debounce_delay) {
     if (active == state) {
@@ -23,16 +65,16 @@ void Drum::Pad::setState(bool state, uint16_t debounce_delay) {
 }
 
 Drum::Drum(const Config &config) : m_config(config) {
-    m_pads.emplace(Id::DON_LEFT, config.pins.don_left);
-    m_pads.emplace(Id::KA_LEFT, config.pins.ka_left);
-    m_pads.emplace(Id::DON_RIGHT, config.pins.don_right);
-    m_pads.emplace(Id::KA_RIGHT, config.pins.ka_right);
-
-    adc_init();
-
-    for (const auto &pad : m_pads) {
-        adc_gpio_init(pad.second.getPin());
+    if (m_config.use_external_adc) {
+        m_adc = std::make_unique<ExternalAdc>(config.external_adc_spi_config);
+    } else {
+        m_adc = std::make_unique<InternalAdc>(config.adc_inputs);
     }
+
+    m_pads.emplace(Id::DON_LEFT, config.adc_inputs.don_left);
+    m_pads.emplace(Id::KA_LEFT, config.adc_inputs.ka_left);
+    m_pads.emplace(Id::DON_RIGHT, config.adc_inputs.don_right);
+    m_pads.emplace(Id::KA_RIGHT, config.adc_inputs.ka_right);
 }
 
 std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
@@ -40,8 +82,7 @@ std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
 
     for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
         for (const auto &pad : m_pads) {
-            adc_select_input(pad.second.getPin());
-            values[pad.first] += adc_read();
+            values[pad.first] += m_adc->read(pad.second.getChannel());
         }
     }
 

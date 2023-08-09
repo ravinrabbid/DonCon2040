@@ -6,9 +6,10 @@
 class Mcp3204 {
   private:
     spi_inst *m_spi;
+    uint8_t m_cs_pin;
 
   public:
-    Mcp3204(spi_inst *spi);
+    Mcp3204(spi_inst *spi, uint8_t cs_pin);
 
     uint16_t read(uint8_t channel);
 };

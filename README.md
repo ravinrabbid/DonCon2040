@@ -51,7 +51,7 @@ Few things which you probably want to change more regularly can be changed using
 
 Those settings are persisted to flash memory if you choose 'Save' when exiting the Menu and will survive power cycles.
 
-Defaults and everything else are compiled statically into the firmware. You can find everything in `include/GlobalConfiguration.h`. This covers default controller emulation mode, i2c pins, addresses and speed, default trigger thresholds, scale and debounce delay, button mapping, LED colors and brightness.
+Defaults and everything else are compiled statically into the firmware. You can find everything in `include/GlobalConfiguration.h`. This covers default controller emulation mode, i2c pins, external ADC configuration, addresses and speed, default trigger thresholds, scale and debounce delay, button mapping, LED colors and brightness.
 
 ### Debounce Delay / Hold Time
 

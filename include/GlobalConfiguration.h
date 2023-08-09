@@ -7,6 +7,7 @@
 #include "peripherals/StatusLed.h"
 
 #include "hardware/i2c.h"
+#include "hardware/spi.h"
 
 namespace Doncon::Config {
 
@@ -45,8 +46,16 @@ const Peripherals::Drum::Config drum_config = {
     },
     230, // Trigger threshold scale level
 
-    50, // ADC sample count
-    18, // Debounce delay in milliseconds
+    true, // Use external ADC
+    // SPI config for external ADC, unused if above is false
+    {
+        3,       // MOSI Pin
+        4,       // MISO Pin
+        2,       // SCLK Pin
+        1,       // SCSn Pin
+        spi0,    // Block
+        2000000, // Speed
+    },
 };
 
 const Peripherals::Buttons::Config button_config = {

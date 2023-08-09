@@ -27,6 +27,8 @@ target_link_libraries(
          tinyusb_board
          pico_stdlib
          hardware_adc
+         hardware_i2c
+         hardware_spi
          pico_multicore
          pio_ws2812
          pico_ssd1306
