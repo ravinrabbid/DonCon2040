@@ -9518,7 +9518,7 @@
     (property "Reference" "D6" (at 182.88 38.1 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "4.1V" (at 182.88 40.64 90)
+    (property "Value" "4.3V" (at 182.88 40.64 90)
       (effects (font (size 1.27 1.27)) (justify left))
     )
     (property "Footprint" "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal" (at 180.34 39.37 0)
