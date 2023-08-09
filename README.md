@@ -79,6 +79,8 @@ If you don't want to use this board, the firmware should be usable on most RP204
 
 Additional controller buttons and the display are attached to the same (or different if your board has more than one) i2c bus. For the display, use a standard SSD1306 OLED display with 128x64 resolution. The buttons need to be attached to a MCP23017 IO expander.
 
+See [DonConPad](/pcb/DonConPad/) for a exemplary gamepad pcb.
+
 Mind that currently the display and buttons are mandatory to use the controller.
 
 ### Physical construction
