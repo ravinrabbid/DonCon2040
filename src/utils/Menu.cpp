@@ -349,7 +349,7 @@ void Menu::performValueAction(Menu::Descriptor::Action action, uint16_t value) {
     } break;
     case Descriptor::Action::SetTriggerThresholdKaRight: {
         auto thresholds = m_store->getTriggerThresholds();
-        thresholds.don_right = value;
+        thresholds.ka_right = value;
         m_store->setTriggerThresholds(thresholds);
     } break;
     case Descriptor::Action::SetTriggerThresholdScaleLevel:
