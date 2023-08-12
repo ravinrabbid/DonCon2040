@@ -70,24 +70,24 @@ const Peripherals::Buttons::Config button_config = {
 
     // Pins
     {{
-         0, // Up
-         1, // Down
-         2, // Left
-         3, // Right
+         8,  // Up
+         9,  // Down
+         10, // Left
+         11, // Right
      },
      {
-         10, // North
-         9,  // East
-         8,  // South
-         11, // West
+         0, // North
+         3, // East
+         1, // South
+         2, // West
 
-         4,  // L
-         12, // R
+         12, // L
+         4,  // R
 
-         13, // Start
-         5,  // Select
-         14, // Home
-         6,  // Share
+         5,  // Start
+         13, // Select
+         6,  // Home
+         14, // Share
      }},
 
     20, // Debounce delay in milliseconds
