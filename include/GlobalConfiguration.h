@@ -46,6 +46,9 @@ const Peripherals::Drum::Config drum_config = {
     },
     230, // Trigger threshold scale level
 
+    50, // ADC sample count
+    25, // Debounce delay in milliseconds
+
     true, // Use external ADC
     // SPI config for external ADC, unused if above is false
     {
