@@ -22,9 +22,11 @@ class SettingsStore {
         Peripherals::Drum::Config::Thresholds trigger_thresholds;
         uint8_t trigger_threshold_scale_level;
         uint8_t led_brightness;
+        uint16_t debounce_delay;
 
         uint8_t _padding[m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
-                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(uint8_t)];
+                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(uint8_t) -
+                         sizeof(uint16_t)];
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
@@ -56,6 +58,9 @@ class SettingsStore {
 
     void setLedBrightness(const uint8_t brightness);
     uint8_t getLedBrightness();
+
+    void setDebounceDelay(const uint16_t delay);
+    uint16_t getDebounceDelay();
 
     void scheduleReboot(const bool bootsel = false);
 

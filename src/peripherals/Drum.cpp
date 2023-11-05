@@ -133,6 +133,8 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     input_state.drum.ka_right.triggered = m_pads.at(Id::KA_RIGHT).getState();
 }
 
+void Drum::setDebounceDelay(const uint16_t delay) { m_config.debounce_delay_ms = delay; }
+
 void Drum::setThresholds(const Config::Thresholds &thresholds) { m_config.trigger_thresholds = thresholds; }
 
 void Drum::setThresholdScaleLevel(const uint8_t threshold_scale_level) {

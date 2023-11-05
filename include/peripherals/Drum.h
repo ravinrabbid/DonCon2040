@@ -103,6 +103,7 @@ class Drum {
 
     void updateInputState(Utils::InputState &input_state);
 
+    void setDebounceDelay(const uint16_t delay);
     void setThresholds(const Config::Thresholds &thresholds);
     void setThresholdScaleLevel(const uint8_t threshold_scale_level);
 };

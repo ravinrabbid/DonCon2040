@@ -16,6 +16,7 @@ SettingsStore::SettingsStore()
                      Config::Default::drum_config.trigger_thresholds,
                      Config::Default::drum_config.trigger_threshold_scale_level,
                      Config::Default::led_config.brightness,
+                     Config::Default::drum_config.debounce_delay_ms,
                      {}}),
       m_dirty(true), m_scheduled_reboot(RebootType::None) {
     uint32_t current_page = m_flash_offset + m_flash_size - m_store_size;
@@ -73,6 +74,14 @@ void SettingsStore::setLedBrightness(const uint8_t brightness) {
     }
 }
 uint8_t SettingsStore::getLedBrightness() { return m_store_cache.led_brightness; }
+
+void SettingsStore::setDebounceDelay(const uint16_t delay) {
+    if (m_store_cache.debounce_delay != delay) {
+        m_store_cache.debounce_delay = delay;
+        m_dirty = true;
+    }
+}
+uint16_t SettingsStore::getDebounceDelay() { return m_store_cache.debounce_delay; }
 
 void SettingsStore::store() {
     if (m_dirty) {

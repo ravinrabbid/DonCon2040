@@ -9,6 +9,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
        {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
+       {"DebnceDly", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
        {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0}},                                                                //
@@ -64,7 +65,13 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
      {Menu::Descriptor::Type::Value,                                   //
       "Sensitivity Scale Lvl",                                         //
       {{"", Menu::Descriptor::Action::SetTriggerThresholdScaleLevel}}, //
-      UINT8_MAX}},                                                     //
+      UINT8_MAX}},
+
+    {Menu::Page::DebounceDelay,                           //
+     {Menu::Descriptor::Type::Value,                      //
+      "Debounce Delay (ms)",                              //
+      {{"", Menu::Descriptor::Action::SetDebounceDelay}}, //
+      255}},
 
     {Menu::Page::LedBrightness,                           //
      {Menu::Descriptor::Type::Value,                      //
@@ -197,6 +204,9 @@ uint16_t Menu::getCurrentSelection(Menu::Page page) {
     case Page::TriggerThresholdScaleLevel:
         return m_store->getTriggerThresholdScaleLevel();
         break;
+    case Page::DebounceDelay:
+        return m_store->getDebounceDelay();
+        break;
     case Page::LedBrightness:
         return m_store->getLedBrightness();
         break;
@@ -247,6 +257,9 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::GotoPageLedBrightness:
         gotoPage(Page::LedBrightness);
         break;
+    case Descriptor::Action::GotoPageDebounceDelay:
+        gotoPage(Page::DebounceDelay);
+        break;
     case Descriptor::Action::GotoPageReset:
         gotoPage(Page::Reset);
         break;
@@ -290,6 +303,9 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::SetTriggerThresholdDonRight:
     case Descriptor::Action::SetTriggerThresholdKaRight:
     case Descriptor::Action::SetTriggerThresholdScaleLevel:
+        gotoParent();
+        break;
+    case Descriptor::Action::SetDebounceDelay:
         gotoParent();
         break;
     case Descriptor::Action::SetLedBrightness:
@@ -340,6 +356,9 @@ void Menu::performValueAction(Menu::Descriptor::Action action, uint16_t value) {
     } break;
     case Descriptor::Action::SetTriggerThresholdScaleLevel:
         m_store->setTriggerThresholdScaleLevel(value);
+        break;
+    case Descriptor::Action::SetDebounceDelay:
+        m_store->setDebounceDelay(value);
         break;
     case Descriptor::Action::SetLedBrightness:
         m_store->setLedBrightness(value);

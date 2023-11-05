@@ -24,6 +24,7 @@ class Menu {
         TriggerThresholdDonRight,
         TriggerThresholdKaRight,
         TriggerThresholdScaleLevel,
+        DebounceDelay,
         LedBrightness,
         Reset,
         Bootsel,
@@ -54,6 +55,7 @@ class Menu {
             GotoPageTriggerThresholdDonRight,
             GotoPageTriggerThresholdKaRight,
             GotoPageTriggerThresholdScaleLevel,
+            GotoPageDebounceDelay,
             GotoPageLedBrightness,
             GotoPageReset,
             GotoPageBootsel,
@@ -72,6 +74,7 @@ class Menu {
             SetTriggerThresholdDonRight,
             SetTriggerThresholdKaRight,
             SetTriggerThresholdScaleLevel,
+            SetDebounceDelay,
             SetLedBrightness,
 
             DoRebootToBootsel,
