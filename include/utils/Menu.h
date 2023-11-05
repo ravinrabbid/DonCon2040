@@ -6,6 +6,7 @@
 
 #include <map>
 #include <memory>
+#include <stack>
 #include <stddef.h>
 #include <string>
 #include <vector>
@@ -15,7 +16,6 @@ namespace Doncon::Utils {
 class Menu {
   public:
     enum class Page {
-        None,
         Main,
         DeviceMode,
         TriggerThreshold,
@@ -82,7 +82,6 @@ class Menu {
         std::string name;
         std::vector<std::pair<std::string, Action>> items;
         uint16_t max_value;
-        Page parent;
     };
 
     const static std::map<Page, const Descriptor> descriptors;
@@ -90,10 +89,11 @@ class Menu {
   private:
     std::shared_ptr<SettingsStore> m_store;
     bool m_active;
-    State m_state;
+    std::stack<State> m_state_stack;
 
     uint16_t getCurrentSelection(Page page);
     void gotoPage(Page page);
+    void gotoParent();
     void performSelectionAction(Descriptor::Action action);
     void performValueAction(Descriptor::Action action, uint16_t value);
 
