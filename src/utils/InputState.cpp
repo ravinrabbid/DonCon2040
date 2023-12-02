@@ -290,6 +290,11 @@ usb_report_t InputState::getDebugReport() {
     return {(uint8_t *)m_debug_report.c_str(), static_cast<uint16_t>(m_debug_report.size() + 1)};
 }
 
+void InputState::releaseAll() {
+    drum = {{false, 0}, {false, 0}, {false, 0}, {false, 0}};
+    controller = {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}};
+}
+
 bool InputState::checkHotkey() {
     static uint32_t hold_since = 0;
     static bool hold_active = false;
