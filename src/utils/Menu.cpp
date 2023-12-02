@@ -9,7 +9,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
        {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
-       {"DebnceDly", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
+       {"DebnceDly", Menu::Descriptor::Action::GotoPageDebounceDelay}, //
        {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0}},                                                                //

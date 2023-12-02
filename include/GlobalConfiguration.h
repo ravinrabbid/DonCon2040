@@ -32,10 +32,10 @@ const I2c i2c_config = {
 const Peripherals::Drum::Config drum_config = {
     // Pin config
     {
-        2, // Don Left
-        3, // Ka Left
-        1, // Don Right
-        0, // Ka Right
+        1, // Don Left
+        0, // Ka Left
+        2, // Don Right
+        3, // Ka Right
     },
     // Trigger thresholds soft
     {
@@ -90,7 +90,7 @@ const Peripherals::Buttons::Config button_config = {
          14, // Share
      }},
 
-    20, // Debounce delay in milliseconds
+    25, // Debounce delay in milliseconds
 };
 
 const Peripherals::StatusLed::Config led_config = {
