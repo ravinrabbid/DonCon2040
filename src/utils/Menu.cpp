@@ -9,7 +9,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
        {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
-       {"DebnceDly", Menu::Descriptor::Action::GotoPageDebounceDelay},    //
+       {"Hold Time", Menu::Descriptor::Action::GotoPageDebounceDelay},    //
        {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0}},                                                                //
@@ -70,7 +70,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
 
     {Menu::Page::DebounceDelay,                           //
      {Menu::Descriptor::Type::Value,                      //
-      "Debounce Delay (ms)",                              //
+      "Hit Hold Time (ms)",                               //
       {{"", Menu::Descriptor::Action::SetDebounceDelay}}, //
       255}},
 
