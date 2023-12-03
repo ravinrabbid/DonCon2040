@@ -9,7 +9,7 @@ InputState::InputState()
     : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}}),
       controller(
           {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}}),
-      m_switch_report({}), m_ps3_report({}), m_ps4_report({}),
+      m_switch_report({}), m_ps3_report({}), m_ps4_report({}), m_keyboard_report({}),
       m_xinput_report({0x00, sizeof(xinput_report_t), 0, 0, 0, 0, 0, 0, 0, 0, {}}),
       m_midi_report({{false, false, false, false}, {0, 0, 0, 0}}) {}
 
@@ -23,6 +23,8 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
     case USB_MODE_PS4_TATACON:
     case USB_MODE_DUALSHOCK4:
         return getPS4InputReport();
+    case USB_MODE_KEYBOARD:
+        return getKeyboardReport();
     case USB_MODE_XBOX360:
         return getXinputReport();
     case USB_MODE_MIDI:
@@ -173,7 +175,7 @@ usb_report_t InputState::getPS4InputReport() {
     m_ps4_report.battery = 0 | (1 << 4) | 11; // Cable connected and fully charged
     m_ps4_report.peripheral = 0x01;
     m_ps4_report.touch_report_count = 0;
-    
+
     // This method actually gets called more often than the report is sent,
     // so counters are not consecutive ... let's see if this turns out to
     // be a problem.
@@ -183,6 +185,41 @@ usb_report_t InputState::getPS4InputReport() {
     }
 
     return {(uint8_t *)&m_ps4_report, sizeof(hid_ps4_report_t)};
+}
+
+usb_report_t InputState::getKeyboardReport() {
+    m_keyboard_report = {.keycodes = {0}};
+
+    auto set_key = [&](const bool input, const uint8_t keycode) {
+        if (input) {
+            m_keyboard_report.keycodes[keycode / 8] |= 1 << (keycode % 8);
+        }
+    };
+
+    set_key(drum.ka_left.triggered, HID_KEY_D);
+    set_key(drum.don_left.triggered, HID_KEY_F);
+    set_key(drum.don_right.triggered, HID_KEY_J);
+    set_key(drum.ka_right.triggered, HID_KEY_K);
+
+    set_key(controller.dpad.up, HID_KEY_ARROW_UP);
+    set_key(controller.dpad.down, HID_KEY_ARROW_DOWN);
+    set_key(controller.dpad.left, HID_KEY_ARROW_LEFT);
+    set_key(controller.dpad.right, HID_KEY_ARROW_RIGHT);
+
+    set_key(controller.buttons.north, HID_KEY_L);
+    set_key(controller.buttons.east, HID_KEY_BACKSPACE);
+    set_key(controller.buttons.south, HID_KEY_ENTER);
+    set_key(controller.buttons.west, HID_KEY_P);
+
+    set_key(controller.buttons.l, HID_KEY_Q);
+    set_key(controller.buttons.r, HID_KEY_E);
+
+    set_key(controller.buttons.start, HID_KEY_ESCAPE);
+    set_key(controller.buttons.select, HID_KEY_TAB);
+    // set_key(controller.buttons.home, );
+    // set_key(controller.buttons.share, );
+
+    return {(uint8_t *)&m_keyboard_report, sizeof(hid_nkro_keyboard_report_t)};
 }
 
 usb_report_t InputState::getXinputReport() {

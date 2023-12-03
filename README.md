@@ -17,6 +17,7 @@ The firmware is pretty much tailored to this specific use case, if you are looki
   - Dualshock 3
   - Switch Pro Controller
   - XInput
+  - Keyboard
   - MIDI
   - Debug mode (will output current state via USB serial)
 - Additional buttons via external i2c GPIO expander

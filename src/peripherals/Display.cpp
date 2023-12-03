@@ -40,6 +40,8 @@ static std::string modeToString(usb_mode_t mode) {
         return "PS4 Tatacon";
     case USB_MODE_DUALSHOCK4:
         return "Dualshock 4";
+    case USB_MODE_KEYBOARD:
+        return "Keyboard";
     case USB_MODE_XBOX360:
         return "Xbox 360";
     case USB_MODE_MIDI:

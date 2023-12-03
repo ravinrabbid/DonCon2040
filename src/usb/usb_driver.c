@@ -26,6 +26,7 @@ char *const usbd_desc_str[] = {
     [USBD_STR_SWITCH] = USBD_SWITCH_NAME,         //
     [USBD_STR_PS3] = USBD_PS3_NAME,               //
     [USBD_STR_PS4] = USBD_PS4_NAME,               //
+    [USBD_STR_KEYBOARD] = USBD_KEYBOARD_NAME,     //
     [USBD_STR_XINPUT] = USBD_XINPUT_NAME,         //
     [USBD_STR_MIDI] = USBD_MIDI_NAME,             //
     [USBD_STR_CDC] = USBD_DEBUG_CDC_NAME,         //
@@ -74,6 +75,14 @@ void usb_driver_init(usb_mode_t mode) {
         usbd_desc_hid_report = ps4_desc_hid_report;
         usbd_app_driver = &hid_app_driver;
         usbd_send_report = send_hid_ps4_report;
+        usbd_receive_report = NULL;
+        break;
+    case USB_MODE_KEYBOARD:
+        usbd_desc_device = &keyboard_desc_device;
+        usbd_desc_cfg = keyboard_desc_cfg;
+        usbd_desc_hid_report = keyboard_desc_hid_report;
+        usbd_app_driver = &hid_app_driver;
+        usbd_send_report = send_hid_keyboard_report;
         usbd_receive_report = NULL;
         break;
     case USB_MODE_XBOX360:

@@ -65,6 +65,7 @@ class Menu {
             ChangeUsbModeDS3,
             ChangeUsbModePS4Tatacon,
             ChangeUsbModeDS4,
+            ChangeUsbModeKeyboard,
             ChangeUsbModeXbox360,
             ChangeUsbModeMidi,
             ChangeUsbModeDebug,

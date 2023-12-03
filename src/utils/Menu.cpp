@@ -9,7 +9,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
        {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
-       {"DebnceDly", Menu::Descriptor::Action::GotoPageDebounceDelay}, //
+       {"DebnceDly", Menu::Descriptor::Action::GotoPageDebounceDelay},    //
        {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0}},                                                                //
@@ -22,6 +22,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Dualshock3", Menu::Descriptor::Action::ChangeUsbModeDS3},           //
        {"PS4 Tata", Menu::Descriptor::Action::ChangeUsbModePS4Tatacon},      //
        {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},           //
+       {"Keyboard", Menu::Descriptor::Action::ChangeUsbModeKeyboard},        //
        {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},         //
        {"MIDI", Menu::Descriptor::Action::ChangeUsbModeMidi},                //
        {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},             //
@@ -284,6 +285,10 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         break;
     case Descriptor::Action::ChangeUsbModeDS4:
         m_store->setUsbMode(USB_MODE_DUALSHOCK4);
+        gotoParent();
+        break;
+    case Descriptor::Action::ChangeUsbModeKeyboard:
+        m_store->setUsbMode(USB_MODE_KEYBOARD);
         gotoParent();
         break;
     case Descriptor::Action::ChangeUsbModeXbox360:
