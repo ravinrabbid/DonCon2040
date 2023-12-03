@@ -35,6 +35,7 @@ class Drum {
 
         uint8_t sample_count;
         uint16_t debounce_delay_ms;
+        uint32_t roll_counter_timeout_ms;
 
         bool use_external_adc;
 
@@ -96,6 +97,7 @@ class Drum {
     std::map<Id, Pad> m_pads;
 
   private:
+    void updateRollCounter(Utils::InputState &input_state);
     std::map<Id, uint16_t> sampleInputs();
 
   public:

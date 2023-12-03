@@ -95,6 +95,44 @@ std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
     return result;
 }
 
+void Drum::updateRollCounter(Utils::InputState &input_state) {
+    static uint32_t last_hit_time = 0;
+    static bool last_don_left_state = false;
+    static bool last_don_right_state = false;
+    static bool last_ka_left_state = false;
+    static bool last_ka_right_state = false;
+    static uint16_t roll_count = 0;
+
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+    if ((now - last_hit_time) > m_config.roll_counter_timeout_ms) {
+        roll_count = 0;
+    }
+
+    if (input_state.drum.don_left.triggered && (last_don_left_state != input_state.drum.don_left.triggered)) {
+        last_hit_time = now;
+        roll_count++;
+    }
+    if (input_state.drum.don_right.triggered && (last_don_right_state != input_state.drum.don_right.triggered)) {
+        last_hit_time = now;
+        roll_count++;
+    }
+    if (input_state.drum.ka_right.triggered && (last_ka_right_state != input_state.drum.ka_right.triggered)) {
+        last_hit_time = now;
+        roll_count++;
+    }
+    if (input_state.drum.ka_left.triggered && (last_ka_left_state != input_state.drum.ka_left.triggered)) {
+        last_hit_time = now;
+        roll_count++;
+    }
+
+    last_don_left_state = input_state.drum.don_left.triggered;
+    last_don_right_state = input_state.drum.don_right.triggered;
+    last_ka_left_state = input_state.drum.ka_left.triggered;
+    last_ka_right_state = input_state.drum.ka_right.triggered;
+
+    input_state.drum.roll_counter = roll_count;
+}
+
 void Drum::updateInputState(Utils::InputState &input_state) {
     // Oversample ADC inputs to get rid of ADC noise
     const auto raw_values = sampleInputs();
@@ -140,6 +178,8 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     input_state.drum.ka_left.triggered = m_pads.at(Id::KA_LEFT).getState();
     input_state.drum.don_right.triggered = m_pads.at(Id::DON_RIGHT).getState();
     input_state.drum.ka_right.triggered = m_pads.at(Id::KA_RIGHT).getState();
+
+    updateRollCounter(input_state);
 }
 
 void Drum::setDebounceDelay(const uint16_t delay) { m_config.debounce_delay_ms = delay; }

@@ -3,7 +3,6 @@
 #include "hardware/gpio.h"
 #include "pico/time.h"
 
-#include "bitmaps/IdleScreen.h"
 #include "bitmaps/MenuScreens.h"
 
 #include <list>
@@ -52,70 +51,15 @@ static std::string modeToString(usb_mode_t mode) {
     return "?";
 }
 
-static std::vector<uint16_t> updateRollCounters(const Utils::InputState::Drum &drum, const uint32_t timeout_ms) {
-    struct CounterState {
-        uint32_t last_triggered_time;
-        bool last_state;
-        uint16_t count;
-    };
-
-    static CounterState ka_left_state = {0, false, 0};
-    static CounterState don_left_state = {0, false, 0};
-    static CounterState don_right_state = {0, false, 0};
-    static CounterState ka_right_state = {0, false, 0};
-
-    uint32_t now = to_ms_since_boot(get_absolute_time());
-
-    auto check_roll = [&](CounterState &target, bool current_state) {
-        if (current_state && (target.last_state != current_state)) {
-            if ((now - target.last_triggered_time) > timeout_ms) {
-                target.count = 0;
-            }
-
-            target.last_triggered_time = now;
-            target.count++;
-        }
-
-        target.last_state = current_state;
-    };
-
-    check_roll(ka_left_state, drum.ka_left.triggered);
-    check_roll(don_left_state, drum.don_left.triggered);
-    check_roll(don_right_state, drum.don_right.triggered);
-    check_roll(ka_right_state, drum.ka_right.triggered);
-
-    return {ka_left_state.count, don_left_state.count, don_right_state.count, ka_right_state.count};
-}
-
 void Display::drawIdleScreen() {
     // Header
     std::string mode_string = modeToString(m_usb_mode) + " mode";
     ssd1306_draw_string(&m_display, 0, 0, 1, mode_string.c_str());
     ssd1306_draw_line(&m_display, 0, 10, 128, 10);
 
-    // Drum
-    ssd1306_bmp_show_image_with_offset(&m_display, drum_bmp.data(), drum_bmp.size(), 64 - 26, 12);
-
-    if (m_input_state.drum.don_left.triggered) {
-        ssd1306_bmp_show_image_with_offset(&m_display, don_l_bmp.data(), don_l_bmp.size(), 64 - 26, 12);
-    }
-    if (m_input_state.drum.don_right.triggered) {
-        ssd1306_bmp_show_image_with_offset(&m_display, don_r_bmp.data(), don_r_bmp.size(), 64 - 26, 12);
-    }
-    if (m_input_state.drum.ka_left.triggered) {
-        ssd1306_bmp_show_image_with_offset(&m_display, ka_l_bmp.data(), ka_l_bmp.size(), 64 - 26, 12);
-    }
-    if (m_input_state.drum.ka_right.triggered) {
-        ssd1306_bmp_show_image_with_offset(&m_display, ka_r_bmp.data(), ka_r_bmp.size(), 64 - 26, 12);
-    }
-
-    // Roll counters
-    auto roll_counters = updateRollCounters(m_input_state.drum, m_config.roll_counter_timeout_ms);
-    int num = 1;
-    for (const auto &counter : roll_counters) {
-        ssd1306_draw_string(&m_display, 2, 12 * num, 1, std::to_string(counter).c_str());
-        num++;
-    }
+    // Roll counter
+    auto roll_str = std::to_string(m_input_state.drum.roll_counter) + " Roll";
+    ssd1306_draw_string(&m_display, (127 - (roll_str.length() * 12)) / 2, 20, 2, roll_str.c_str());
 
     // Player "LEDs"
     if (m_player_id != 0) {

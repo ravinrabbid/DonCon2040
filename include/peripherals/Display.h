@@ -19,8 +19,6 @@ class Display {
     struct Config {
         i2c_inst_t *i2c_block;
         uint8_t i2c_address;
-
-        uint32_t roll_counter_timeout_ms;
     };
 
   private:

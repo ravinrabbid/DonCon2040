@@ -6,7 +6,7 @@
 namespace Doncon::Utils {
 
 InputState::InputState()
-    : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}}),
+    : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}, 0}),
       controller(
           {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}}),
       m_switch_report({}), m_ps3_report({}), m_ps4_report({}), m_keyboard_report({}),
@@ -328,7 +328,7 @@ usb_report_t InputState::getDebugReport() {
 }
 
 void InputState::releaseAll() {
-    drum = {{false, 0}, {false, 0}, {false, 0}, {false, 0}};
+    drum = {{false, 0}, {false, 0}, {false, 0}, {false, 0}, 0};
     controller = {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}};
 }
 

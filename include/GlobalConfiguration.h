@@ -37,7 +37,7 @@ const Peripherals::Drum::Config drum_config = {
         2, // Don Right
         3, // Ka Right
     },
-    // Trigger thresholds soft
+    // Trigger thresholds
     {
         80, // Don Left
         50, // Ka Left
@@ -45,8 +45,9 @@ const Peripherals::Drum::Config drum_config = {
         50, // Ka Right
     },
 
-    10, // ADC sample count
-    25, // Debounce delay in milliseconds
+    10,  // ADC sample count
+    25,  // Debounce delay in milliseconds
+    500, // Roll Counter Timeout in Milliseconds
 
     true, // Use external ADC
     // SPI config for external ADC, unused if above is false
@@ -93,11 +94,11 @@ const Peripherals::Buttons::Config button_config = {
 };
 
 const Peripherals::StatusLed::Config led_config = {
-    {128, 128, 128},   // Idle Color
-    {255, 0, 0},   // Don Left Color
-    {0, 0, 255},   // Ka Left Color
-    {255, 255, 0}, // Don Right Color
-    {0, 255, 255}, // Ka Right Color
+    {128, 128, 128}, // Idle Color
+    {255, 0, 0},     // Don Left Color
+    {0, 0, 255},     // Ka Left Color
+    {255, 255, 0},   // Don Right Color
+    {0, 255, 255},   // Ka Right Color
 
     11,    // LED Enable Pin,
     12,    // LED Pin
@@ -108,8 +109,6 @@ const Peripherals::StatusLed::Config led_config = {
 const Peripherals::Display::Config display_config = {
     i2c_config.block, // Block
     0x3C,             // Address
-
-    500, // Roll Counter Timeout in Milliseconds
 };
 
 } // namespace Default

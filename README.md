@@ -23,7 +23,7 @@ The firmware is pretty much tailored to this specific use case, if you are looki
 - Additional buttons via external i2c GPIO expander
 - Basic configuration via on-screen menu on attached OLED screen
 - Single WS2812 LED for trigger feedback
-- Drumroll counters on display
+- Drumroll counter on display
 
 *: Will not work properly on an actual PS4 since there are measures to prevent unauthorized accessories from being used.
 
