@@ -40,9 +40,9 @@ const Peripherals::Drum::Config drum_config = {
     // Trigger thresholds soft
     {
         80, // Don Left
-        50,  // Ka Left
+        50, // Ka Left
         80, // Don Right
-        50,  // Ka Right
+        50, // Ka Right
     },
 
     10, // ADC sample count
@@ -93,6 +93,7 @@ const Peripherals::Buttons::Config button_config = {
 };
 
 const Peripherals::StatusLed::Config led_config = {
+    {128, 128, 128},   // Idle Color
     {255, 0, 0},   // Don Left Color
     {0, 0, 255},   // Ka Left Color
     {255, 255, 0}, // Don Right Color

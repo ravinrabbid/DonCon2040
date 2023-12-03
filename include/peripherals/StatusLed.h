@@ -16,6 +16,7 @@ class StatusLed {
             uint8_t b;
         };
 
+        Color idle_color;
         Color don_left_color;
         Color ka_left_color;
         Color don_right_color;
@@ -37,6 +38,7 @@ class StatusLed {
 
     void setInputState(const Utils::InputState input_state);
     void setBrightness(const uint8_t brightness);
+    void setPlayerColor(const Config::Color color);
 
     void update();
 };

@@ -67,9 +67,13 @@ void core1_task() {
                 display.setUsbMode(control_msg.data.usb_mode);
                 break;
             case ControlCommand::SetPlayerLed:
-                if (control_msg.data.player_led.type == USB_PLAYER_LED_ID) {
+                switch (control_msg.data.player_led.type) {
+                case USB_PLAYER_LED_ID:
                     display.setPlayerId(control_msg.data.player_led.id);
-                } else if (control_msg.data.player_led.type == USB_PLAYER_LED_COLOR) {
+                    break;
+                case USB_PLAYER_LED_COLOR:
+                    led.setPlayerColor({control_msg.data.player_led.red, control_msg.data.player_led.green,
+                                        control_msg.data.player_led.blue});
                 }
                 break;
             case ControlCommand::SetLedBrightness:

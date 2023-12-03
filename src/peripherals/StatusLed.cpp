@@ -17,6 +17,8 @@ void StatusLed::setInputState(const Utils::InputState input_state) { m_input_sta
 
 void StatusLed::setBrightness(const uint8_t brightness) { m_config.brightness = brightness; }
 
+void StatusLed::setPlayerColor(const Config::Color color) { m_config.idle_color = color; }
+
 void StatusLed::update() {
     float brightness_factor = m_config.brightness / static_cast<float>(UINT8_MAX);
 
@@ -57,7 +59,10 @@ void StatusLed::update() {
             static_cast<uint8_t>((mixed_green / num_colors) * brightness_factor),
             static_cast<uint8_t>((mixed_blue / num_colors) * brightness_factor)));
     } else {
-        ws2812_put_pixel(0);
+        ws2812_put_pixel(
+            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((m_config.idle_color.r) * brightness_factor),
+                                                   static_cast<uint8_t>((m_config.idle_color.g) * brightness_factor),
+                                                   static_cast<uint8_t>((m_config.idle_color.b) * brightness_factor)));
     }
 }
 
