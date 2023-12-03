@@ -14,7 +14,6 @@ SettingsStore::SettingsStore()
     : m_store_cache({m_magic_byte,
                      Config::Default::usb_mode,
                      Config::Default::drum_config.trigger_thresholds,
-                     Config::Default::drum_config.trigger_threshold_scale_level,
                      Config::Default::led_config.brightness,
                      Config::Default::drum_config.debounce_delay_ms,
                      {}}),
@@ -58,14 +57,6 @@ void SettingsStore::setTriggerThresholds(const Peripherals::Drum::Config::Thresh
     }
 }
 Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() { return m_store_cache.trigger_thresholds; }
-
-void SettingsStore::setTriggerThresholdScaleLevel(const uint8_t threshold_scale_level) {
-    if (threshold_scale_level != m_store_cache.trigger_threshold_scale_level) {
-        m_store_cache.trigger_threshold_scale_level = threshold_scale_level;
-        m_dirty = true;
-    }
-}
-uint8_t SettingsStore::getTriggerThresholdScaleLevel() { return m_store_cache.trigger_threshold_scale_level; }
 
 void SettingsStore::setLedBrightness(const uint8_t brightness) {
     if (m_store_cache.led_brightness != brightness) {

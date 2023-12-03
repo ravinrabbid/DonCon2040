@@ -28,15 +28,14 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},             //
       0}},                                                                   //
 
-    {Menu::Page::TriggerThreshold,                                                   //
-     {Menu::Descriptor::Type::Selection,                                             //
-      "Sensitivity",                                                                 //
-      {{"Ka Left", Menu::Descriptor::Action::GotoPageTriggerThresholdKaLeft},        //
-       {"Don Left", Menu::Descriptor::Action::GotoPageTriggerThresholdDonLeft},      //
-       {"Don Right", Menu::Descriptor::Action::GotoPageTriggerThresholdDonRight},    //
-       {"Ka Right", Menu::Descriptor::Action::GotoPageTriggerThresholdKaRight},      //
-       {"Scale Lvl", Menu::Descriptor::Action::GotoPageTriggerThresholdScaleLevel}}, //
-      0}},                                                                           //
+    {Menu::Page::TriggerThreshold,                                                //
+     {Menu::Descriptor::Type::Selection,                                          //
+      "Sensitivity",                                                              //
+      {{"Ka Left", Menu::Descriptor::Action::GotoPageTriggerThresholdKaLeft},     //
+       {"Don Left", Menu::Descriptor::Action::GotoPageTriggerThresholdDonLeft},   //
+       {"Don Right", Menu::Descriptor::Action::GotoPageTriggerThresholdDonRight}, //
+       {"Ka Right", Menu::Descriptor::Action::GotoPageTriggerThresholdKaRight}},  //
+      0}},                                                                        //
 
     {Menu::Page::TriggerThresholdKaLeft,                           //
      {Menu::Descriptor::Type::Value,                               //
@@ -61,12 +60,6 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       "Trg Level Ka Right",                                         //
       {{"", Menu::Descriptor::Action::SetTriggerThresholdKaRight}}, //
       4095}},
-
-    {Menu::Page::TriggerThresholdScaleLevel,                           //
-     {Menu::Descriptor::Type::Value,                                   //
-      "Sensitivity Scale Lvl",                                         //
-      {{"", Menu::Descriptor::Action::SetTriggerThresholdScaleLevel}}, //
-      UINT8_MAX}},
 
     {Menu::Page::DebounceDelay,                           //
      {Menu::Descriptor::Type::Value,                      //
@@ -202,9 +195,6 @@ uint16_t Menu::getCurrentSelection(Menu::Page page) {
     case Page::TriggerThresholdKaRight:
         return m_store->getTriggerThresholds().ka_right;
         break;
-    case Page::TriggerThresholdScaleLevel:
-        return m_store->getTriggerThresholdScaleLevel();
-        break;
     case Page::DebounceDelay:
         return m_store->getDebounceDelay();
         break;
@@ -251,9 +241,6 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         break;
     case Descriptor::Action::GotoPageTriggerThresholdKaRight:
         gotoPage(Page::TriggerThresholdKaRight);
-        break;
-    case Descriptor::Action::GotoPageTriggerThresholdScaleLevel:
-        gotoPage(Page::TriggerThresholdScaleLevel);
         break;
     case Descriptor::Action::GotoPageLedBrightness:
         gotoPage(Page::LedBrightness);
@@ -307,7 +294,6 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::SetTriggerThresholdDonLeft:
     case Descriptor::Action::SetTriggerThresholdDonRight:
     case Descriptor::Action::SetTriggerThresholdKaRight:
-    case Descriptor::Action::SetTriggerThresholdScaleLevel:
         gotoParent();
         break;
     case Descriptor::Action::SetDebounceDelay:
@@ -359,9 +345,6 @@ void Menu::performValueAction(Menu::Descriptor::Action action, uint16_t value) {
         thresholds.ka_right = value;
         m_store->setTriggerThresholds(thresholds);
     } break;
-    case Descriptor::Action::SetTriggerThresholdScaleLevel:
-        m_store->setTriggerThresholdScaleLevel(value);
-        break;
     case Descriptor::Action::SetDebounceDelay:
         m_store->setDebounceDelay(value);
         break;

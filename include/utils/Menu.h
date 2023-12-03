@@ -23,7 +23,6 @@ class Menu {
         TriggerThresholdDonLeft,
         TriggerThresholdDonRight,
         TriggerThresholdKaRight,
-        TriggerThresholdScaleLevel,
         DebounceDelay,
         LedBrightness,
         Reset,
@@ -54,7 +53,6 @@ class Menu {
             GotoPageTriggerThresholdDonLeft,
             GotoPageTriggerThresholdDonRight,
             GotoPageTriggerThresholdKaRight,
-            GotoPageTriggerThresholdScaleLevel,
             GotoPageDebounceDelay,
             GotoPageLedBrightness,
             GotoPageReset,
@@ -74,7 +72,6 @@ class Menu {
             SetTriggerThresholdDonLeft,
             SetTriggerThresholdDonRight,
             SetTriggerThresholdKaRight,
-            SetTriggerThresholdScaleLevel,
             SetDebounceDelay,
             SetLedBrightness,
 

@@ -92,8 +92,6 @@ void core1_task() {
 
         led.update();
         display.update();
-
-        // sleep_ms(1);
     }
 }
 
@@ -131,7 +129,6 @@ int main() {
 
         drum.setDebounceDelay(settings_store->getDebounceDelay());
         drum.setThresholds(settings_store->getTriggerThresholds());
-        drum.setThresholdScaleLevel(settings_store->getTriggerThresholdScaleLevel());
     };
 
     readSettings();

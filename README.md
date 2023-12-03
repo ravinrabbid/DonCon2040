@@ -47,7 +47,8 @@ Few things which you probably want to change more regularly can be changed using
 
 - Controller emulation mode
 - LED brightness
-- Trigger thresholds and scale level
+- Trigger thresholds
+- Hold Time
 - Enter BOOTSEL mode for firmware flashing
 
 Those settings are persisted to flash memory if you choose 'Save' when exiting the Menu and will survive power cycles.
@@ -59,14 +60,6 @@ Defaults and everything else are compiled statically into the firmware. You can 
 The debounce delay also implicitly serves as the hold time of the input after a hit. On some platforms inputs won't be registered properly if this time is too short. For example Taiko no Tatsujin on Switch needs at least 25 milliseconds.
 
 If you notice dropped inputs even if the controller signals a hit on the LED/Display, try to increase this value.
-
-### Trigger Scale Level
-
-To avoid false inputs for very hard hits, trigger levels of the non-hit pads are scaled dynamically. The trigger scale level defines how much trigger levels are increased.
-
-Increase the value if you get false inputs on hard hits, decrease if simultaneous left and right hits are not registered properly.
-
-Mind that the scaling is non-linear and changes in the higher end of the scale level range have a much larger impact.
 
 ## Hardware
 

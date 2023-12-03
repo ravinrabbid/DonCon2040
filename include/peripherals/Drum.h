@@ -32,7 +32,6 @@ class Drum {
 
         AdcInputs adc_inputs;
         Thresholds trigger_thresholds;
-        uint8_t trigger_threshold_scale_level;
 
         uint8_t sample_count;
         uint16_t debounce_delay_ms;
@@ -51,6 +50,7 @@ class Drum {
 
   private:
     enum class Id {
+        NONE,
         DON_LEFT,
         KA_LEFT,
         DON_RIGHT,
@@ -64,11 +64,11 @@ class Drum {
         bool active;
 
       public:
-        Pad(uint8_t channel);
+        Pad(const uint8_t channel);
 
         uint8_t getChannel() const { return channel; };
         bool getState() const { return active; };
-        void setState(bool state, uint16_t debounce_delay);
+        void setState(const bool state, const uint16_t debounce_delay);
     };
 
     class AdcInterface {
@@ -105,7 +105,6 @@ class Drum {
 
     void setDebounceDelay(const uint16_t delay);
     void setThresholds(const Config::Thresholds &thresholds);
-    void setThresholdScaleLevel(const uint8_t threshold_scale_level);
 };
 
 } // namespace Doncon::Peripherals

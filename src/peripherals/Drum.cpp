@@ -49,9 +49,9 @@ Drum::ExternalAdc::ExternalAdc(const Drum::Config::Spi &spi_config) : m_mcp3204(
 
 uint16_t Drum::ExternalAdc::read(uint8_t channel) { return m_mcp3204.read(channel); }
 
-Drum::Pad::Pad(uint8_t channel) : channel(channel), last_change(0), active(false) {}
+Drum::Pad::Pad(const uint8_t channel) : channel(channel), last_change(0), active(false) {}
 
-void Drum::Pad::setState(bool state, uint16_t debounce_delay) {
+void Drum::Pad::setState(const bool state, const uint16_t debounce_delay) {
     if (active == state) {
         return;
     }
@@ -99,28 +99,37 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     // Oversample ADC inputs to get rid of ADC noise
     const auto raw_values = sampleInputs();
 
-    const auto max_value = std::max_element(raw_values.cbegin(), raw_values.cend(),
-                                            [](const auto a, const auto b) { return a.second < b.second; });
-
-    auto do_set_state = [&](const auto &id, const auto &threshold) {
-        // Increase threshold for very hard hits to avoid false inputs on neighboring pads
-        float mult = 1.0;
-        if (id != max_value->first && m_config.trigger_threshold_scale_level > 0) {
-            mult = float(max_value->second) / (((UINT8_MAX * 16) - (m_config.trigger_threshold_scale_level * 16)) + 1);
-            mult = mult < 1.0 ? 1.0 : mult;
+    auto get_threshold = [&](const Id target) {
+        switch (target) {
+        case Id::DON_LEFT:
+            return m_config.trigger_thresholds.don_left;
+        case Id::DON_RIGHT:
+            return m_config.trigger_thresholds.don_right;
+        case Id::KA_LEFT:
+            return m_config.trigger_thresholds.ka_left;
+        case Id::KA_RIGHT:
+            return m_config.trigger_thresholds.ka_right;
+        case Id::NONE:
+            return (uint16_t)0;
         }
-
-        if (raw_values.at(id) > (threshold * mult)) {
-            m_pads.at(id).setState(true, m_config.debounce_delay_ms);
-        } else {
-            m_pads.at(id).setState(false, m_config.debounce_delay_ms);
-        }
+        return (uint16_t)0;
     };
 
-    do_set_state(Id::DON_LEFT, m_config.trigger_thresholds.don_left);
-    do_set_state(Id::KA_LEFT, m_config.trigger_thresholds.ka_left);
-    do_set_state(Id::DON_RIGHT, m_config.trigger_thresholds.don_right);
-    do_set_state(Id::KA_RIGHT, m_config.trigger_thresholds.ka_right);
+    // Consider the hardest hit pad the one that actually was hit,
+    const auto max_hit = std::max_element(raw_values.cbegin(), raw_values.cend(),
+                                          [](const auto a, const auto b) { return a.second < b.second; });
+
+    if (max_hit->second > get_threshold(max_hit->first)) {
+        m_pads.at(max_hit->first).setState(true, m_config.debounce_delay_ms);
+    } else {
+        m_pads.at(max_hit->first).setState(false, m_config.debounce_delay_ms);
+    }
+
+    for (const auto &input : raw_values) {
+        if (input.first != max_hit->first) {
+            m_pads.at(input.first).setState(false, m_config.debounce_delay_ms);
+        }
+    }
 
     input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
     input_state.drum.ka_left.raw = raw_values.at(Id::KA_LEFT);
@@ -136,9 +145,5 @@ void Drum::updateInputState(Utils::InputState &input_state) {
 void Drum::setDebounceDelay(const uint16_t delay) { m_config.debounce_delay_ms = delay; }
 
 void Drum::setThresholds(const Config::Thresholds &thresholds) { m_config.trigger_thresholds = thresholds; }
-
-void Drum::setThresholdScaleLevel(const uint8_t threshold_scale_level) {
-    m_config.trigger_threshold_scale_level = threshold_scale_level;
-}
 
 } // namespace Doncon::Peripherals

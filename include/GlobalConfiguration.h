@@ -44,9 +44,8 @@ const Peripherals::Drum::Config drum_config = {
         80, // Don Right
         50,  // Ka Right
     },
-    230, // Trigger threshold scale level
 
-    50, // ADC sample count
+    10, // ADC sample count
     25, // Debounce delay in milliseconds
 
     true, // Use external ADC
