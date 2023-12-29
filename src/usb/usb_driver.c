@@ -77,7 +77,8 @@ void usb_driver_init(usb_mode_t mode) {
         usbd_send_report = send_hid_ps4_report;
         usbd_receive_report = NULL;
         break;
-    case USB_MODE_KEYBOARD:
+    case USB_MODE_KEYBOARD_P1:
+    case USB_MODE_KEYBOARD_P2:
         usbd_desc_device = &keyboard_desc_device;
         usbd_desc_cfg = keyboard_desc_cfg;
         usbd_desc_hid_report = keyboard_desc_hid_report;

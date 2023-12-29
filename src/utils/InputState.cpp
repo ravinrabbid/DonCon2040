@@ -23,8 +23,10 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
     case USB_MODE_PS4_TATACON:
     case USB_MODE_DUALSHOCK4:
         return getPS4InputReport();
-    case USB_MODE_KEYBOARD:
-        return getKeyboardReport();
+    case USB_MODE_KEYBOARD_P1:
+        return getKeyboardReport(Player::One);
+    case USB_MODE_KEYBOARD_P2:
+        return getKeyboardReport(Player::Two);
     case USB_MODE_XBOX360:
         return getXinputReport();
     case USB_MODE_MIDI:
@@ -187,7 +189,7 @@ usb_report_t InputState::getPS4InputReport() {
     return {(uint8_t *)&m_ps4_report, sizeof(hid_ps4_report_t)};
 }
 
-usb_report_t InputState::getKeyboardReport() {
+usb_report_t InputState::getKeyboardReport(InputState::Player player) {
     m_keyboard_report = {.keycodes = {0}};
 
     auto set_key = [&](const bool input, const uint8_t keycode) {
@@ -196,10 +198,20 @@ usb_report_t InputState::getKeyboardReport() {
         }
     };
 
-    set_key(drum.ka_left.triggered, HID_KEY_D);
-    set_key(drum.don_left.triggered, HID_KEY_F);
-    set_key(drum.don_right.triggered, HID_KEY_J);
-    set_key(drum.ka_right.triggered, HID_KEY_K);
+    switch (player) {
+    case Player::One: {
+        set_key(drum.ka_left.triggered, HID_KEY_D);
+        set_key(drum.don_left.triggered, HID_KEY_F);
+        set_key(drum.don_right.triggered, HID_KEY_J);
+        set_key(drum.ka_right.triggered, HID_KEY_K);
+    } break;
+    case Player::Two: {
+        set_key(drum.ka_left.triggered, HID_KEY_C);
+        set_key(drum.don_left.triggered, HID_KEY_B);
+        set_key(drum.don_right.triggered, HID_KEY_N);
+        set_key(drum.ka_right.triggered, HID_KEY_COMMA);
+    } break;
+    }
 
     set_key(controller.dpad.up, HID_KEY_ARROW_UP);
     set_key(controller.dpad.down, HID_KEY_ARROW_DOWN);

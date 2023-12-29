@@ -44,6 +44,12 @@ struct InputState {
     Controller controller;
 
   private:
+    enum class Player {
+        One,
+        Two,
+    };
+
+  private:
     hid_switch_report_t m_switch_report;
     hid_ps3_report_t m_ps3_report;
     hid_ps4_report_t m_ps4_report;
@@ -55,7 +61,7 @@ struct InputState {
     usb_report_t getSwitchReport();
     usb_report_t getPS3InputReport();
     usb_report_t getPS4InputReport();
-    usb_report_t getKeyboardReport();
+    usb_report_t getKeyboardReport(Player player);
     usb_report_t getXinputReport();
     usb_report_t getMidiReport();
     usb_report_t getDebugReport();

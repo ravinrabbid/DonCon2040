@@ -22,7 +22,8 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Dualshock3", Menu::Descriptor::Action::ChangeUsbModeDS3},           //
        {"PS4 Tata", Menu::Descriptor::Action::ChangeUsbModePS4Tatacon},      //
        {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},           //
-       {"Keyboard", Menu::Descriptor::Action::ChangeUsbModeKeyboard},        //
+       {"Keybrd P1", Menu::Descriptor::Action::ChangeUsbModeKeyboardP1},     //
+       {"Keybrd P2", Menu::Descriptor::Action::ChangeUsbModeKeyboardP2},     //
        {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},         //
        {"MIDI", Menu::Descriptor::Action::ChangeUsbModeMidi},                //
        {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},             //
@@ -274,8 +275,12 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         m_store->setUsbMode(USB_MODE_DUALSHOCK4);
         gotoParent();
         break;
-    case Descriptor::Action::ChangeUsbModeKeyboard:
-        m_store->setUsbMode(USB_MODE_KEYBOARD);
+    case Descriptor::Action::ChangeUsbModeKeyboardP1:
+        m_store->setUsbMode(USB_MODE_KEYBOARD_P1);
+        gotoParent();
+        break;
+    case Descriptor::Action::ChangeUsbModeKeyboardP2:
+        m_store->setUsbMode(USB_MODE_KEYBOARD_P2);
         gotoParent();
         break;
     case Descriptor::Action::ChangeUsbModeXbox360:
