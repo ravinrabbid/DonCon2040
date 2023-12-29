@@ -58,8 +58,10 @@ void Display::drawIdleScreen() {
     ssd1306_draw_line(&m_display, 0, 10, 128, 10);
 
     // Roll counter
-    auto roll_str = std::to_string(m_input_state.drum.roll_counter) + " Roll";
+    auto roll_str = std::to_string(m_input_state.drum.current_roll) + " Roll";
+    auto prev_roll_str = "Last " + std::to_string(m_input_state.drum.previous_roll);
     ssd1306_draw_string(&m_display, (127 - (roll_str.length() * 12)) / 2, 20, 2, roll_str.c_str());
+    ssd1306_draw_string(&m_display, (127 - (prev_roll_str.length() * 6)) / 2, 40, 1, prev_roll_str.c_str());
 
     // Player "LEDs"
     if (m_player_id != 0) {

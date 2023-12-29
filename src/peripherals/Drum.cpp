@@ -102,9 +102,13 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
     static bool last_ka_left_state = false;
     static bool last_ka_right_state = false;
     static uint16_t roll_count = 0;
+    static uint16_t previous_roll = 0;
 
     uint32_t now = to_ms_since_boot(get_absolute_time());
     if ((now - last_hit_time) > m_config.roll_counter_timeout_ms) {
+        if (roll_count > 1) {
+            previous_roll = roll_count;
+        }
         roll_count = 0;
     }
 
@@ -130,7 +134,8 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
     last_ka_left_state = input_state.drum.ka_left.triggered;
     last_ka_right_state = input_state.drum.ka_right.triggered;
 
-    input_state.drum.roll_counter = roll_count;
+    input_state.drum.current_roll = roll_count;
+    input_state.drum.previous_roll = previous_roll;
 }
 
 void Drum::updateInputState(Utils::InputState &input_state) {

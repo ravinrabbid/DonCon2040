@@ -20,7 +20,8 @@ struct InputState {
         };
 
         Pad don_left, ka_left, don_right, ka_right;
-        uint16_t roll_counter;
+        uint16_t current_roll;
+        uint16_t previous_roll;
     };
 
     struct Controller {
