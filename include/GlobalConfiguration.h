@@ -45,7 +45,7 @@ const Peripherals::Drum::Config drum_config = {
         50, // Ka Right
     },
 
-    10,  // ADC sample count
+    16,  // ADC sample count
     25,  // Debounce delay in milliseconds
     500, // Roll Counter Timeout in Milliseconds
 

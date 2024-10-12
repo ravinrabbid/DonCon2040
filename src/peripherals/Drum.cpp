@@ -158,21 +158,27 @@ void Drum::updateInputState(Utils::InputState &input_state) {
         return (uint16_t)0;
     };
 
-    // Consider the hardest hit pad the one that actually was hit,
-    const auto max_hit = std::max_element(raw_values.cbegin(), raw_values.cend(),
-                                          [](const auto a, const auto b) { return a.second < b.second; });
+    const auto set_max = [&](Id a, Id b) {
+        const auto set_with_threshold = [&](Id target) {
+            if (raw_values.at(target) > get_threshold(target)) {
+                m_pads.at(target).setState(true, m_config.debounce_delay_ms);
+            } else {
+                m_pads.at(target).setState(false, m_config.debounce_delay_ms);
+            }
+        };
 
-    if (max_hit->second > get_threshold(max_hit->first)) {
-        m_pads.at(max_hit->first).setState(true, m_config.debounce_delay_ms);
-    } else {
-        m_pads.at(max_hit->first).setState(false, m_config.debounce_delay_ms);
-    }
-
-    for (const auto &input : raw_values) {
-        if (input.first != max_hit->first) {
-            m_pads.at(input.first).setState(false, m_config.debounce_delay_ms);
+        if (raw_values.at(a) > raw_values.at(b)) {
+            set_with_threshold(a);
+            m_pads.at(b).setState(false, m_config.debounce_delay_ms);
+        } else {
+            set_with_threshold(b);
+            m_pads.at(a).setState(false, m_config.debounce_delay_ms);
         }
-    }
+    };
+
+    // Consider the hardest hit for each side
+    set_max(Id::DON_LEFT, Id::KA_LEFT);
+    set_max(Id::DON_RIGHT, Id::KA_RIGHT);
 
     input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
     input_state.drum.ka_left.raw = raw_values.at(Id::KA_LEFT);
