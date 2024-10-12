@@ -14,20 +14,22 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
       0}},                                                                //
 
-    {Menu::Page::DeviceMode,                                                 //
-     {Menu::Descriptor::Type::Selection,                                     //
-      "Mode",                                                                //
-      {{"Swtch Tata", Menu::Descriptor::Action::ChangeUsbModeSwitchTatacon}, //
-       {"Swtch Pro", Menu::Descriptor::Action::ChangeUsbModeSwitchHoripad},  //
-       {"Dualshock3", Menu::Descriptor::Action::ChangeUsbModeDS3},           //
-       {"PS4 Tata", Menu::Descriptor::Action::ChangeUsbModePS4Tatacon},      //
-       {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},           //
-       {"Keybrd P1", Menu::Descriptor::Action::ChangeUsbModeKeyboardP1},     //
-       {"Keybrd P2", Menu::Descriptor::Action::ChangeUsbModeKeyboardP2},     //
-       {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},         //
-       {"MIDI", Menu::Descriptor::Action::ChangeUsbModeMidi},                //
-       {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},             //
-      0}},                                                                   //
+    {Menu::Page::DeviceMode,                                                  //
+     {Menu::Descriptor::Type::Selection,                                      //
+      "Mode",                                                                 //
+      {{"Swtch Tata", Menu::Descriptor::Action::ChangeUsbModeSwitchTatacon},  //
+       {"Swtch Pro", Menu::Descriptor::Action::ChangeUsbModeSwitchHoripad},   //
+       {"Dualshock3", Menu::Descriptor::Action::ChangeUsbModeDS3},            //
+       {"PS4 Tata", Menu::Descriptor::Action::ChangeUsbModePS4Tatacon},       //
+       {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},            //
+       {"Keybrd P1", Menu::Descriptor::Action::ChangeUsbModeKeyboardP1},      //
+       {"Keybrd P2", Menu::Descriptor::Action::ChangeUsbModeKeyboardP2},      //
+       {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},          //
+       {"Analog P1", Menu::Descriptor::Action::ChangeUsbModeXbox360AnalogP1}, //
+       {"Analog P2", Menu::Descriptor::Action::ChangeUsbModeXbox360AnalogP2}, //
+       {"MIDI", Menu::Descriptor::Action::ChangeUsbModeMidi},                 //
+       {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},              //
+      0}},                                                                    //
 
     {Menu::Page::TriggerThreshold,                                                //
      {Menu::Descriptor::Type::Selection,                                          //
@@ -95,7 +97,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
 };
 
 Menu::Menu(std::shared_ptr<SettingsStore> settings_store)
-    : m_store(settings_store), m_active(false), m_state_stack({{Page::Main, 0}}){};
+    : m_store(settings_store), m_active(false), m_state_stack({{Page::Main, 0}}) {};
 
 void Menu::activate() {
     m_state_stack = std::stack<State>({{Page::Main, 0}});
@@ -285,6 +287,14 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         break;
     case Descriptor::Action::ChangeUsbModeXbox360:
         m_store->setUsbMode(USB_MODE_XBOX360);
+        gotoParent();
+        break;
+    case Descriptor::Action::ChangeUsbModeXbox360AnalogP1:
+        m_store->setUsbMode(USB_MODE_XBOX360_ANALOG_P1);
+        gotoParent();
+        break;
+    case Descriptor::Action::ChangeUsbModeXbox360AnalogP2:
+        m_store->setUsbMode(USB_MODE_XBOX360_ANALOG_P2);
         gotoParent();
         break;
     case Descriptor::Action::ChangeUsbModeMidi:

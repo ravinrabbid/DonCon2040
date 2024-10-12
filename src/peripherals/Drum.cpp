@@ -4,14 +4,17 @@
 #include "pico/time.h"
 
 #include <algorithm>
+#include <deque>
 
 namespace Doncon::Peripherals {
 
 Drum::InternalAdc::InternalAdc(const Drum::Config::AdcInputs &adc_inputs) {
-    adc_gpio_init(adc_inputs.don_left + 26);
-    adc_gpio_init(adc_inputs.don_right + 26);
-    adc_gpio_init(adc_inputs.ka_left + 26);
-    adc_gpio_init(adc_inputs.ka_right + 26);
+    static const uint adc_base_pin = 26;
+
+    adc_gpio_init(adc_base_pin + adc_inputs.don_left);
+    adc_gpio_init(adc_base_pin + adc_inputs.don_right);
+    adc_gpio_init(adc_base_pin + adc_inputs.ka_left);
+    adc_gpio_init(adc_base_pin + adc_inputs.ka_right);
 
     adc_init();
 }
@@ -80,6 +83,7 @@ Drum::Drum(const Config &config) : m_config(config) {
 std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
     std::map<Id, uint32_t> values;
 
+    // Oversample ADC inputs to get rid of ADC noise
     for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
         for (const auto &pad : m_pads) {
             values[pad.first] += m_adc->read(pad.second.getChannel());
@@ -138,10 +142,7 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
     input_state.drum.previous_roll = previous_roll;
 }
 
-void Drum::updateInputState(Utils::InputState &input_state) {
-    // Oversample ADC inputs to get rid of ADC noise
-    const auto raw_values = sampleInputs();
-
+void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::map<Drum::Id, uint16_t> &raw_values) {
     auto get_threshold = [&](const Id target) {
         switch (target) {
         case Id::DON_LEFT:
@@ -152,8 +153,6 @@ void Drum::updateInputState(Utils::InputState &input_state) {
             return m_config.trigger_thresholds.ka_left;
         case Id::KA_RIGHT:
             return m_config.trigger_thresholds.ka_right;
-        case Id::NONE:
-            return (uint16_t)0;
         }
         return (uint16_t)0;
     };
@@ -180,17 +179,69 @@ void Drum::updateInputState(Utils::InputState &input_state) {
     set_max(Id::DON_LEFT, Id::KA_LEFT);
     set_max(Id::DON_RIGHT, Id::KA_RIGHT);
 
-    input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
-    input_state.drum.ka_left.raw = raw_values.at(Id::KA_LEFT);
-    input_state.drum.don_right.raw = raw_values.at(Id::DON_RIGHT);
-    input_state.drum.ka_right.raw = raw_values.at(Id::KA_RIGHT);
-
     input_state.drum.don_left.triggered = m_pads.at(Id::DON_LEFT).getState();
     input_state.drum.ka_left.triggered = m_pads.at(Id::KA_LEFT).getState();
     input_state.drum.don_right.triggered = m_pads.at(Id::DON_RIGHT).getState();
     input_state.drum.ka_right.triggered = m_pads.at(Id::KA_RIGHT).getState();
 
     updateRollCounter(input_state);
+}
+
+void Drum::updateAnalogInputState(Utils::InputState &input_state, const std::map<Drum::Id, uint16_t> &raw_values) {
+    struct buffer_entry {
+        uint16_t value;
+        uint32_t timestamp;
+    };
+
+    static std::map<Id, std::deque<buffer_entry>> buffer;
+
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+
+    std::for_each(raw_values.cbegin(), raw_values.cend(), [&](const auto &entry) {
+        const auto &id = entry.first;
+        const auto &raw = entry.second;
+        auto &buf = buffer[id];
+
+        // Clear outdated values, i.e. anything older than debounce_delay to allow for convenient configuration.
+        while (!buf.empty() && (buf.front().timestamp + m_config.debounce_delay_ms) <= now) {
+            buf.pop_front();
+        }
+
+        // Insert current value.
+        buf.push_back({raw, now});
+
+        // Set maximum value for each pads buffer window.
+        const auto get_max = [](const auto &input) {
+            return std::max_element(input.cbegin(), input.cend(),
+                                    [](const auto &a, const auto &b) { return a.value < b.value; })
+                ->value;
+        };
+
+        // Map 12bit raw value to 16bit
+        const auto raw_to_uint16 = [](uint16_t raw) { return ((raw << 4) & 0xFFF0) | ((raw >> 8) & 0x000F); };
+
+        switch (id) {
+        case Id::DON_LEFT:
+            input_state.drum.don_left.analog = raw_to_uint16(get_max(buf));
+            break;
+        case Id::DON_RIGHT:
+            input_state.drum.don_right.analog = raw_to_uint16(get_max(buf));
+            break;
+        case Id::KA_LEFT:
+            input_state.drum.ka_left.analog = raw_to_uint16(get_max(buf));
+            break;
+        case Id::KA_RIGHT:
+            input_state.drum.ka_right.analog = raw_to_uint16(get_max(buf));
+            break;
+        }
+    });
+}
+
+void Drum::updateInputState(Utils::InputState &input_state) {
+    const auto raw_values = sampleInputs();
+
+    updateDigitalInputState(input_state, raw_values);
+    updateAnalogInputState(input_state, raw_values);
 }
 
 void Drum::setDebounceDelay(const uint16_t delay) { m_config.debounce_delay_ms = delay; }

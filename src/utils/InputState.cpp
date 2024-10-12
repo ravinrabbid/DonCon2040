@@ -28,7 +28,11 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
     case USB_MODE_KEYBOARD_P2:
         return getKeyboardReport(Player::Two);
     case USB_MODE_XBOX360:
-        return getXinputReport();
+        return getXinputDigitalReport();
+    case USB_MODE_XBOX360_ANALOG_P1:
+        return getXinputAnalogReport(Player::One);
+    case USB_MODE_XBOX360_ANALOG_P2:
+        return getXinputAnalogReport(Player::Two);
     case USB_MODE_MIDI:
         return getMidiReport();
     case USB_MODE_DEBUG:
@@ -234,25 +238,25 @@ usb_report_t InputState::getKeyboardReport(InputState::Player player) {
     return {(uint8_t *)&m_keyboard_report, sizeof(hid_nkro_keyboard_report_t)};
 }
 
-usb_report_t InputState::getXinputReport() {
-    m_xinput_report.buttons1 = 0                                                                    //
-                               | (controller.dpad.up ? (1 << 0) : 0)                                // Dpad Up
-                               | ((controller.dpad.down || drum.don_left.triggered) ? (1 << 1) : 0) // Dpad Down
-                               | ((controller.dpad.left || drum.ka_left.triggered) ? (1 << 2) : 0)  // Dpad Left
-                               | (controller.dpad.right ? (1 << 3) : 0)                             // Dpad Right
-                               | (controller.buttons.start ? (1 << 4) : 0)                          // Start
-                               | (controller.buttons.select ? (1 << 5) : 0)                         // Select
-                               | (false ? (1 << 6) : 0)                                             // L3
-                               | (false ? (1 << 7) : 0);                                            // R3
+usb_report_t InputState::getXinputBaseReport() {
+    m_xinput_report.buttons1 = 0                                            //
+                               | (controller.dpad.up ? (1 << 0) : 0)        // Dpad Up
+                               | (controller.dpad.down ? (1 << 1) : 0)      // Dpad Down
+                               | (controller.dpad.left ? (1 << 2) : 0)      // Dpad Left
+                               | (controller.dpad.right ? (1 << 3) : 0)     // Dpad Right
+                               | (controller.buttons.start ? (1 << 4) : 0)  // Start
+                               | (controller.buttons.select ? (1 << 5) : 0) // Select
+                               | (false ? (1 << 6) : 0)                     // L3
+                               | (false ? (1 << 7) : 0);                    // R3
 
-    m_xinput_report.buttons2 = 0                                                                         //
-                               | (controller.buttons.l ? (1 << 0) : 0)                                   // L1
-                               | (controller.buttons.r ? (1 << 1) : 0)                                   // R1
-                               | (controller.buttons.home ? (1 << 2) : 0)                                // Guide
-                               | ((controller.buttons.south || drum.don_right.triggered) ? (1 << 4) : 0) // A
-                               | ((controller.buttons.east || drum.ka_right.triggered) ? (1 << 5) : 0)   // B
-                               | (controller.buttons.west ? (1 << 6) : 0)                                // X
-                               | (controller.buttons.north ? (1 << 7) : 0);                              // Y
+    m_xinput_report.buttons2 = 0                                            //
+                               | (controller.buttons.l ? (1 << 0) : 0)      // L1
+                               | (controller.buttons.r ? (1 << 1) : 0)      // R1
+                               | (controller.buttons.home ? (1 << 2) : 0)   // Guide
+                               | (controller.buttons.south ? (1 << 4) : 0)  // A
+                               | (controller.buttons.east ? (1 << 5) : 0)   // B
+                               | (controller.buttons.west ? (1 << 6) : 0)   // X
+                               | (controller.buttons.north ? (1 << 7) : 0); // Y
 
     m_xinput_report.lt = 0;
     m_xinput_report.rt = 0;
@@ -261,6 +265,52 @@ usb_report_t InputState::getXinputReport() {
     m_xinput_report.ly = 0;
     m_xinput_report.rx = 0;
     m_xinput_report.ry = 0;
+
+    return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+}
+
+usb_report_t InputState::getXinputDigitalReport() {
+    getXinputBaseReport();
+
+    m_xinput_report.buttons1 |= (drum.don_left.triggered ? (1 << 1) : 0)   // Dpad Down
+                                | (drum.ka_left.triggered ? (1 << 2) : 0); // Dpad Left
+
+    m_xinput_report.buttons2 |= (drum.don_right.triggered ? (1 << 4) : 0)   // A
+                                | (drum.ka_right.triggered ? (1 << 5) : 0); // B
+
+    return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+}
+
+usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
+    getXinputBaseReport();
+
+    int16_t x = 0;
+    int16_t y = 0;
+
+    auto map_to_axis = [](uint16_t raw) -> uint16_t { return raw >> 1; };
+
+    if (drum.ka_left.analog > drum.don_left.analog) {
+        x = -map_to_axis(drum.ka_left.analog);
+    } else {
+        x = map_to_axis(drum.don_left.analog);
+    }
+
+    if (drum.ka_right.analog > drum.don_right.analog) {
+        y = map_to_axis(drum.ka_right.analog);
+    } else {
+        y = -map_to_axis(drum.don_right.analog);
+    }
+
+    switch (player) {
+    case Player::One:
+        m_xinput_report.lx = x;
+        m_xinput_report.ly = y;
+        break;
+    case Player::Two:
+        m_xinput_report.rx = x;
+        m_xinput_report.ry = y;
+        break;
+    }
 
     return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
 }
@@ -287,8 +337,8 @@ usb_report_t InputState::getMidiReport() {
             target.on = false;
         }
 
-        if (new_state.triggered && new_state.raw > target.velocity) {
-            target.velocity = new_state.raw;
+        if (new_state.triggered && new_state.analog > target.velocity) {
+            target.velocity = new_state.analog;
         }
 
         target.last_triggered = new_state.triggered;
@@ -305,7 +355,7 @@ usb_report_t InputState::getMidiReport() {
     m_midi_report.status.side_stick = side_stick.on;
 
     auto convert_range = [](uint16_t in) {
-        uint16_t out = in / 16;
+        uint16_t out = in / 256;
         return uint8_t(out > 127 ? 127 : out);
     };
 
@@ -320,17 +370,17 @@ usb_report_t InputState::getMidiReport() {
 usb_report_t InputState::getDebugReport() {
     std::stringstream out;
 
-    auto bar = [](uint16_t val) { return std::string(val / 512, '#'); };
+    auto bar = [](uint16_t val) { return std::string(val / 8191, '#'); };
 
     if (drum.don_left.triggered || drum.ka_left.triggered || drum.don_right.triggered || drum.ka_right.triggered) {
-        out << "(" << (drum.ka_left.triggered ? "*" : " ") << "( "                                              //
-            << std::setw(4) << drum.ka_left.raw << "[" << std::setw(8) << bar(drum.ka_left.raw) << "]"          //
-            << "(" << (drum.don_left.triggered ? "*" : " ") << "| "                                             //
-            << std::setw(4) << drum.don_left.raw << "[" << std::setw(8) << bar(drum.don_left.raw) << "]"        //
-            << "|" << (drum.don_right.triggered ? "*" : " ") << ") "                                            //
-            << std::setw(4) << drum.don_right.raw << "[" << std::setw(8) << bar(drum.don_right.raw) << "]"      //
-            << ")" << (drum.ka_right.triggered ? "*" : " ") << ") " << std::setw(4) << drum.ka_right.raw << "[" //
-            << std::setw(8) << bar(drum.ka_right.raw) << "]"                                                    //
+        out << "(" << (drum.ka_left.triggered ? "*" : " ") << "( "                                               //
+            << std::setw(5) << drum.ka_left.analog << "[" << std::setw(8) << bar(drum.ka_left.analog) << "]"     //
+            << "(" << (drum.don_left.triggered ? "*" : " ") << "| "                                              //
+            << std::setw(5) << drum.don_left.analog << "[" << std::setw(8) << bar(drum.don_left.analog) << "]"   //
+            << "|" << (drum.don_right.triggered ? "*" : " ") << ") "                                             //
+            << std::setw(5) << drum.don_right.analog << "[" << std::setw(8) << bar(drum.don_right.analog) << "]" //
+            << ")" << (drum.ka_right.triggered ? "*" : " ") << ") "                                              //
+            << std::setw(5) << drum.ka_right.analog << "[" << std::setw(8) << bar(drum.ka_right.analog) << "]"   //
             << "\n";
     }
 

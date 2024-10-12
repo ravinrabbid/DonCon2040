@@ -86,6 +86,8 @@ void usb_driver_init(usb_mode_t mode) {
         usbd_send_report = send_hid_keyboard_report;
         usbd_receive_report = NULL;
         break;
+    case USB_MODE_XBOX360_ANALOG_P1:
+    case USB_MODE_XBOX360_ANALOG_P2:
     case USB_MODE_XBOX360:
         usbd_desc_device = &xinput_desc_device;
         usbd_desc_cfg = xinput_desc_cfg;

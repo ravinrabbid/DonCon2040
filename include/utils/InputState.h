@@ -16,7 +16,7 @@ struct InputState {
     struct Drum {
         struct Pad {
             bool triggered;
-            uint16_t raw;
+            uint16_t analog;
         };
 
         Pad don_left, ka_left, don_right, ka_right;
@@ -62,7 +62,9 @@ struct InputState {
     usb_report_t getPS3InputReport();
     usb_report_t getPS4InputReport();
     usb_report_t getKeyboardReport(Player player);
-    usb_report_t getXinputReport();
+    usb_report_t getXinputBaseReport();
+    usb_report_t getXinputDigitalReport();
+    usb_report_t getXinputAnalogReport(Player player);
     usb_report_t getMidiReport();
     usb_report_t getDebugReport();
 

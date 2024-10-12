@@ -51,7 +51,6 @@ class Drum {
 
   private:
     enum class Id {
-        NONE,
         DON_LEFT,
         KA_LEFT,
         DON_RIGHT,
@@ -74,6 +73,7 @@ class Drum {
 
     class AdcInterface {
       public:
+        // This is expected to return a 12bit value.
         virtual uint16_t read(uint8_t channel) = 0;
     };
 
@@ -98,6 +98,8 @@ class Drum {
 
   private:
     void updateRollCounter(Utils::InputState &input_state);
+    void updateDigitalInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
+    void updateAnalogInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     std::map<Id, uint16_t> sampleInputs();
 
   public:

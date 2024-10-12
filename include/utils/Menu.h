@@ -66,6 +66,8 @@ class Menu {
             ChangeUsbModeKeyboardP1,
             ChangeUsbModeKeyboardP2,
             ChangeUsbModeXbox360,
+            ChangeUsbModeXbox360AnalogP1,
+            ChangeUsbModeXbox360AnalogP2,
             ChangeUsbModeMidi,
             ChangeUsbModeDebug,
 

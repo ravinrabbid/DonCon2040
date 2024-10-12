@@ -17,7 +17,8 @@ The firmware is pretty much tailored to this specific use case, if you are looki
   - Dualshock 3
   - Switch Pro Controller
   - XInput
-  - Keyboard
+  - XInput Analog (Compatible with [TaikoArcadeLoader](https://github.com/esuo1198/TaikoArcadeLoader) analog input)
+  - Keyboard (Mapping: 'DFJK' / 'CBN,')
   - MIDI
   - Debug mode (will output current state via USB serial)
 - Additional buttons via external i2c GPIO expander
