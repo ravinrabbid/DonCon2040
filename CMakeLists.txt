@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION 3.13)
 
-include(libs/pico-sdk/pico_sdk_init.cmake)
+if((NOT DEFINED ENV{PICO_SDK_PATH}) AND (NOT PICO_SDK_PATH))
+  set(PICO_SDK_FETCH_FROM_GIT_TAG "2.0.0")
+  set(PICO_SDK_FETCH_FROM_GIT ON)
+endif()
 
-project(DonCon2040 VERSION 0.1.0)
+if((NOT DEFINED ENV{PICO_BOARD}) AND (NOT PICO_BOARD))
+  set(PICO_BOARD "seeed_xiao_rp2040")
+endif()
+
+include(pico_sdk_import.cmake)
+
+project(DonCon2040 VERSION 0.39.0)
 
 pico_sdk_init()
 
@@ -13,8 +22,16 @@ add_compile_options(-Wall -Wextra -Werror)
 
 add_subdirectory(libs)
 
-file(GLOB ${PROJECT_NAME}_SOURCES src/*.cpp src/usb/*.c src/utils/*.cpp
-     src/peripherals/*.cpp)
+file(
+  GLOB
+  ${PROJECT_NAME}_SOURCES
+  src/*.cpp
+  src/usb/*.c
+  src/usb/device/*.c
+  src/usb/device/hid/*.c
+  src/usb/device/vendor/*.c
+  src/utils/*.cpp
+  src/peripherals/*.cpp)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 

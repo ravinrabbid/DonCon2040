@@ -11,7 +11,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
        {"Hold Time", Menu::Descriptor::Action::GotoPageDebounceDelay},    //
        {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
-       {"BOOTSEL", Menu::Descriptor::Action::GotoPageBootsel}},           //
+       {"USB Flash", Menu::Descriptor::Action::GotoPageBootsel}},         //
       0}},                                                                //
 
     {Menu::Page::DeviceMode,                                                  //
@@ -85,7 +85,7 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
 
     {Menu::Page::Bootsel,                                         //
      {Menu::Descriptor::Type::Selection,                          //
-      "Reboot to BOOTSEL",                                        //
+      "Reboot to Flash Mode",                                     //
       {{"Reboot?", Menu::Descriptor::Action::DoRebootToBootsel}}, //
       0}},                                                        //
 

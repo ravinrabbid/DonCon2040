@@ -99,19 +99,17 @@ void SettingsStore::store() {
 
         m_dirty = false;
 
-        restore_interrupts(interrupts);
+        restore_interrupts_from_disabled(interrupts);
         multicore_lockout_end_blocking();
     }
 
     switch (m_scheduled_reboot) {
     case RebootType::Normal:
-        watchdog_enable(1, 1);
-        while (1)
-            ;
+        watchdog_reboot(0, 0, 1);
         break;
     case RebootType::Bootsel:
         sleep_ms(100);
-        reset_usb_boot(0, 0);
+        reset_usb_boot(0, PICO_STDIO_USB_RESET_BOOTSEL_INTERFACE_DISABLE_MASK);
         break;
     case RebootType::None:
         break;
