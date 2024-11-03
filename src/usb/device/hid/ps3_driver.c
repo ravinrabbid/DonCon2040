@@ -1,7 +1,7 @@
-#include "usb/hid_ps3_driver.h"
-#include "usb/usb_driver.h"
+#include "usb/device/hid/ps3_driver.h"
 
-#include "class/hid/hid_device.h"
+#include "usb/device/hid/common.h"
+
 #include "pico/unique_id.h"
 
 #include "tusb.h"
@@ -26,12 +26,6 @@ const tusb_desc_device_t ds3_desc_device = {
 enum {
     USBD_ITF_HID,
     USBD_ITF_MAX,
-};
-
-#define USBD_PS3_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_INOUT_DESC_LEN)
-const uint8_t ps3_desc_cfg[] = {
-    TUD_CONFIG_DESCRIPTOR(1, USBD_ITF_MAX, USBD_STR_LANGUAGE, USBD_PS3_DESC_LEN, 0, USBD_MAX_POWER_MAX),
-    TUD_HID_INOUT_DESCRIPTOR(USBD_ITF_HID, USBD_STR_PS3, 0, 148, 0x02, 0x81, CFG_TUD_HID_EP_BUFSIZE, 1),
 };
 
 const uint8_t ps3_desc_hid_report[] = {
@@ -110,6 +104,12 @@ const uint8_t ps3_desc_hid_report[] = {
     0xB1, 0x02,       //     Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
     0xC0,             //   End Collection
     0xC0,             // End Collection
+};
+
+#define USBD_PS3_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_INOUT_DESC_LEN)
+const uint8_t ps3_desc_cfg[] = {
+    TUD_CONFIG_DESCRIPTOR(1, USBD_ITF_MAX, USBD_STR_LANGUAGE, USBD_PS3_DESC_LEN, 0, USBD_MAX_POWER_MAX),
+    TUD_HID_INOUT_DESCRIPTOR(USBD_ITF_HID, 0, 0, sizeof(ps3_desc_hid_report), 0x02, 0x81, CFG_TUD_HID_EP_BUFSIZE, 1),
 };
 
 static hid_ps3_report_t last_report = {};
@@ -201,9 +201,18 @@ void hid_ps3_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
                             | ((report->leds_bitmap & 0x08) ? (1 << 2) : 0)   //
                             | ((report->leds_bitmap & 0x10) ? (1 << 3) : 0);
 
-            usb_driver_get_player_led_cb()(player_led);
+            usbd_driver_get_player_led_cb()(player_led);
         }
         break;
     default:
     }
 }
+
+const usbd_driver_t hid_ds3_device_driver = {
+    .name = "DS3",
+    .app_driver = &hid_app_driver,
+    .desc_device = &ds3_desc_device,
+    .desc_cfg = ps3_desc_cfg,
+    .desc_bos = NULL,
+    .send_report = send_hid_ps3_report,
+};

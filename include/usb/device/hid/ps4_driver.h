@@ -1,13 +1,11 @@
-#ifndef _USB_HID_PS4_DRIVER_H_
-#define _USB_HID_PS4_DRIVER_H_
+#ifndef _USB_DEVICE_HID_PS4_DRIVER_H_
+#define _USB_DEVICE_HID_PS4_DRIVER_H_
 
-#include "usb/usb_driver.h"
+#include "usb/device_driver.h"
 
-#include "device/usbd_pvt.h"
+#include "class/hid/hid_device.h"
 
 #include <stdint.h>
-
-#define USBD_PS4_NAME "Dualshock4 Emulation"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,12 +42,11 @@ typedef struct __attribute((packed, aligned(1))) {
     uint8_t _reserved3[3];
 } hid_ps4_report_t;
 
-extern const tusb_desc_device_t ps4_tatacon_desc_device;
-extern const tusb_desc_device_t ds4_desc_device;
-extern const uint8_t ps4_desc_cfg[];
+extern const usbd_driver_t hid_ds4_device_driver;
+extern const usbd_driver_t hid_ps4_tatacon_device_driver;
+
 extern const uint8_t ps4_desc_hid_report[];
 
-bool send_hid_ps4_report(usb_report_t report);
 uint16_t hid_ps4_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer,
                                uint16_t reqlen);
 void hid_ps4_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer,
@@ -59,4 +56,4 @@ void hid_ps4_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
 }
 #endif
 
-#endif // _USB_HID_PS4_DRIVER_H_
+#endif // _USB_DEVICE_HID_PS4_DRIVER_H_

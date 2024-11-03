@@ -2,7 +2,7 @@
 #define _UTILS_SETTINGSSTORE_H_
 
 #include "peripherals/Drum.h"
-#include "usb/usb_driver.h"
+#include "usb/device_driver.h"
 
 #include "hardware/flash.h"
 

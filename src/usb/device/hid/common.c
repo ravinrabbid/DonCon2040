@@ -1,13 +1,17 @@
-#include "usb/hid_driver.h"
-#include "usb/usb_driver.h"
+#include "usb/device/hid/common.h"
+
+#include "usb/device/hid/keyboard_driver.h"
+#include "usb/device/hid/ps3_driver.h"
+#include "usb/device/hid/ps4_driver.h"
+#include "usb/device/hid/switch_driver.h"
+#include "usb/device_driver.h"
 
 #include "class/hid/hid_device.h"
-
 #include "tusb.h"
 
 uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer,
                                uint16_t reqlen) {
-    switch (usb_driver_get_mode()) {
+    switch (usbd_driver_get_mode()) {
     case USB_MODE_SWITCH_TATACON:
     case USB_MODE_SWITCH_HORIPAD:
         return hid_switch_get_report_cb(itf, report_id, report_type, buffer, reqlen);
@@ -27,7 +31,7 @@ uint16_t tud_hid_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t
 
 void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer,
                            uint16_t bufsize) {
-    switch (usb_driver_get_mode()) {
+    switch (usbd_driver_get_mode()) {
     case USB_MODE_SWITCH_TATACON:
     case USB_MODE_SWITCH_HORIPAD:
         hid_switch_set_report_cb(itf, report_id, report_type, buffer, bufsize);
@@ -57,6 +61,27 @@ bool hid_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t c
     } else {
         return hidd_control_xfer_cb(rhport, stage, request);
     }
+}
+
+uint8_t const *tud_hid_descriptor_report_cb(uint8_t itf) {
+    (void)itf;
+
+    switch (usbd_driver_get_mode()) {
+    case USB_MODE_SWITCH_TATACON:
+    case USB_MODE_SWITCH_HORIPAD:
+        return switch_desc_hid_report;
+    case USB_MODE_DUALSHOCK3:
+        return ps3_desc_hid_report;
+    case USB_MODE_PS4_TATACON:
+    case USB_MODE_DUALSHOCK4:
+        return ps4_desc_hid_report;
+    case USB_MODE_KEYBOARD_P1:
+    case USB_MODE_KEYBOARD_P2:
+        return keyboard_desc_hid_report;
+    default:
+    }
+
+    return NULL;
 }
 
 const usbd_class_driver_t hid_app_driver = {

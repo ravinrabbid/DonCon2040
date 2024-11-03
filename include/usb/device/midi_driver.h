@@ -1,13 +1,9 @@
-#ifndef _USB_MIDI_DRIVER_H_
-#define _USB_MIDI_DRIVER_H_
+#ifndef _USB_DEVICE_MIDI_DRIVER_H_
+#define _USB_DEVICE_MIDI_DRIVER_H_
 
-#include "usb/usb_driver.h"
-
-#include "device/usbd_pvt.h"
+#include "usb/device_driver.h"
 
 #include <stdint.h>
-
-#define USBD_MIDI_NAME "MIDI Controller"
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,15 +25,10 @@ typedef struct __attribute((packed, aligned(1))) {
     } velocity;
 } midi_report_t;
 
-bool receive_midi_report(void);
-bool send_midi_report(usb_report_t report);
-
-extern const tusb_desc_device_t midi_desc_device;
-extern const uint8_t midi_desc_cfg[];
-extern const usbd_class_driver_t midi_app_driver;
+extern const usbd_driver_t midi_device_driver;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _USB_MIDI_DRIVER_H_
+#endif // _USB_DEVICE_MIDI_DRIVER_H_

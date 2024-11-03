@@ -1,12 +1,12 @@
-#ifndef _USB_USB_DRIVER_H_
-#define _USB_USB_DRIVER_H_
+#ifndef _USB_DEVICE_DRIVER_H_
+#define _USB_DEVICE_DRIVER_H_
 
-#include "tusb.h"
+#include "device/usbd_pvt.h"
 
 #include <stdint.h>
 
-#define USBD_MANUFACTURER "DonCon"
-#define USBD_PRODUCT "DonCon rev1"
+#define USBD_MANUFACTURER "DonCon2040"
+#define USBD_PRODUCT_BASE "Taiko Controller"
 
 #define USBD_MAX_POWER_MAX (500)
 
@@ -34,20 +34,24 @@ enum {
     USBD_STR_MANUFACTURER,
     USBD_STR_PRODUCT,
     USBD_STR_SERIAL,
-    USBD_STR_CDC,
-    USBD_STR_SWITCH,
-    USBD_STR_PS3,
-    USBD_STR_PS4,
-    USBD_STR_KEYBOARD,
-    USBD_STR_XINPUT,
-    USBD_STR_MIDI,
-    USBD_STR_RPI_RESET,
 };
 
 typedef struct {
     uint8_t *data;
     uint16_t size;
 } usb_report_t;
+
+typedef struct {
+    const char *name;
+    const usbd_class_driver_t *app_driver;
+    // Descriptors
+    const tusb_desc_device_t *desc_device;
+    const uint8_t *desc_cfg;
+    const uint8_t *desc_hid_report;
+    const uint8_t *desc_bos;
+    // Callbacks
+    bool (*send_report)(usb_report_t report);
+} usbd_driver_t;
 
 typedef enum {
     USB_PLAYER_LED_ID,
@@ -70,18 +74,18 @@ extern char *const usbd_desc_str[];
 
 typedef void (*usbd_player_led_cb_t)(usb_player_led_t);
 
-void usb_driver_init(usb_mode_t mode);
-void usb_driver_task();
+void usbd_driver_init(usb_mode_t mode);
+void usbd_driver_task();
 
-usb_mode_t usb_driver_get_mode();
+usb_mode_t usbd_driver_get_mode();
 
-void usb_driver_send_and_receive_report(usb_report_t report);
+void usbd_driver_send_report(usb_report_t report);
 
-void usb_driver_set_player_led_cb(usbd_player_led_cb_t cb);
-usbd_player_led_cb_t usb_driver_get_player_led_cb();
+void usbd_driver_set_player_led_cb(usbd_player_led_cb_t cb);
+usbd_player_led_cb_t usbd_driver_get_player_led_cb();
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _USB_USB_DRIVER_H_
+#endif // _USB_DEVICE_DRIVER_H_

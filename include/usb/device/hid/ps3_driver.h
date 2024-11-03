@@ -1,13 +1,11 @@
-#ifndef _USB_HID_PS3_DRIVER_H_
-#define _USB_HID_PS3_DRIVER_H_
+#ifndef _USB_DEVICE_HID_PS3_DRIVER_H_
+#define _USB_DEVICE_HID_PS3_DRIVER_H_
 
-#include "usb/usb_driver.h"
+#include "usb/device_driver.h"
 
-#include "device/usbd_pvt.h"
+#include "class/hid/hid_device.h"
 
 #include <stdint.h>
-
-#define USBD_PS3_NAME "Dualshock3 Emulation"
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,11 +38,10 @@ typedef struct __attribute((packed, aligned(1))) {
     uint8_t unknown_0x02_2;
 } hid_ps3_report_t;
 
-extern const tusb_desc_device_t ds3_desc_device;
-extern const uint8_t ps3_desc_cfg[];
+extern const usbd_driver_t hid_ds3_device_driver;
+
 extern const uint8_t ps3_desc_hid_report[];
 
-bool send_hid_ps3_report(usb_report_t report);
 uint16_t hid_ps3_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t *buffer,
                                uint16_t reqlen);
 void hid_ps3_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const *buffer,
@@ -54,4 +51,4 @@ void hid_ps3_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
 }
 #endif
 
-#endif // _USB_HID_PS3_DRIVER_H_
+#endif // _USB_DEVICE_HID_PS3_DRIVER_H_

@@ -1,7 +1,6 @@
-#include "usb/hid_switch_driver.h"
-#include "usb/usb_driver.h"
+#include "usb/device/hid/switch_driver.h"
 
-#include "class/hid/hid_device.h"
+#include "usb/device/hid/common.h"
 
 #include "tusb.h"
 
@@ -42,12 +41,6 @@ const tusb_desc_device_t switch_horipad_desc_device = {
 enum {
     USBD_ITF_HID,
     USBD_ITF_MAX,
-};
-
-#define USBD_SWITCH_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_INOUT_DESC_LEN)
-const uint8_t switch_desc_cfg[] = {
-    TUD_CONFIG_DESCRIPTOR(1, USBD_ITF_MAX, USBD_STR_LANGUAGE, USBD_SWITCH_DESC_LEN, 0, USBD_MAX_POWER_MAX),
-    TUD_HID_INOUT_DESCRIPTOR(USBD_ITF_HID, USBD_STR_SWITCH, 0, 86, 0x02, 0x81, CFG_TUD_HID_EP_BUFSIZE, 1),
 };
 
 const uint8_t switch_desc_hid_report[] = {
@@ -94,6 +87,12 @@ const uint8_t switch_desc_hid_report[] = {
     0xC0,             // End Collection
 };
 
+#define USBD_SWITCH_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_HID_INOUT_DESC_LEN)
+const uint8_t switch_desc_cfg[] = {
+    TUD_CONFIG_DESCRIPTOR(1, USBD_ITF_MAX, USBD_STR_LANGUAGE, USBD_SWITCH_DESC_LEN, 0, USBD_MAX_POWER_MAX),
+    TUD_HID_INOUT_DESCRIPTOR(USBD_ITF_HID, 0, 0, sizeof(switch_desc_hid_report), 0x02, 0x81, CFG_TUD_HID_EP_BUFSIZE, 1),
+};
+
 static hid_switch_report_t last_report = {};
 
 bool send_hid_switch_report(usb_report_t report) {
@@ -128,3 +127,21 @@ void hid_switch_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t 
     (void)bufsize;
     (void)buffer;
 }
+
+const usbd_driver_t hid_switch_horipad_device_driver = {
+    .name = "Switch",
+    .app_driver = &hid_app_driver,
+    .desc_device = &switch_horipad_desc_device,
+    .desc_cfg = switch_desc_cfg,
+    .desc_bos = NULL,
+    .send_report = send_hid_switch_report,
+};
+
+const usbd_driver_t hid_switch_tatacon_device_driver = {
+    .name = "Switch Tatacon",
+    .app_driver = &hid_app_driver,
+    .desc_device = &switch_tatacon_desc_device,
+    .desc_cfg = switch_desc_cfg,
+    .desc_bos = NULL,
+    .send_report = send_hid_switch_report,
+};

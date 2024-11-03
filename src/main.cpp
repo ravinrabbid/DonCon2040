@@ -2,7 +2,7 @@
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
-#include "usb/usb_driver.h"
+#include "usb/device_driver.h"
 #include "utils/Menu.h"
 #include "utils/SettingsStore.h"
 
@@ -34,13 +34,15 @@ struct ControlMessage {
     union {
         usb_mode_t usb_mode;
         usb_player_led_t player_led;
-        uint8_t brightness;
+        uint8_t led_brightness;
     } data;
 };
 
 void core1_task() {
     multicore_lockout_victim_init();
 
+    // Init i2c port here because Controller and Display share it and
+    // therefore can't init it themself.
     gpio_set_function(Config::Default::i2c_config.sda_pin, GPIO_FUNC_I2C);
     gpio_set_function(Config::Default::i2c_config.scl_pin, GPIO_FUNC_I2C);
     gpio_pull_up(Config::Default::i2c_config.sda_pin);
@@ -77,7 +79,7 @@ void core1_task() {
                 }
                 break;
             case ControlCommand::SetLedBrightness:
-                led.setBrightness(control_msg.data.brightness);
+                led.setBrightness(control_msg.data.led_brightness);
                 break;
             case ControlCommand::EnterMenu:
                 display.showMenu();
@@ -104,18 +106,20 @@ int main() {
     queue_init(&menu_display_queue, sizeof(Utils::Menu::State), 1);
     queue_init(&drum_input_queue, sizeof(Utils::InputState::Drum), 1);
     queue_init(&controller_input_queue, sizeof(Utils::InputState::Controller), 1);
-    multicore_launch_core1(core1_task);
 
     Utils::InputState input_state;
 
     auto settings_store = std::make_shared<Utils::SettingsStore>();
     Utils::Menu menu(settings_store);
 
+    auto mode = settings_store->getUsbMode();
+
     Peripherals::Drum drum(Config::Default::drum_config);
 
-    auto mode = settings_store->getUsbMode();
-    usb_driver_init(mode);
-    usb_driver_set_player_led_cb([](usb_player_led_t player_led) {
+    multicore_launch_core1(core1_task);
+
+    usbd_driver_init(mode);
+    usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
         auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
         queue_add_blocking(&control_queue, &ctrl_message);
     });
@@ -128,7 +132,7 @@ int main() {
         ctrl_message = {ControlCommand::SetUsbMode, {.usb_mode = mode}};
         queue_add_blocking(&control_queue, &ctrl_message);
 
-        ctrl_message = {ControlCommand::SetLedBrightness, {.brightness = settings_store->getLedBrightness()}};
+        ctrl_message = {ControlCommand::SetLedBrightness, {.led_brightness = settings_store->getLedBrightness()}};
         queue_add_blocking(&control_queue, &ctrl_message);
 
         drum.setDebounceDelay(settings_store->getDebounceDelay());
@@ -154,21 +158,19 @@ int main() {
             }
 
             readSettings();
+            input_state.releaseAll();
 
         } else if (input_state.checkHotkey()) {
             menu.activate();
 
-            input_state.releaseAll();
-            usb_driver_send_and_receive_report(input_state.getReport(mode));
-
             ControlMessage ctrl_message{ControlCommand::EnterMenu, {}};
             queue_add_blocking(&control_queue, &ctrl_message);
-        } else {
-            usb_driver_send_and_receive_report(input_state.getReport(mode));
         }
 
-        usb_driver_task();
+        usbd_driver_send_report(input_state.getReport(mode));
+        usbd_driver_task();
 
+        // TODO don't send whole input_state
         queue_try_add(&drum_input_queue, &input_state);
     }
 

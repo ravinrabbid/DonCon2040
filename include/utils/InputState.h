@@ -1,10 +1,13 @@
 #ifndef _UTILS_INPUTSTATE_H_
 #define _UTILS_INPUTSTATE_H_
 
-#include "usb/hid_driver.h"
-#include "usb/midi_driver.h"
-#include "usb/usb_driver.h"
-#include "usb/xinput_driver.h"
+#include "usb/device/hid/keyboard_driver.h"
+#include "usb/device/hid/ps3_driver.h"
+#include "usb/device/hid/ps4_driver.h"
+#include "usb/device/hid/switch_driver.h"
+#include "usb/device/midi_driver.h"
+#include "usb/device/vendor/xinput_driver.h"
+#include "usb/device_driver.h"
 
 #include <stdint.h>
 #include <string>
