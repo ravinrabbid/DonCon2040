@@ -7,7 +7,6 @@
 #include <map>
 #include <memory>
 #include <stack>
-#include <stddef.h>
 #include <string>
 #include <vector>
 
@@ -17,29 +16,37 @@ class Menu {
   public:
     enum class Page {
         Main,
+
         DeviceMode,
-        TriggerThreshold,
-        TriggerThresholdKaLeft,
-        TriggerThresholdDonLeft,
-        TriggerThresholdDonRight,
-        TriggerThresholdKaRight,
-        DebounceDelay,
-        LedBrightness,
+        Drum,
+        Led,
         Reset,
         Bootsel,
+
+        DrumDebounceDelay,
+        DrumTriggerThresholdKaLeft,
+        DrumTriggerThresholdDonLeft,
+        DrumTriggerThresholdDonRight,
+        DrumTriggerThresholdKaRight,
+
+        LedBrightness,
+        LedEnablePlayerColor,
+
         BootselMsg,
     };
 
     struct State {
         Page page;
-        uint16_t selection;
+        uint16_t selected_value;
+        uint16_t original_value;
     };
 
     struct Descriptor {
         enum class Type {
-            Root,
+            Menu,
             Selection,
             Value,
+            Toggle,
             RebootInfo,
         };
 
@@ -48,38 +55,33 @@ class Menu {
             GotoParent,
 
             GotoPageDeviceMode,
-            GotoPageTriggerThreshold,
-            GotoPageTriggerThresholdKaLeft,
-            GotoPageTriggerThresholdDonLeft,
-            GotoPageTriggerThresholdDonRight,
-            GotoPageTriggerThresholdKaRight,
-            GotoPageDebounceDelay,
-            GotoPageLedBrightness,
+            GotoPageDrum,
+            GotoPageLed,
             GotoPageReset,
             GotoPageBootsel,
 
-            ChangeUsbModeSwitchTatacon,
-            ChangeUsbModeSwitchHoripad,
-            ChangeUsbModeDS3,
-            ChangeUsbModePS4Tatacon,
-            ChangeUsbModeDS4,
-            ChangeUsbModeKeyboardP1,
-            ChangeUsbModeKeyboardP2,
-            ChangeUsbModeXbox360,
-            ChangeUsbModeXbox360AnalogP1,
-            ChangeUsbModeXbox360AnalogP2,
-            ChangeUsbModeMidi,
-            ChangeUsbModeDebug,
+            GotoPageDrumDebounceDelay,
+            GotoPageDrumTriggerThresholdKaLeft,
+            GotoPageDrumTriggerThresholdDonLeft,
+            GotoPageDrumTriggerThresholdDonRight,
+            GotoPageDrumTriggerThresholdKaRight,
 
-            SetTriggerThresholdKaLeft,
-            SetTriggerThresholdDonLeft,
-            SetTriggerThresholdDonRight,
-            SetTriggerThresholdKaRight,
-            SetDebounceDelay,
+            GotoPageLedBrightness,
+            GotoPageLedEnablePlayerColor,
+
+            SetUsbMode,
+
+            SetDrumDebounceDelay,
+            SetDrumTriggerThresholdKaLeft,
+            SetDrumTriggerThresholdDonLeft,
+            SetDrumTriggerThresholdDonRight,
+            SetDrumTriggerThresholdKaRight,
+
             SetLedBrightness,
+            SetLedEnablePlayerColor,
 
-            DoRebootToBootsel,
             DoReset,
+            DoRebootToBootsel,
         };
 
         Type type;
@@ -95,11 +97,11 @@ class Menu {
     bool m_active;
     std::stack<State> m_state_stack;
 
-    uint16_t getCurrentSelection(Page page);
+    uint16_t getCurrentValue(Page page);
     void gotoPage(Page page);
-    void gotoParent();
-    void performSelectionAction(Descriptor::Action action);
-    void performValueAction(Descriptor::Action action, uint16_t value);
+    void gotoParent(bool do_restore);
+
+    void performAction(Descriptor::Action action, uint8_t value);
 
   public:
     Menu(std::shared_ptr<SettingsStore> settings_store);

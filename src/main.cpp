@@ -25,6 +25,7 @@ enum class ControlCommand {
     SetUsbMode,
     SetPlayerLed,
     SetLedBrightness,
+    SetLedEnablePlayerColor,
     EnterMenu,
     ExitMenu,
 };
@@ -35,6 +36,7 @@ struct ControlMessage {
         usb_mode_t usb_mode;
         usb_player_led_t player_led;
         uint8_t led_brightness;
+        bool led_enable_player_color;
     } data;
 };
 
@@ -81,6 +83,9 @@ void core1_task() {
             case ControlCommand::SetLedBrightness:
                 led.setBrightness(control_msg.data.led_brightness);
                 break;
+            case ControlCommand::SetLedEnablePlayerColor:
+                led.setEnablePlayerColor(control_msg.data.led_enable_player_color);
+                break;
             case ControlCommand::EnterMenu:
                 display.showMenu();
                 break;
@@ -112,7 +117,7 @@ int main() {
     auto settings_store = std::make_shared<Utils::SettingsStore>();
     Utils::Menu menu(settings_store);
 
-    auto mode = settings_store->getUsbMode();
+    const auto mode = settings_store->getUsbMode();
 
     Peripherals::Drum drum(Config::Default::drum_config);
 
@@ -120,19 +125,22 @@ int main() {
 
     usbd_driver_init(mode);
     usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
-        auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
+        const auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
         queue_add_blocking(&control_queue, &ctrl_message);
     });
 
     stdio_init_all();
 
-    auto readSettings = [&]() {
+    const auto readSettings = [&]() {
         ControlMessage ctrl_message;
 
         ctrl_message = {ControlCommand::SetUsbMode, {.usb_mode = mode}};
         queue_add_blocking(&control_queue, &ctrl_message);
 
         ctrl_message = {ControlCommand::SetLedBrightness, {.led_brightness = settings_store->getLedBrightness()}};
+        queue_add_blocking(&control_queue, &ctrl_message);
+        ctrl_message = {ControlCommand::SetLedEnablePlayerColor,
+                        {.led_enable_player_color = settings_store->getLedEnablePlayerColor()}};
         queue_add_blocking(&control_queue, &ctrl_message);
 
         drum.setDebounceDelay(settings_store->getDebounceDelay());
@@ -145,10 +153,12 @@ int main() {
         drum.updateInputState(input_state);
         queue_try_remove(&controller_input_queue, &input_state.controller);
 
+        const auto drum_message = input_state.drum;
+
         if (menu.active()) {
             menu.update(input_state.controller);
             if (menu.active()) {
-                auto display_msg = menu.getState();
+                const auto display_msg = menu.getState();
                 queue_add_blocking(&menu_display_queue, &display_msg);
             } else {
                 settings_store->store();
@@ -170,8 +180,7 @@ int main() {
         usbd_driver_send_report(input_state.getReport(mode));
         usbd_driver_task();
 
-        // TODO don't send whole input_state
-        queue_try_add(&drum_input_queue, &input_state);
+        queue_try_add(&drum_input_queue, &drum_message);
     }
 
     return 0;

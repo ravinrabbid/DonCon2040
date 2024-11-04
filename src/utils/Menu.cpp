@@ -3,72 +3,79 @@
 namespace Doncon::Utils {
 
 const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
-    {Menu::Page::Main,                                                    //
-     {Menu::Descriptor::Type::Root,                                       //
-      "Settings",                                                         //
-      {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},            //
-       {"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},   //
-       {"Sensitvty", Menu::Descriptor::Action::GotoPageTriggerThreshold}, //
-       {"Hold Time", Menu::Descriptor::Action::GotoPageDebounceDelay},    //
-       {"Reset", Menu::Descriptor::Action::GotoPageReset},                //
-       {"USB Flash", Menu::Descriptor::Action::GotoPageBootsel}},         //
-      0}},                                                                //
+    {Menu::Page::Main,                                            //
+     {Menu::Descriptor::Type::Menu,                               //
+      "Settings",                                                 //
+      {{"Mode", Menu::Descriptor::Action::GotoPageDeviceMode},    //
+       {"Drum", Menu::Descriptor::Action::GotoPageDrum},          //
+       {"Led", Menu::Descriptor::Action::GotoPageLed},            //
+       {"Reset", Menu::Descriptor::Action::GotoPageReset},        //
+       {"USB Flash", Menu::Descriptor::Action::GotoPageBootsel}}, //
+      0}},                                                        //
 
-    {Menu::Page::DeviceMode,                                                  //
-     {Menu::Descriptor::Type::Selection,                                      //
-      "Mode",                                                                 //
-      {{"Swtch Tata", Menu::Descriptor::Action::ChangeUsbModeSwitchTatacon},  //
-       {"Swtch Pro", Menu::Descriptor::Action::ChangeUsbModeSwitchHoripad},   //
-       {"Dualshock3", Menu::Descriptor::Action::ChangeUsbModeDS3},            //
-       {"PS4 Tata", Menu::Descriptor::Action::ChangeUsbModePS4Tatacon},       //
-       {"Dualshock4", Menu::Descriptor::Action::ChangeUsbModeDS4},            //
-       {"Keybrd P1", Menu::Descriptor::Action::ChangeUsbModeKeyboardP1},      //
-       {"Keybrd P2", Menu::Descriptor::Action::ChangeUsbModeKeyboardP2},      //
-       {"Xbox 360", Menu::Descriptor::Action::ChangeUsbModeXbox360},          //
-       {"Analog P1", Menu::Descriptor::Action::ChangeUsbModeXbox360AnalogP1}, //
-       {"Analog P2", Menu::Descriptor::Action::ChangeUsbModeXbox360AnalogP2}, //
-       {"MIDI", Menu::Descriptor::Action::ChangeUsbModeMidi},                 //
-       {"Debug", Menu::Descriptor::Action::ChangeUsbModeDebug}},              //
-      0}},                                                                    //
+    {Menu::Page::DeviceMode,                                 //
+     {Menu::Descriptor::Type::Selection,                     //
+      "Mode",                                                //
+      {{"Swtch Tata", Menu::Descriptor::Action::SetUsbMode}, //
+       {"Swtch Pro", Menu::Descriptor::Action::SetUsbMode},  //
+       {"Dualshock3", Menu::Descriptor::Action::SetUsbMode}, //
+       {"PS4 Tata", Menu::Descriptor::Action::SetUsbMode},   //
+       {"Dualshock4", Menu::Descriptor::Action::SetUsbMode}, //
+       {"Keybrd P1", Menu::Descriptor::Action::SetUsbMode},  //
+       {"Keybrd P2", Menu::Descriptor::Action::SetUsbMode},  //
+       {"Xbox 360", Menu::Descriptor::Action::SetUsbMode},   //
+       {"Analog P1", Menu::Descriptor::Action::SetUsbMode},  //
+       {"Analog P2", Menu::Descriptor::Action::SetUsbMode},  //
+       {"MIDI", Menu::Descriptor::Action::SetUsbMode},       //
+       {"Debug", Menu::Descriptor::Action::SetUsbMode}},     //
+      0}},                                                   //
 
-    {Menu::Page::TriggerThreshold,                                                //
-     {Menu::Descriptor::Type::Selection,                                          //
-      "Sensitivity",                                                              //
-      {{"Ka Left", Menu::Descriptor::Action::GotoPageTriggerThresholdKaLeft},     //
-       {"Don Left", Menu::Descriptor::Action::GotoPageTriggerThresholdDonLeft},   //
-       {"Don Right", Menu::Descriptor::Action::GotoPageTriggerThresholdDonRight}, //
-       {"Ka Right", Menu::Descriptor::Action::GotoPageTriggerThresholdKaRight}},  //
-      0}},                                                                        //
+    {Menu::Page::Drum,                                                                //
+     {Menu::Descriptor::Type::Menu,                                                   //
+      "Drum Settings",                                                                //
+      {{"Hold Time", Menu::Descriptor::Action::GotoPageDrumDebounceDelay},            //
+       {"Left Ka", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdKaLeft},     //
+       {"Left Don", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdDonLeft},   //
+       {"Right Don", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdDonRight}, //
+       {"Right Ka", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdKaRight}},  //
+      0}},                                                                            //
 
-    {Menu::Page::TriggerThresholdKaLeft,                           //
-     {Menu::Descriptor::Type::Value,                               //
-      "Trg Level Ka Left",                                         //
-      {{"", Menu::Descriptor::Action::SetTriggerThresholdKaLeft}}, //
+    {Menu::Page::DrumDebounceDelay,                           //
+     {Menu::Descriptor::Type::Value,                          //
+      "Hit Hold Time (ms)",                                   //
+      {{"", Menu::Descriptor::Action::SetDrumDebounceDelay}}, //
+      UINT8_MAX}},
+
+    {Menu::Page::DrumTriggerThresholdKaLeft,                           //
+     {Menu::Descriptor::Type::Value,                                   //
+      "Trg Level Left Ka",                                             //
+      {{"", Menu::Descriptor::Action::SetDrumTriggerThresholdKaLeft}}, //
       4095}},
 
-    {Menu::Page::TriggerThresholdDonLeft,                           //
-     {Menu::Descriptor::Type::Value,                                //
-      "Trg Level Don Left",                                         //
-      {{"", Menu::Descriptor::Action::SetTriggerThresholdDonLeft}}, //
+    {Menu::Page::DrumTriggerThresholdDonLeft,                           //
+     {Menu::Descriptor::Type::Value,                                    //
+      "Trg Level Left Don",                                             //
+      {{"", Menu::Descriptor::Action::SetDrumTriggerThresholdDonLeft}}, //
       4095}},
 
-    {Menu::Page::TriggerThresholdDonRight,                           //
-     {Menu::Descriptor::Type::Value,                                 //
-      "Trg Level Don Right",                                         //
-      {{"", Menu::Descriptor::Action::SetTriggerThresholdDonRight}}, //
+    {Menu::Page::DrumTriggerThresholdDonRight,                           //
+     {Menu::Descriptor::Type::Value,                                     //
+      "Trg Level Right Don",                                             //
+      {{"", Menu::Descriptor::Action::SetDrumTriggerThresholdDonRight}}, //
       4095}},
 
-    {Menu::Page::TriggerThresholdKaRight,                           //
-     {Menu::Descriptor::Type::Value,                                //
-      "Trg Level Ka Right",                                         //
-      {{"", Menu::Descriptor::Action::SetTriggerThresholdKaRight}}, //
+    {Menu::Page::DrumTriggerThresholdKaRight,                           //
+     {Menu::Descriptor::Type::Value,                                    //
+      "Trg Level Right Ka",                                             //
+      {{"", Menu::Descriptor::Action::SetDrumTriggerThresholdKaRight}}, //
       4095}},
 
-    {Menu::Page::DebounceDelay,                           //
-     {Menu::Descriptor::Type::Value,                      //
-      "Hit Hold Time (ms)",                               //
-      {{"", Menu::Descriptor::Action::SetDebounceDelay}}, //
-      255}},
+    {Menu::Page::Led,                                                           //
+     {Menu::Descriptor::Type::Menu,                                             //
+      "LED Settings",                                                           //
+      {{"Brightness", Menu::Descriptor::Action::GotoPageLedBrightness},         //
+       {"Plyr Color", Menu::Descriptor::Action::GotoPageLedEnablePlayerColor}}, //
+      0}},                                                                      //
 
     {Menu::Page::LedBrightness,                           //
      {Menu::Descriptor::Type::Value,                      //
@@ -76,15 +83,21 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"", Menu::Descriptor::Action::SetLedBrightness}}, //
       UINT8_MAX}},                                        //
 
+    {Menu::Page::LedEnablePlayerColor,                           //
+     {Menu::Descriptor::Type::Toggle,                            //
+      "Player Color (PS4)",                                      //
+      {{"", Menu::Descriptor::Action::SetLedEnablePlayerColor}}, //
+      0}},                                                       //
+
     {Menu::Page::Reset,                              //
-     {Menu::Descriptor::Type::Selection,             //
+     {Menu::Descriptor::Type::Menu,                  //
       "Reset all Settings?",                         //
       {{"No", Menu::Descriptor::Action::GotoParent}, //
        {"Yes", Menu::Descriptor::Action::DoReset}},  //
       0}},                                           //
 
     {Menu::Page::Bootsel,                                         //
-     {Menu::Descriptor::Type::Selection,                          //
+     {Menu::Descriptor::Type::Menu,                               //
       "Reboot to Flash Mode",                                     //
       {{"Reboot?", Menu::Descriptor::Action::DoRebootToBootsel}}, //
       0}},                                                        //
@@ -97,10 +110,10 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
 };
 
 Menu::Menu(std::shared_ptr<SettingsStore> settings_store)
-    : m_store(settings_store), m_active(false), m_state_stack({{Page::Main, 0}}) {};
+    : m_store(settings_store), m_active(false), m_state_stack({{Page::Main, 0, 0}}) {};
 
 void Menu::activate() {
-    m_state_stack = std::stack<State>({{Page::Main, 0}});
+    m_state_stack = std::stack<State>({{Page::Main, 0, 0}});
     m_active = true;
 }
 
@@ -181,31 +194,27 @@ static InputState::Controller checkPressed(const InputState::Controller &control
     return result;
 }
 
-uint16_t Menu::getCurrentSelection(Menu::Page page) {
+uint16_t Menu::getCurrentValue(Menu::Page page) {
     switch (page) {
     case Page::DeviceMode:
         return static_cast<uint16_t>(m_store->getUsbMode());
-        break;
-    case Page::TriggerThresholdKaLeft:
-        return m_store->getTriggerThresholds().ka_left;
-        break;
-    case Page::TriggerThresholdDonLeft:
-        return m_store->getTriggerThresholds().don_left;
-        break;
-    case Page::TriggerThresholdDonRight:
-        return m_store->getTriggerThresholds().don_right;
-        break;
-    case Page::TriggerThresholdKaRight:
-        return m_store->getTriggerThresholds().ka_right;
-        break;
-    case Page::DebounceDelay:
+    case Page::DrumDebounceDelay:
         return m_store->getDebounceDelay();
-        break;
+    case Page::DrumTriggerThresholdKaLeft:
+        return m_store->getTriggerThresholds().ka_left;
+    case Page::DrumTriggerThresholdDonLeft:
+        return m_store->getTriggerThresholds().don_left;
+    case Page::DrumTriggerThresholdDonRight:
+        return m_store->getTriggerThresholds().don_right;
+    case Page::DrumTriggerThresholdKaRight:
+        return m_store->getTriggerThresholds().ka_right;
     case Page::LedBrightness:
         return m_store->getLedBrightness();
-        break;
+    case Page::LedEnablePlayerColor:
+        return static_cast<uint16_t>(m_store->getLedEnablePlayerColor());
     case Page::Main:
-    case Page::TriggerThreshold:
+    case Page::Drum:
+    case Page::Led:
     case Page::Reset:
     case Page::Bootsel:
     case Page::BootselMsg:
@@ -215,41 +224,85 @@ uint16_t Menu::getCurrentSelection(Menu::Page page) {
     return 0;
 }
 
-void Menu::gotoPage(Menu::Page page) { m_state_stack.push({page, getCurrentSelection(page)}); }
+void Menu::gotoPage(Menu::Page page) {
+    const auto current_value = getCurrentValue(page);
 
-void Menu::gotoParent() { m_state_stack.pop(); }
+    m_state_stack.push({page, current_value, current_value});
+}
 
-void Menu::performSelectionAction(Menu::Descriptor::Action action) {
-    auto descriptor_it = descriptors.find(m_state_stack.top().page);
-    if (descriptor_it == descriptors.end()) {
-        assert(false);
-        return;
+void Menu::gotoParent(bool do_restore) {
+    const auto current_state = m_state_stack.top();
+
+    if (current_state.page == Page::Main) {
+        m_active = false;
     }
 
+    if (do_restore) {
+        switch (current_state.page) {
+        case Page::DeviceMode:
+            m_store->setUsbMode(static_cast<usb_mode_t>(current_state.original_value));
+            break;
+        case Page::DrumDebounceDelay:
+            m_store->setDebounceDelay(current_state.original_value);
+            break;
+        case Page::DrumTriggerThresholdKaLeft: {
+            auto thresholds = m_store->getTriggerThresholds();
+
+            thresholds.ka_left = current_state.original_value;
+            m_store->setTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumTriggerThresholdDonLeft: {
+            auto thresholds = m_store->getTriggerThresholds();
+
+            thresholds.don_left = current_state.original_value;
+            m_store->setTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumTriggerThresholdDonRight: {
+            auto thresholds = m_store->getTriggerThresholds();
+
+            thresholds.don_right = current_state.original_value;
+            m_store->setTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumTriggerThresholdKaRight: {
+            auto thresholds = m_store->getTriggerThresholds();
+
+            thresholds.ka_right = current_state.original_value;
+            m_store->setTriggerThresholds(thresholds);
+        } break;
+        case Page::LedBrightness:
+            m_store->setLedBrightness(current_state.original_value);
+            break;
+        case Page::LedEnablePlayerColor:
+            m_store->setLedEnablePlayerColor(static_cast<bool>(current_state.original_value));
+            break;
+        case Page::Main:
+        case Page::Drum:
+        case Page::Led:
+        case Page::Reset:
+        case Page::Bootsel:
+        case Page::BootselMsg:
+            break;
+        }
+    }
+
+    m_state_stack.pop();
+}
+
+void Menu::performAction(Descriptor::Action action, uint8_t value) {
     switch (action) {
+    case Descriptor::Action::None:
+        break;
+    case Descriptor::Action::GotoParent:
+        gotoParent(false);
+        break;
     case Descriptor::Action::GotoPageDeviceMode:
         gotoPage(Page::DeviceMode);
         break;
-    case Descriptor::Action::GotoPageTriggerThreshold:
-        gotoPage(Page::TriggerThreshold);
+    case Descriptor::Action::GotoPageDrum:
+        gotoPage(Page::Drum);
         break;
-    case Descriptor::Action::GotoPageTriggerThresholdKaLeft:
-        gotoPage(Page::TriggerThresholdKaLeft);
-        break;
-    case Descriptor::Action::GotoPageTriggerThresholdDonLeft:
-        gotoPage(Page::TriggerThresholdDonLeft);
-        break;
-    case Descriptor::Action::GotoPageTriggerThresholdDonRight:
-        gotoPage(Page::TriggerThresholdDonRight);
-        break;
-    case Descriptor::Action::GotoPageTriggerThresholdKaRight:
-        gotoPage(Page::TriggerThresholdKaRight);
-        break;
-    case Descriptor::Action::GotoPageLedBrightness:
-        gotoPage(Page::LedBrightness);
-        break;
-    case Descriptor::Action::GotoPageDebounceDelay:
-        gotoPage(Page::DebounceDelay);
+    case Descriptor::Action::GotoPageLed:
+        gotoPage(Page::Led);
         break;
     case Descriptor::Action::GotoPageReset:
         gotoPage(Page::Reset);
@@ -257,65 +310,62 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
     case Descriptor::Action::GotoPageBootsel:
         gotoPage(Page::Bootsel);
         break;
-    case Descriptor::Action::ChangeUsbModeSwitchTatacon:
-        m_store->setUsbMode(USB_MODE_SWITCH_TATACON);
-        gotoParent();
+    case Descriptor::Action::GotoPageDrumDebounceDelay:
+        gotoPage(Page::DrumDebounceDelay);
         break;
-    case Descriptor::Action::ChangeUsbModeSwitchHoripad:
-        m_store->setUsbMode(USB_MODE_SWITCH_HORIPAD);
-        gotoParent();
+    case Descriptor::Action::GotoPageDrumTriggerThresholdKaLeft:
+        gotoPage(Page::DrumTriggerThresholdKaLeft);
         break;
-    case Descriptor::Action::ChangeUsbModeDS3:
-        m_store->setUsbMode(USB_MODE_DUALSHOCK3);
-        gotoParent();
+    case Descriptor::Action::GotoPageDrumTriggerThresholdDonLeft:
+        gotoPage(Page::DrumTriggerThresholdDonLeft);
         break;
-    case Descriptor::Action::ChangeUsbModePS4Tatacon:
-        m_store->setUsbMode(USB_MODE_PS4_TATACON);
-        gotoParent();
+    case Descriptor::Action::GotoPageDrumTriggerThresholdDonRight:
+        gotoPage(Page::DrumTriggerThresholdDonRight);
         break;
-    case Descriptor::Action::ChangeUsbModeDS4:
-        m_store->setUsbMode(USB_MODE_DUALSHOCK4);
-        gotoParent();
+    case Descriptor::Action::GotoPageDrumTriggerThresholdKaRight:
+        gotoPage(Page::DrumTriggerThresholdKaRight);
         break;
-    case Descriptor::Action::ChangeUsbModeKeyboardP1:
-        m_store->setUsbMode(USB_MODE_KEYBOARD_P1);
-        gotoParent();
+    case Descriptor::Action::GotoPageLedBrightness:
+        gotoPage(Page::LedBrightness);
         break;
-    case Descriptor::Action::ChangeUsbModeKeyboardP2:
-        m_store->setUsbMode(USB_MODE_KEYBOARD_P2);
-        gotoParent();
+    case Descriptor::Action::GotoPageLedEnablePlayerColor:
+        gotoPage(Page::LedEnablePlayerColor);
         break;
-    case Descriptor::Action::ChangeUsbModeXbox360:
-        m_store->setUsbMode(USB_MODE_XBOX360);
-        gotoParent();
+    case Descriptor::Action::SetUsbMode:
+        m_store->setUsbMode(static_cast<usb_mode_t>(value));
         break;
-    case Descriptor::Action::ChangeUsbModeXbox360AnalogP1:
-        m_store->setUsbMode(USB_MODE_XBOX360_ANALOG_P1);
-        gotoParent();
+    case Descriptor::Action::SetDrumDebounceDelay:
+        m_store->setDebounceDelay(value);
         break;
-    case Descriptor::Action::ChangeUsbModeXbox360AnalogP2:
-        m_store->setUsbMode(USB_MODE_XBOX360_ANALOG_P2);
-        gotoParent();
-        break;
-    case Descriptor::Action::ChangeUsbModeMidi:
-        m_store->setUsbMode(USB_MODE_MIDI);
-        gotoParent();
-        break;
-    case Descriptor::Action::ChangeUsbModeDebug:
-        m_store->setUsbMode(USB_MODE_DEBUG);
-        gotoParent();
-        break;
-    case Descriptor::Action::SetTriggerThresholdKaLeft:
-    case Descriptor::Action::SetTriggerThresholdDonLeft:
-    case Descriptor::Action::SetTriggerThresholdDonRight:
-    case Descriptor::Action::SetTriggerThresholdKaRight:
-        gotoParent();
-        break;
-    case Descriptor::Action::SetDebounceDelay:
-        gotoParent();
-        break;
+    case Descriptor::Action::SetDrumTriggerThresholdKaLeft: {
+        auto thresholds = m_store->getTriggerThresholds();
+
+        thresholds.ka_left = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumTriggerThresholdDonLeft: {
+        auto thresholds = m_store->getTriggerThresholds();
+
+        thresholds.don_left = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumTriggerThresholdDonRight: {
+        auto thresholds = m_store->getTriggerThresholds();
+
+        thresholds.don_right = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumTriggerThresholdKaRight: {
+        auto thresholds = m_store->getTriggerThresholds();
+
+        thresholds.ka_right = value;
+        m_store->setTriggerThresholds(thresholds);
+    } break;
     case Descriptor::Action::SetLedBrightness:
-        gotoParent();
+        m_store->setLedBrightness(value);
+        break;
+    case Descriptor::Action::SetLedEnablePlayerColor:
+        m_store->setLedEnablePlayerColor(static_cast<bool>(value));
         break;
     case Descriptor::Action::DoReset:
         m_store->reset();
@@ -324,51 +374,9 @@ void Menu::performSelectionAction(Menu::Descriptor::Action action) {
         m_store->scheduleReboot(true);
         gotoPage(Page::BootselMsg);
         break;
-    case Descriptor::Action::GotoParent:
-        gotoParent();
-        break;
-    case Descriptor::Action::None:
-        break;
-    }
-}
-
-void Menu::performValueAction(Menu::Descriptor::Action action, uint16_t value) {
-    auto descriptor_it = descriptors.find(m_state_stack.top().page);
-    if (descriptor_it == descriptors.end()) {
-        assert(false);
-        return;
     }
 
-    switch (action) {
-    case Descriptor::Action::SetTriggerThresholdKaLeft: {
-        auto thresholds = m_store->getTriggerThresholds();
-        thresholds.ka_left = value;
-        m_store->setTriggerThresholds(thresholds);
-    } break;
-    case Descriptor::Action::SetTriggerThresholdDonLeft: {
-        auto thresholds = m_store->getTriggerThresholds();
-        thresholds.don_left = value;
-        m_store->setTriggerThresholds(thresholds);
-    } break;
-    case Descriptor::Action::SetTriggerThresholdDonRight: {
-        auto thresholds = m_store->getTriggerThresholds();
-        thresholds.don_right = value;
-        m_store->setTriggerThresholds(thresholds);
-    } break;
-    case Descriptor::Action::SetTriggerThresholdKaRight: {
-        auto thresholds = m_store->getTriggerThresholds();
-        thresholds.ka_right = value;
-        m_store->setTriggerThresholds(thresholds);
-    } break;
-    case Descriptor::Action::SetDebounceDelay:
-        m_store->setDebounceDelay(value);
-        break;
-    case Descriptor::Action::SetLedBrightness:
-        m_store->setLedBrightness(value);
-        break;
-    default:
-        break;
-    }
+    return;
 }
 
 void Menu::update(const InputState::Controller &controller_state) {
@@ -386,13 +394,22 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.left) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
+        case Descriptor::Type::Toggle:
             break;
         case Descriptor::Type::Selection:
-        case Descriptor::Type::Root:
-            if (current_state.selection == 0) {
-                current_state.selection = descriptor_it->second.items.size() - 1;
+            if (current_state.selected_value == 0) {
+                current_state.selected_value = descriptor_it->second.items.size() - 1;
             } else {
-                current_state.selection--;
+                current_state.selected_value--;
+            }
+            performAction(descriptor_it->second.items.at(current_state.selected_value).second,
+                          current_state.selected_value);
+            break;
+        case Descriptor::Type::Menu:
+            if (current_state.selected_value == 0) {
+                current_state.selected_value = descriptor_it->second.items.size() - 1;
+            } else {
+                current_state.selected_value--;
             }
             break;
         case Descriptor::Type::RebootInfo:
@@ -401,13 +418,22 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.right) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
+        case Descriptor::Type::Toggle:
             break;
         case Descriptor::Type::Selection:
-        case Descriptor::Type::Root:
-            if (current_state.selection == descriptor_it->second.items.size() - 1) {
-                current_state.selection = 0;
+            if (current_state.selected_value == descriptor_it->second.items.size() - 1) {
+                current_state.selected_value = 0;
             } else {
-                current_state.selection++;
+                current_state.selected_value++;
+            }
+            performAction(descriptor_it->second.items.at(current_state.selected_value).second,
+                          current_state.selected_value);
+            break;
+        case Descriptor::Type::Menu:
+            if (current_state.selected_value == descriptor_it->second.items.size() - 1) {
+                current_state.selected_value = 0;
+            } else {
+                current_state.selected_value++;
             }
             break;
         case Descriptor::Type::RebootInfo:
@@ -416,49 +442,60 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.up) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (current_state.selection < descriptor_it->second.max_value) {
-                current_state.selection++;
-                performValueAction(descriptor_it->second.items.at(0).second, current_state.selection);
+            if (current_state.selected_value < UINT8_MAX) {
+                current_state.selected_value++;
+                performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             }
             break;
+        case Descriptor::Type::Toggle:
+            current_state.selected_value = !current_state.selected_value;
+            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
+            break;
         case Descriptor::Type::Selection:
-        case Descriptor::Type::Root:
+        case Descriptor::Type::Menu:
         case Descriptor::Type::RebootInfo:
             break;
         }
     } else if (pressed.dpad.down) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (current_state.selection > 0) {
-                current_state.selection--;
-                performValueAction(descriptor_it->second.items.at(0).second, current_state.selection);
+            if (current_state.selected_value > 0) {
+                current_state.selected_value--;
+                performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             }
             break;
+        case Descriptor::Type::Toggle:
+            current_state.selected_value = !current_state.selected_value;
+            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
+            break;
         case Descriptor::Type::Selection:
-        case Descriptor::Type::Root:
+        case Descriptor::Type::Menu:
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.south) {
+    } else if (pressed.buttons.south) { // Back/Exit
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
+        case Descriptor::Type::Toggle:
         case Descriptor::Type::Selection:
-            gotoParent();
+            gotoParent(true);
             break;
-        case Descriptor::Type::Root:
-            m_active = false;
+        case Descriptor::Type::Menu:
+            gotoParent(false);
             break;
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.east) {
+    } else if (pressed.buttons.east) { // Select
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            performSelectionAction(descriptor_it->second.items.at(0).second);
-            break;
+        case Descriptor::Type::Toggle:
         case Descriptor::Type::Selection:
-        case Descriptor::Type::Root:
-            performSelectionAction(descriptor_it->second.items.at(current_state.selection).second);
+            gotoParent(false);
+            break;
+        case Descriptor::Type::Menu:
+            performAction(descriptor_it->second.items.at(current_state.selected_value).second,
+                          current_state.selected_value);
             break;
         case Descriptor::Type::RebootInfo:
             break;

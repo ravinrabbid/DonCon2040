@@ -21,10 +21,12 @@ class SettingsStore {
         usb_mode_t usb_mode;
         Peripherals::Drum::Config::Thresholds trigger_thresholds;
         uint8_t led_brightness;
+        bool led_enable_player_color;
         uint16_t debounce_delay;
 
         uint8_t _padding[m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
-                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(uint16_t)];
+                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(bool) -
+                         sizeof(uint16_t)];
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
@@ -53,6 +55,9 @@ class SettingsStore {
 
     void setLedBrightness(const uint8_t brightness);
     uint8_t getLedBrightness();
+
+    void setLedEnablePlayerColor(const bool do_enable);
+    bool getLedEnablePlayerColor();
 
     void setDebounceDelay(const uint16_t delay);
     uint16_t getDebounceDelay();

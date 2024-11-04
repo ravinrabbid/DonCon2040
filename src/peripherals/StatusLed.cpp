@@ -5,7 +5,7 @@
 
 namespace Doncon::Peripherals {
 
-StatusLed::StatusLed(const Config &config) : m_config(config) {
+StatusLed::StatusLed(const Config &config) : m_config(config), m_input_state({}), m_player_color(std::nullopt) {
     gpio_init(m_config.led_enable_pin);
     gpio_set_dir(m_config.led_enable_pin, GPIO_OUT);
     gpio_put(m_config.led_enable_pin, 1);
@@ -13,11 +13,11 @@ StatusLed::StatusLed(const Config &config) : m_config(config) {
     ws2812_init(config.led_pin, m_config.is_rgbw);
 }
 
-void StatusLed::setInputState(const Utils::InputState input_state) { m_input_state = input_state; }
-
 void StatusLed::setBrightness(const uint8_t brightness) { m_config.brightness = brightness; }
+void StatusLed::setEnablePlayerColor(const bool do_enable) { m_config.enable_player_color = do_enable; }
 
-void StatusLed::setPlayerColor(const Config::Color color) { m_config.idle_color = color; }
+void StatusLed::setInputState(const Utils::InputState input_state) { m_input_state = input_state; }
+void StatusLed::setPlayerColor(const Config::Color color) { m_player_color = color; }
 
 void StatusLed::update() {
     float brightness_factor = m_config.brightness / static_cast<float>(UINT8_MAX);
@@ -28,6 +28,7 @@ void StatusLed::update() {
 
     uint8_t num_colors = 0;
 
+    // TODO simply use max of each channel
     if (m_input_state.drum.don_left.triggered) {
         mixed_red += m_config.don_left_color.r;
         mixed_green += m_config.don_left_color.g;
@@ -59,10 +60,13 @@ void StatusLed::update() {
             static_cast<uint8_t>((mixed_green / num_colors) * brightness_factor),
             static_cast<uint8_t>((mixed_blue / num_colors) * brightness_factor)));
     } else {
+        const auto idle_color =
+            m_config.enable_player_color ? m_player_color.value_or(m_config.idle_color) : m_config.idle_color;
+
         ws2812_put_pixel(
-            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((m_config.idle_color.r) * brightness_factor),
-                                                   static_cast<uint8_t>((m_config.idle_color.g) * brightness_factor),
-                                                   static_cast<uint8_t>((m_config.idle_color.b) * brightness_factor)));
+            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((idle_color.r) * brightness_factor),
+                                                   static_cast<uint8_t>((idle_color.g) * brightness_factor),
+                                                   static_cast<uint8_t>((idle_color.b) * brightness_factor)));
     }
 }
 

@@ -93,14 +93,19 @@ void Display::drawMenuScreen() {
 
     // Background
     switch (descriptor_it->second.type) {
-    case Utils::Menu::Descriptor::Type::Root:
-        ssd1306_bmp_show_image(&m_display, menu_screen_top.data(), menu_screen_top.size());
-        break;
-    case Utils::Menu::Descriptor::Type::Selection:
-        ssd1306_bmp_show_image(&m_display, menu_screen_sub.data(), menu_screen_value.size());
+    case Utils::Menu::Descriptor::Type::Menu:
+        if (m_menu_state.page == Utils::Menu::Page::Main) {
+            ssd1306_bmp_show_image(&m_display, menu_screen_top.data(), menu_screen_top.size());
+        } else {
+            ssd1306_bmp_show_image(&m_display, menu_screen_sub.data(), menu_screen_sub.size());
+        }
         break;
     case Utils::Menu::Descriptor::Type::Value:
         ssd1306_bmp_show_image(&m_display, menu_screen_value.data(), menu_screen_value.size());
+        break;
+    case Utils::Menu::Descriptor::Type::Selection:
+    case Utils::Menu::Descriptor::Type::Toggle:
+        ssd1306_bmp_show_image(&m_display, menu_screen_sub.data(), menu_screen_sub.size());
         break;
     case Utils::Menu::Descriptor::Type::RebootInfo:
         break;
@@ -112,24 +117,27 @@ void Display::drawMenuScreen() {
     // Current Selection
     std::string selection;
     switch (descriptor_it->second.type) {
-    case Utils::Menu::Descriptor::Type::Root:
+    case Utils::Menu::Descriptor::Type::Menu:
     case Utils::Menu::Descriptor::Type::Selection:
     case Utils::Menu::Descriptor::Type::RebootInfo:
-        selection = descriptor_it->second.items.at(m_menu_state.selection).first;
+        selection = descriptor_it->second.items.at(m_menu_state.selected_value).first;
         break;
     case Utils::Menu::Descriptor::Type::Value:
-        selection = std::to_string(m_menu_state.selection);
+        selection = std::to_string(m_menu_state.selected_value);
+        break;
+    case Utils::Menu::Descriptor::Type::Toggle:
+        selection = m_menu_state.selected_value ? "On" : "Off";
         break;
     }
     ssd1306_draw_string(&m_display, (127 - (selection.length() * 12)) / 2, 15, 2, selection.c_str());
 
     // Breadcrumbs
     switch (descriptor_it->second.type) {
-    case Utils::Menu::Descriptor::Type::Root:
+    case Utils::Menu::Descriptor::Type::Menu:
     case Utils::Menu::Descriptor::Type::Selection: {
         auto selection_count = descriptor_it->second.items.size();
         for (uint8_t i = 0; i < selection_count; ++i) {
-            if (i == m_menu_state.selection) {
+            if (i == m_menu_state.selected_value) {
                 ssd1306_draw_square(&m_display, ((127) - ((selection_count - i) * 6)) - 1, 2, 4, 4);
             } else {
                 ssd1306_draw_square(&m_display, (127) - ((selection_count - i) * 6), 3, 2, 2);
@@ -139,6 +147,7 @@ void Display::drawMenuScreen() {
     case Utils::Menu::Descriptor::Type::RebootInfo:
         break;
     case Utils::Menu::Descriptor::Type::Value:
+    case Utils::Menu::Descriptor::Type::Toggle:
         break;
     }
 }

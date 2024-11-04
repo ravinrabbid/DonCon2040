@@ -20,7 +20,7 @@ struct I2c {
 
 namespace Default {
 
-const usb_mode_t usb_mode = USB_MODE_XBOX360;
+const usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
 
 const I2c i2c_config = {
     6,       // SDA Pin
@@ -39,10 +39,10 @@ const Peripherals::Drum::Config drum_config = {
     },
     // Trigger thresholds
     {
-        80, // Don Left
-        50, // Ka Left
-        80, // Don Right
-        50, // Ka Right
+        30, // Don Left
+        10, // Ka Left
+        30, // Don Right
+        10, // Ka Right
     },
 
     16,  // ADC sample count
@@ -57,7 +57,7 @@ const Peripherals::Drum::Config drum_config = {
         2,       // SCLK Pin
         1,       // SCSn Pin
         spi0,    // Block
-        2000000, // Speed
+        2000000, // Speed // TODO Does lowring help?
     },
 };
 
@@ -103,7 +103,9 @@ const Peripherals::StatusLed::Config led_config = {
     11,    // LED Enable Pin,
     12,    // LED Pin
     false, // Is RGBW
-    255,   // Brightness
+
+    255,  // Brightness
+    true, // Idle Color is DS4 light bar color
 };
 
 const Peripherals::Display::Config display_config = {

@@ -3,6 +3,7 @@
 
 #include "utils/InputState.h"
 
+#include <optional>
 #include <stdint.h>
 
 namespace Doncon::Peripherals {
@@ -25,19 +26,24 @@ class StatusLed {
         uint8_t led_enable_pin;
         uint8_t led_pin;
         bool is_rgbw;
+
         uint8_t brightness;
+        bool enable_player_color;
     };
 
   private:
     Config m_config;
 
     Utils::InputState m_input_state;
+    std::optional<Config::Color> m_player_color;
 
   public:
     StatusLed(const Config &config);
 
-    void setInputState(const Utils::InputState input_state);
     void setBrightness(const uint8_t brightness);
+    void setEnablePlayerColor(const bool do_enable);
+
+    void setInputState(const Utils::InputState input_state);
     void setPlayerColor(const Config::Color color);
 
     void update();

@@ -15,6 +15,7 @@ SettingsStore::SettingsStore()
                      Config::Default::usb_mode,
                      Config::Default::drum_config.trigger_thresholds,
                      Config::Default::led_config.brightness,
+                     Config::Default::led_config.enable_player_color,
                      Config::Default::drum_config.debounce_delay_ms,
                      {}}),
       m_dirty(true), m_scheduled_reboot(RebootType::None) {
@@ -65,6 +66,14 @@ void SettingsStore::setLedBrightness(const uint8_t brightness) {
     }
 }
 uint8_t SettingsStore::getLedBrightness() { return m_store_cache.led_brightness; }
+
+void SettingsStore::setLedEnablePlayerColor(const bool do_enable) {
+    if (m_store_cache.led_enable_player_color != do_enable) {
+        m_store_cache.led_enable_player_color = do_enable;
+        m_dirty = true;
+    }
+}
+bool SettingsStore::getLedEnablePlayerColor() { return m_store_cache.led_enable_player_color; }
 
 void SettingsStore::setDebounceDelay(const uint16_t delay) {
     if (m_store_cache.debounce_delay != delay) {
