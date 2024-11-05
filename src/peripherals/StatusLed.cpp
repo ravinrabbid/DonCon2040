@@ -20,45 +20,39 @@ void StatusLed::setInputState(const Utils::InputState input_state) { m_input_sta
 void StatusLed::setPlayerColor(const Config::Color color) { m_player_color = color; }
 
 void StatusLed::update() {
-    float brightness_factor = m_config.brightness / static_cast<float>(UINT8_MAX);
+    float brightness_factor = (float)m_config.brightness / static_cast<float>(UINT8_MAX);
 
-    uint16_t mixed_red = 0;
-    uint16_t mixed_green = 0;
-    uint16_t mixed_blue = 0;
+    Config::Color mixed = {0, 0, 0};
+    bool triggered = false;
 
-    uint8_t num_colors = 0;
+    const auto add_color = [](Config::Color &base, const Config::Color &add) {
+        base.r = std::max(base.r, add.r);
+        base.g = std::max(base.g, add.g);
+        base.b = std::max(base.b, add.b);
+    };
 
-    // TODO simply use max of each channel
     if (m_input_state.drum.don_left.triggered) {
-        mixed_red += m_config.don_left_color.r;
-        mixed_green += m_config.don_left_color.g;
-        mixed_blue += m_config.don_left_color.b;
-        num_colors++;
+        add_color(mixed, m_config.don_left_color);
+        triggered = true;
     }
     if (m_input_state.drum.ka_left.triggered) {
-        mixed_red += m_config.ka_left_color.r;
-        mixed_green += m_config.ka_left_color.g;
-        mixed_blue += m_config.ka_left_color.b;
-        num_colors++;
+        add_color(mixed, m_config.ka_left_color);
+        triggered = true;
     }
     if (m_input_state.drum.don_right.triggered) {
-        mixed_red += m_config.don_right_color.r;
-        mixed_green += m_config.don_right_color.g;
-        mixed_blue += m_config.don_right_color.b;
-        num_colors++;
+        add_color(mixed, m_config.don_right_color);
+        triggered = true;
     }
     if (m_input_state.drum.ka_right.triggered) {
-        mixed_red += m_config.ka_right_color.r;
-        mixed_green += m_config.ka_right_color.g;
-        mixed_blue += m_config.ka_right_color.b;
-        num_colors++;
+        add_color(mixed, m_config.ka_right_color);
+        triggered = true;
     }
 
-    if (num_colors > 0) {
-        ws2812_put_pixel(ws2812_rgb_to_gamma_corrected_u32pixel(
-            static_cast<uint8_t>((mixed_red / num_colors) * brightness_factor),
-            static_cast<uint8_t>((mixed_green / num_colors) * brightness_factor),
-            static_cast<uint8_t>((mixed_blue / num_colors) * brightness_factor)));
+    if (triggered) {
+        ws2812_put_pixel(
+            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((float)mixed.r * brightness_factor),
+                                                   static_cast<uint8_t>((float)mixed.g * brightness_factor),
+                                                   static_cast<uint8_t>((float)mixed.b * brightness_factor)));
     } else {
         const auto idle_color =
             m_config.enable_player_color ? m_player_color.value_or(m_config.idle_color) : m_config.idle_color;
