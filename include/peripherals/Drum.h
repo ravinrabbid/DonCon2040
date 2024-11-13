@@ -5,8 +5,9 @@
 
 #include "hardware/spi.h"
 
-#include <mcp3204/Mcp3204.h>
+#include <mcp3204/Mcp3204Dma.h>
 
+#include <array>
 #include <map>
 #include <memory>
 #include <stdint.h>
@@ -44,6 +45,7 @@ class Drum {
             uint8_t miso_pin;
             uint8_t sclk_pin;
             uint8_t scsn_pin;
+            uint8_t level_shifter_enable_pin;
             spi_inst_t *block;
             uint speed_hz;
         } external_adc_spi_config;
@@ -73,23 +75,23 @@ class Drum {
 
     class AdcInterface {
       public:
-        // This is expected to return a 12bit value.
-        virtual uint16_t read(uint8_t channel) = 0;
+        // Those are expected to be 12bit values
+        virtual std::array<uint16_t, 4> read() = 0;
     };
 
     class InternalAdc : public AdcInterface {
       public:
         InternalAdc(const Config::AdcInputs &adc_inputs);
-        virtual uint16_t read(uint8_t channel) final;
+        virtual std::array<uint16_t, 4> read() final;
     };
 
     class ExternalAdc : public AdcInterface {
       private:
-        Mcp3204 m_mcp3204;
+        Mcp3204Dma m_mcp3204;
 
       public:
         ExternalAdc(const Config::Spi &spi_config);
-        virtual uint16_t read(uint8_t channel) final;
+        virtual std::array<uint16_t, 4> read() final;
     };
 
     Config m_config;

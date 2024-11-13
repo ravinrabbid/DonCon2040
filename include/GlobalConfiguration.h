@@ -56,8 +56,9 @@ const Peripherals::Drum::Config drum_config = {
         4,       // MISO Pin
         2,       // SCLK Pin
         1,       // SCSn Pin
+        0,       // Level Shifter Enable Pin
         spi0,    // Block
-        2000000, // Speed // TODO Does lowring help?
+        2000000, // Speed
     },
 };
 

@@ -19,38 +19,37 @@ Drum::InternalAdc::InternalAdc(const Drum::Config::AdcInputs &adc_inputs) {
     adc_init();
 }
 
-uint16_t Drum::InternalAdc::read(uint8_t channel) {
-    adc_select_input(channel);
-    return adc_read();
+std::array<uint16_t, 4> Drum::InternalAdc::read() {
+    // TODO: This should probably also use DMA
+
+    std::array<uint16_t, 4> result;
+
+    for (size_t idx = 0; idx < 4; ++idx) {
+        adc_select_input(idx);
+        result[idx] = adc_read();
+    }
+
+    return result;
 }
 
 Drum::ExternalAdc::ExternalAdc(const Drum::Config::Spi &spi_config) : m_mcp3204(spi_config.block, spi_config.scsn_pin) {
     // Enable level shifter
-    gpio_init(0);
-    gpio_set_dir(0, GPIO_OUT);
-    gpio_put(0, true);
+    gpio_init(spi_config.level_shifter_enable_pin);
+    gpio_set_dir(spi_config.level_shifter_enable_pin, GPIO_OUT);
+    gpio_put(spi_config.level_shifter_enable_pin, true);
 
     gpio_set_function(spi_config.miso_pin, GPIO_FUNC_SPI);
     gpio_set_function(spi_config.mosi_pin, GPIO_FUNC_SPI);
     gpio_set_function(spi_config.sclk_pin, GPIO_FUNC_SPI);
-    // gpio_set_function(spi_config.scsn_pin, GPIO_FUNC_SPI);
-
     spi_init(spi_config.block, spi_config.speed_hz);
 
-    // Theoretically the ADC should work in SPI 1,1 mode.
-    // In this mode date will be clocked out on
-    // a falling edge and latched from the ADC on a rising edge.
-    // Also the CS will be held low in-between bytes as required
-    // by the mcp3204.
-    // However this mode causes glitches during continuous reading,
-    // so we need to use default mode and set CS manually.
-    // spi_set_format(m_spi, 8, SPI_CPOL_1, SPI_CPHA_1, SPI_MSB_FIRST);
     gpio_init(spi_config.scsn_pin);
     gpio_set_dir(spi_config.scsn_pin, GPIO_OUT);
-    gpio_put(spi_config.scsn_pin, true);
+
+    m_mcp3204.run();
 }
 
-uint16_t Drum::ExternalAdc::read(uint8_t channel) { return m_mcp3204.read(channel); }
+std::array<uint16_t, 4> Drum::ExternalAdc::read() { return m_mcp3204.take_maximums(); }
 
 Drum::Pad::Pad(const uint8_t channel) : channel(channel), last_change(0), active(false) {}
 
@@ -81,19 +80,12 @@ Drum::Drum(const Config &config) : m_config(config) {
 }
 
 std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
-    std::map<Id, uint32_t> values;
-
-    // Oversample ADC inputs to get rid of ADC noise
-    for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
-        for (const auto &pad : m_pads) {
-            values[pad.first] += m_adc->read(pad.second.getChannel());
-        }
-    }
-
-    // Take average of all samples
     std::map<Id, uint16_t> result;
-    for (auto &value : values) {
-        result[value.first] = value.second / m_config.sample_count;
+
+    const auto adc_values = m_adc->read();
+
+    for (const auto &pad : m_pads) {
+        result[pad.first] = adc_values[pad.second.getChannel()];
     }
 
     return result;
