@@ -395,6 +395,8 @@ void Menu::update(const InputState::Controller &controller_state) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
+            current_state.selected_value = !current_state.selected_value;
+            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             break;
         case Descriptor::Type::Selection:
             if (current_state.selected_value == 0) {
@@ -419,6 +421,8 @@ void Menu::update(const InputState::Controller &controller_state) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
+            current_state.selected_value = !current_state.selected_value;
+            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             break;
         case Descriptor::Type::Selection:
             if (current_state.selected_value == descriptor_it->second.items.size() - 1) {
@@ -448,9 +452,6 @@ void Menu::update(const InputState::Controller &controller_state) {
             }
             break;
         case Descriptor::Type::Toggle:
-            current_state.selected_value = !current_state.selected_value;
-            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
-            break;
         case Descriptor::Type::Selection:
         case Descriptor::Type::Menu:
         case Descriptor::Type::RebootInfo:
@@ -465,9 +466,6 @@ void Menu::update(const InputState::Controller &controller_state) {
             }
             break;
         case Descriptor::Type::Toggle:
-            current_state.selected_value = !current_state.selected_value;
-            performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
-            break;
         case Descriptor::Type::Selection:
         case Descriptor::Type::Menu:
         case Descriptor::Type::RebootInfo:
