@@ -1,46 +1,51 @@
 # DonCon2040 - A RP2040 based Taiko no Tatsujin arcade controller
 
-DonCon2040 is a firmware (and by extension a PCB) for DIY Taiko no Tatsujin arcade drum controllers based on the RP2040 microcontroller.
+DonCon2040 is a firmware (and by extension a PCB) for DIY Taiko no Tatsujin arcade style drum controllers.
 
-Big disclaimer: I've never played on or even touched a real arcade drum, so everything in this project is based on information I could scrape of the internet.
+It is pretty much tailored to this specific use case, if you are looking for something universal, ready-to-flash and on-the-fly configurable I'd recommend to have a look at more generic approaches like [GP2040-CE](https://github.com/OpenStickCommunity/GP2040-CE). If you however want build something more specialized or custom, feel free to use this project as a base, it is designed to be somewhat modular and should be easy remodel. See [DivaCon2040](https://github.com/ravinrabbid/DivaCon2040) for an example on how this could look like.
+If you have any questions about the project in general or need hints how to build this thing, feel free to open a [discussion](https://github.com/ravinrabbid/DonCon2040/discussions) anytime!
 
-The firmware is pretty much tailored to this specific use case, if you are looking for something universal, ready-to-flash and on-the-fly configurable I'd recommend to have a look at more general approaches like [GP2040-CE](https://github.com/OpenStickCommunity/GP2040-CE). If you however want build something more specialized or custom, feel free to use this project as a base, it is designed to be somewhat modular to be easily remodeled. See [DivaCon2040](https://github.com/ravinrabbid/DivaCon2040) for an example on how this could look like.
-
-![DonCon2040](drum.jpg)
+![DonCon2040](assets/drum.jpg)
 
 ## Features
 
-- Various controller emulation modes
-  - HORI PS4-095 Taiko Drum for PS4*
-  - HORI NSW-079 Taiko Drum for Switch
-  - Dualshock 4*
+- Various controller emulation modes 
+  - HORI PS4-095 Taiko Drum for PS4 (Untested! Will probably timeout after 8 minutes)
+  - HORI NSW-079 Taiko Drum for Switch (compatible with Taiko no Tatsujin Rhythm Festival / Drum'n'Fun on Switch)
+  - Dualshock 4 (does not work on an actual PS4!)
   - Dualshock 3
   - Switch Pro Controller
   - XInput
   - XInput Analog (Compatible with [TaikoArcadeLoader](https://github.com/esuo1198/TaikoArcadeLoader) analog input)
   - Keyboard (Mapping: 'DFJK' / 'CBN,')
   - MIDI
-  - Debug mode (will output current state via USB serial)
+  - Debug mode (will output current state via USB serial and allow direct flashing)
 - Additional buttons via external i2c GPIO expander
 - Basic configuration via on-screen menu on attached OLED screen
 - Single WS2812 LED for trigger feedback
 - Drumroll counter on display
 
-*: Will not work properly on an actual PS4 since there are measures to prevent unauthorized accessories from being used.
-
 ## Building
+
+I highly recommend to build the firmware yourself so you can make adjustments in `include/GlobalConfiguration.h` to match your specific controller build.
+You can still use the [binary release](https://github.com/ravinrabbid/DonCon2040/releases) which is pre-configured for the [DonConIO](/pcb/DonConIO).
+
+### VSCode (Windows, Linux, MacOS)
+
+Install [VSCode](https://code.visualstudio.com/) and get the [Raspberry Pi Pico](https://marketplace.visualstudio.com/items?itemName=raspberry-pi.raspberry-pi-pico) extension. From the extension choose 'Import Project' and select the folder where you've checked out this repository, then use 'Compile Project'.
+
+### CLI
 
 See [pico-sdk readme](https://github.com/raspberrypi/pico-sdk/blob/master/README.md#quick-start-your-own-project) for a list of pre-requisites.
 
+Use the environment variables `PICO_SDK_PATH` to use a local pico-sdk, and `PICO_BOARD` to select another target board.
+By default the pico-sdk will be fetched from Github and the target board will be "pico".
+
 ```sh
-git submodule update --init
-git -C libs/pico-sdk submodule update --init
 mkdir build && cd build
 cmake ..
 make
 ```
-
-If you want to use a local pico-sdk distribution instead of using git submodule, also see [pico-sdk readme](https://github.com/raspberrypi/pico-sdk/blob/master/README.md#quick-start-your-own-project) for alternatives.
 
 ## Configuration
 
@@ -85,7 +90,7 @@ I'll only give a rough outline of the physical construction since I'm still not 
 - The pads are made of 12mm thick multiplex boards. The outer diameter is ~42cm, the inner diameter is ~35cm.
 - Pads are mounted to another 20mm multiplex board with rubber dampeners. The backplates on the arcade drum seem to be thinner, but since those are sturdily mounted to the arcade machine, I figured some more mass couldn't hurt.
 - The rubber dampeners are 15mm of height and 20mm in diameter. The arcade drum seems to use tapered dampeners, but at least the tapered dampeners I could get my hands on felt too soft, so I went with straight ones.
-- For the drum skin I went with a 2mm natural rubber sheet covered by some canvas.
+- For the drum skin I tried with a 2mm natural rubber sheet covered by some canvas, which worked reasonably well but is pretty loud and has little rebound. I imported real arcade drum skins now, which work a lot better.
 
 ## Acknowledgements
 
