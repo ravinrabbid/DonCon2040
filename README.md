@@ -9,10 +9,10 @@ If you have any questions about the project in general or need hints how to buil
 
 ## Features
 
-- Various controller emulation modes 
-  - HORI PS4-095 Taiko Drum for PS4 (Untested! Will probably timeout after 8 minutes)
+- Various controller emulation modes
+  - HORI PS4-095 Taiko Drum for PS4 (will timeout after ~8 minutes, replug before each song)
   - HORI NSW-079 Taiko Drum for Switch (compatible with Taiko no Tatsujin Rhythm Festival / Drum'n'Fun on Switch)
-  - Dualshock 4 (does not work on an actual PS4!)
+  - Dualshock 4 (Only for PC/Steam, will not work on an actual PS4!)
   - Dualshock 3
   - Switch Pro Controller
   - XInput
