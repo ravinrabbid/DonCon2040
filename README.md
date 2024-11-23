@@ -95,5 +95,5 @@ I'll only give a rough outline of the physical construction since I'm still not 
 ## Acknowledgements
 
 - [daschr](https://github.com/daschr) for the [SSD1306 OLED driver](https://github.com/daschr/pico-ssd1306)
-- [FeralAI](https://github.com/FeralAI) for the inspiration and XInput driver from the [GP2040 Project](https://github.com/FeralAI/GP2040)
+- [FeralAI](https://github.com/FeralAI) for the inspiration and Dualshock3/XInput driver from the [GP2040 Project](https://github.com/FeralAI/GP2040)
 - The linux kernel contributors for documenting the game controllers in their drivers

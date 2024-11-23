@@ -7,6 +7,10 @@ The i2c address for the MCP23017 can be configured using the jumpers JP1, JP2 an
 
 ![DonConPad PCB](board.jpg)
 
+## Case
+
+A 3D-printable case can be found in the [case subdirectory](./Case/). Print the `Top`, the `Bottom` and 14 `Buttons`. Insert 6mm diameter M4 heat set inserts into the top part and screw together using M4 screws.  
+
 ## Bill of Materials
 
 | **Reference**          |       **Description**       |       **Digikey Part**       |                                 **Notes**                                 |
