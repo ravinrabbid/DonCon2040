@@ -162,13 +162,22 @@ void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::ma
             {entry.first, value_if_above_threshold(raw_values, m_config.trigger_thresholds, entry.first)});
     }
 
-    // Only DON or KA can be active, zero minimum
+    // Only DON or KA can be active at a time, zero the lesser
     if (std::max(filtered_raw_values.at(Id::DON_LEFT), filtered_raw_values.at(Id::DON_RIGHT)) >
         std::max(filtered_raw_values.at(Id::KA_LEFT), filtered_raw_values.at(Id::KA_RIGHT))) {
 
         filtered_raw_values.at(Id::KA_LEFT) = 0;
         filtered_raw_values.at(Id::KA_RIGHT) = 0;
     } else {
+        filtered_raw_values.at(Id::DON_LEFT) = 0;
+        filtered_raw_values.at(Id::DON_RIGHT) = 0;
+    }
+
+    // Check same same with regard to current debounce state
+    if (m_pads.at(Id::DON_LEFT).getState() || m_pads.at(Id::DON_RIGHT).getState()) {
+        filtered_raw_values.at(Id::KA_LEFT) = 0;
+        filtered_raw_values.at(Id::KA_RIGHT) = 0;
+    } else if (m_pads.at(Id::KA_LEFT).getState() || m_pads.at(Id::KA_RIGHT).getState()) {
         filtered_raw_values.at(Id::DON_LEFT) = 0;
         filtered_raw_values.at(Id::DON_RIGHT) = 0;
     }
@@ -193,7 +202,7 @@ void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::ma
     zero_if_not_within_twin(filtered_raw_values, Id::DON_LEFT, Id::DON_RIGHT);
     zero_if_not_within_twin(filtered_raw_values, Id::KA_LEFT, Id::KA_RIGHT);
 
-    // All values we now need to consider are != 0 and over their threshold.
+    // All values != 0 are already over their threshold.
     for (const auto &entry : filtered_raw_values) {
         if (entry.second != 0) {
             m_pads.at(entry.first).setState(true, m_config.debounce_delay_ms);
