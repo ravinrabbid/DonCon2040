@@ -263,6 +263,11 @@ void Drum::updateAnalogInputState(Utils::InputState &input_state, const std::map
 void Drum::updateInputState(Utils::InputState &input_state) {
     const auto raw_values = sampleInputs();
 
+    input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
+    input_state.drum.don_right.raw = raw_values.at(Id::DON_RIGHT);
+    input_state.drum.ka_left.raw = raw_values.at(Id::KA_LEFT);
+    input_state.drum.ka_right.raw = raw_values.at(Id::KA_RIGHT);
+
     updateDigitalInputState(input_state, raw_values);
     updateAnalogInputState(input_state, raw_values);
 }

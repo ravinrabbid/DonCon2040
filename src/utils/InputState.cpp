@@ -6,7 +6,7 @@
 namespace Doncon::Utils {
 
 InputState::InputState()
-    : drum({{false, 0}, {false, 0}, {false, 0}, {false, 0}, 0, 0}),
+    : drum({{false, 0, 0}, {false, 0, 0}, {false, 0, 0}, {false, 0, 0}, 0, 0}),
       controller(
           {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}}),
       m_switch_report({}), m_ps3_report({}), m_ps4_report({}), m_keyboard_report({}),
@@ -370,17 +370,17 @@ usb_report_t InputState::getMidiReport() {
 usb_report_t InputState::getDebugReport() {
     std::stringstream out;
 
-    auto bar = [](uint16_t val) { return std::string(val / 8191, '#'); };
+    auto bar = [](uint16_t val) { return std::string(val / 511, '#'); };
 
     if (drum.don_left.triggered || drum.ka_left.triggered || drum.don_right.triggered || drum.ka_right.triggered) {
-        out << "(" << (drum.ka_left.triggered ? "*" : " ") << "( "                                               //
-            << std::setw(5) << drum.ka_left.analog << "[" << std::setw(8) << bar(drum.ka_left.analog) << "]"     //
-            << "(" << (drum.don_left.triggered ? "*" : " ") << "| "                                              //
-            << std::setw(5) << drum.don_left.analog << "[" << std::setw(8) << bar(drum.don_left.analog) << "]"   //
-            << "|" << (drum.don_right.triggered ? "*" : " ") << ") "                                             //
-            << std::setw(5) << drum.don_right.analog << "[" << std::setw(8) << bar(drum.don_right.analog) << "]" //
-            << ")" << (drum.ka_right.triggered ? "*" : " ") << ") "                                              //
-            << std::setw(5) << drum.ka_right.analog << "[" << std::setw(8) << bar(drum.ka_right.analog) << "]"   //
+        out << "(" << (drum.ka_left.triggered ? "*" : " ") << "( "                                         //
+            << std::setw(4) << drum.ka_left.raw << "[" << std::setw(8) << bar(drum.ka_left.raw) << "]"     //
+            << "(" << (drum.don_left.triggered ? "*" : " ") << "| "                                        //
+            << std::setw(4) << drum.don_left.raw << "[" << std::setw(8) << bar(drum.don_left.raw) << "]"   //
+            << "|" << (drum.don_right.triggered ? "*" : " ") << ") "                                       //
+            << std::setw(4) << drum.don_right.raw << "[" << std::setw(8) << bar(drum.don_right.raw) << "]" //
+            << ")" << (drum.ka_right.triggered ? "*" : " ") << ") "                                        //
+            << std::setw(4) << drum.ka_right.raw << "[" << std::setw(8) << bar(drum.ka_right.raw) << "]"   //
             << "\n";
     }
 
@@ -390,7 +390,7 @@ usb_report_t InputState::getDebugReport() {
 }
 
 void InputState::releaseAll() {
-    drum = {{false, 0}, {false, 0}, {false, 0}, {false, 0}, 0, 0};
+    drum = {{false, 0, 0}, {false, 0, 0}, {false, 0, 0}, {false, 0, 0}, 0, 0};
     controller = {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}};
 }
 

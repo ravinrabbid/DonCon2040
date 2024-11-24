@@ -20,6 +20,7 @@ struct InputState {
         struct Pad {
             bool triggered;
             uint16_t analog;
+            uint16_t raw;
         };
 
         Pad don_left, ka_left, don_right, ka_right;
