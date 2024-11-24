@@ -135,41 +135,72 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
 }
 
 void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::map<Drum::Id, uint16_t> &raw_values) {
-    auto get_threshold = [&](const Id target) {
-        switch (target) {
-        case Id::DON_LEFT:
-            return m_config.trigger_thresholds.don_left;
-        case Id::DON_RIGHT:
-            return m_config.trigger_thresholds.don_right;
-        case Id::KA_LEFT:
-            return m_config.trigger_thresholds.ka_left;
-        case Id::KA_RIGHT:
-            return m_config.trigger_thresholds.ka_right;
-        }
-        return (uint16_t)0;
-    };
 
-    const auto set_max = [&](Id a, Id b) {
-        const auto set_with_threshold = [&](Id target) {
-            if (raw_values.at(target) > get_threshold(target)) {
-                m_pads.at(target).setState(true, m_config.debounce_delay_ms);
-            } else {
-                m_pads.at(target).setState(false, m_config.debounce_delay_ms);
+    std::map<Drum::Id, uint16_t> filtered_raw_values;
+
+    // First zero everything below its threshold.
+    const auto value_if_above_threshold = [](const auto &values, const auto &thresholds, Id target) {
+        const auto get_threshold = [&](const Id target) {
+            switch (target) {
+            case Id::DON_LEFT:
+                return thresholds.don_left;
+            case Id::DON_RIGHT:
+                return thresholds.don_right;
+            case Id::KA_LEFT:
+                return thresholds.ka_left;
+            case Id::KA_RIGHT:
+                return thresholds.ka_right;
             }
+            assert(false);
+            return (uint16_t)0;
         };
+        return (values.at(target) > get_threshold(target)) ? values.at(target) : (uint16_t)0;
+    };
 
-        if (raw_values.at(a) > raw_values.at(b)) {
-            set_with_threshold(a);
-            m_pads.at(b).setState(false, m_config.debounce_delay_ms);
+    for (const auto &entry : raw_values) {
+        filtered_raw_values.insert(
+            {entry.first, value_if_above_threshold(raw_values, m_config.trigger_thresholds, entry.first)});
+    }
+
+    // Only DON or KA can be active, zero minimum
+    if (std::max(filtered_raw_values.at(Id::DON_LEFT), filtered_raw_values.at(Id::DON_RIGHT)) >
+        std::max(filtered_raw_values.at(Id::KA_LEFT), filtered_raw_values.at(Id::KA_RIGHT))) {
+
+        filtered_raw_values.at(Id::KA_LEFT) = 0;
+        filtered_raw_values.at(Id::KA_RIGHT) = 0;
+    } else {
+        filtered_raw_values.at(Id::DON_LEFT) = 0;
+        filtered_raw_values.at(Id::DON_RIGHT) = 0;
+    }
+
+    // Zero values which are not within +/- 50% of their twin pad
+    const auto zero_if_not_within_twin = [](auto &values, Id a, Id b) {
+        if (values.at(a) == 0 || values.at(b) == 0) {
+            return;
+        }
+
+        if (values.at(a) > values.at(b)) {
+            if (values.at(b) < (values.at(a) >> 1)) {
+                values.at(b) = 0;
+            }
         } else {
-            set_with_threshold(b);
-            m_pads.at(a).setState(false, m_config.debounce_delay_ms);
+            if (values.at(a) < (values.at(b) >> 1)) {
+                values.at(a) = 0;
+            }
         }
     };
 
-    // Consider the hardest hit for each side
-    set_max(Id::DON_LEFT, Id::KA_LEFT);
-    set_max(Id::DON_RIGHT, Id::KA_RIGHT);
+    zero_if_not_within_twin(filtered_raw_values, Id::DON_LEFT, Id::DON_RIGHT);
+    zero_if_not_within_twin(filtered_raw_values, Id::KA_LEFT, Id::KA_RIGHT);
+
+    // All values we now need to consider are != 0 and over their threshold.
+    for (const auto &entry : filtered_raw_values) {
+        if (entry.second != 0) {
+            m_pads.at(entry.first).setState(true, m_config.debounce_delay_ms);
+        } else {
+            m_pads.at(entry.first).setState(false, m_config.debounce_delay_ms);
+        }
+    }
 
     input_state.drum.don_left.triggered = m_pads.at(Id::DON_LEFT).getState();
     input_state.drum.ka_left.triggered = m_pads.at(Id::KA_LEFT).getState();
