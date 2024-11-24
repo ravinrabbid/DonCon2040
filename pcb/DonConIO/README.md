@@ -10,9 +10,10 @@ The arcade drum uses *Sensatec GSS-4SD* piezo impact sensors. While those are on
 
 You can also try your luck with any generic piezo, in this case you might have to tune the filters and amplification factor.
 
-## Note
+## Notes
 
-This board does not use the internal ADCs of the RP2040 since those are pretty noisy and have a static offset of around +25mV. You can however still skip the external ADC and level-shifter and connect the signals directly to ADC pins of the XIAO RP2040 if you want to save some cost.
+- If the sensitivity for a pad feels to low you can try to increase the feedback resistor (R3,R13,R21,R30) of the affected pad for more amplification.
+- This board does not use the internal ADCs of the RP2040 since those are pretty noisy and have a static offset of around +25mV. You can however still skip the external ADC and level-shifter and connect the signals directly to ADC pins of the XIAO RP2040 if you want to save some cost.
 
 ## Bill of Materials
 
