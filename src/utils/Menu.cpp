@@ -393,7 +393,6 @@ void Menu::update(const InputState::Controller &controller_state) {
         m_active = false;
     } else if (pressed.dpad.left) {
         switch (descriptor_it->second.type) {
-        case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
             current_state.selected_value = !current_state.selected_value;
             performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
@@ -414,12 +413,12 @@ void Menu::update(const InputState::Controller &controller_state) {
                 current_state.selected_value--;
             }
             break;
+        case Descriptor::Type::Value:
         case Descriptor::Type::RebootInfo:
             break;
         }
     } else if (pressed.dpad.right) {
         switch (descriptor_it->second.type) {
-        case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
             current_state.selected_value = !current_state.selected_value;
             performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
@@ -440,6 +439,7 @@ void Menu::update(const InputState::Controller &controller_state) {
                 current_state.selected_value++;
             }
             break;
+        case Descriptor::Type::Value:
         case Descriptor::Type::RebootInfo:
             break;
         }
