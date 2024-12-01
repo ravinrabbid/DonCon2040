@@ -11,6 +11,7 @@
 #include <map>
 #include <memory>
 #include <stdint.h>
+#include <variant>
 
 namespace Doncon::Peripherals {
 
@@ -24,31 +25,34 @@ class Drum {
             uint16_t ka_right;
         };
 
-        struct AdcInputs {
+        struct AdcChannels {
             uint8_t don_left;
             uint8_t ka_left;
             uint8_t don_right;
             uint8_t ka_right;
         };
 
-        AdcInputs adc_inputs;
-        Thresholds trigger_thresholds;
+        struct InternalAdc {
+            uint8_t sample_count;
+        };
 
-        uint8_t sample_count;
+        struct ExternalAdc {
+            spi_inst_t *spi_block;
+            uint spi_speed_hz;
+            uint8_t spi_mosi_pin;
+            uint8_t spi_miso_pin;
+            uint8_t spi_sclk_pin;
+            uint8_t spi_scsn_pin;
+            uint8_t spi_level_shifter_enable_pin;
+        };
+
+        Thresholds trigger_thresholds;
         uint16_t debounce_delay_ms;
+
         uint32_t roll_counter_timeout_ms;
 
-        bool use_external_adc;
-
-        struct Spi {
-            uint8_t mosi_pin;
-            uint8_t miso_pin;
-            uint8_t sclk_pin;
-            uint8_t scsn_pin;
-            uint8_t level_shifter_enable_pin;
-            spi_inst_t *block;
-            uint speed_hz;
-        } external_adc_spi_config;
+        AdcChannels adc_channels;
+        std::variant<InternalAdc, ExternalAdc> adc_config;
     };
 
   private:
@@ -80,8 +84,11 @@ class Drum {
     };
 
     class InternalAdc : public AdcInterface {
+      private:
+        Config::InternalAdc m_config;
+
       public:
-        InternalAdc(const Config::AdcInputs &adc_inputs);
+        InternalAdc(const Config::InternalAdc &config);
         virtual std::array<uint16_t, 4> read() final;
     };
 
@@ -90,7 +97,7 @@ class Drum {
         Mcp3204Dma m_mcp3204;
 
       public:
-        ExternalAdc(const Config::Spi &spi_config);
+        ExternalAdc(const Config::ExternalAdc &config);
         virtual std::array<uint16_t, 4> read() final;
     };
 
@@ -102,7 +109,7 @@ class Drum {
     void updateRollCounter(Utils::InputState &input_state);
     void updateDigitalInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     void updateAnalogInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
-    std::map<Id, uint16_t> sampleInputs();
+    std::map<Id, uint16_t> readInputs();
 
   public:
     Drum(const Config &config);

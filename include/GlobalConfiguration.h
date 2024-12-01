@@ -30,13 +30,6 @@ const I2c i2c_config = {
 };
 
 const Peripherals::Drum::Config drum_config = {
-    // Pin config
-    {
-        1, // Don Left
-        0, // Ka Left
-        2, // Don Right
-        3, // Ka Right
-    },
     // Trigger thresholds
     {
         30, // Don Left
@@ -44,21 +37,31 @@ const Peripherals::Drum::Config drum_config = {
         30, // Don Right
         10, // Ka Right
     },
-
-    16,  // ADC sample count
     25,  // Debounce delay in milliseconds
     500, // Roll Counter Timeout in Milliseconds
 
-    true, // Use external ADC
-    // SPI config for external ADC, unused if above is false
+    // ADC Channel config
     {
+        1, // Don Left
+        0, // Ka Left
+        2, // Don Right
+        3, // Ka Right
+    },
+
+    // ADC Config, either InternalAdc or ExternalAdc
+    //
+    // Peripherals::Drum::Config::InternalAdc{
+    //     16, // ADC sample count
+    // },
+
+    Peripherals::Drum::Config::ExternalAdc{
+        spi0,    // Block
+        2000000, // Speed
         3,       // MOSI Pin
         4,       // MISO Pin
         2,       // SCLK Pin
         1,       // SCSn Pin
         0,       // Level Shifter Enable Pin
-        spi0,    // Block
-        2000000, // Speed
     },
 };
 

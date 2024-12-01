@@ -8,43 +8,49 @@
 
 namespace Doncon::Peripherals {
 
-Drum::InternalAdc::InternalAdc(const Drum::Config::AdcInputs &adc_inputs) {
+Drum::InternalAdc::InternalAdc(const Config::InternalAdc &config) : m_config(config) {
     static const uint adc_base_pin = 26;
 
-    adc_gpio_init(adc_base_pin + adc_inputs.don_left);
-    adc_gpio_init(adc_base_pin + adc_inputs.don_right);
-    adc_gpio_init(adc_base_pin + adc_inputs.ka_left);
-    adc_gpio_init(adc_base_pin + adc_inputs.ka_right);
+    for (uint pin = adc_base_pin; pin < adc_base_pin + 4; ++pin) {
+        adc_gpio_init(pin);
+    }
 
     adc_init();
 }
 
 std::array<uint16_t, 4> Drum::InternalAdc::read() {
-    // TODO: This should probably also use DMA
+    // Oversample ADC inputs to get rid of ADC noise
+    std::array<uint32_t, 4> values{};
+    for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
+        for (size_t idx = 0; idx < values.size(); ++idx) {
+            adc_select_input(idx);
+            values[idx] += adc_read();
+        }
+    }
 
-    std::array<uint16_t, 4> result;
-
-    for (size_t idx = 0; idx < 4; ++idx) {
-        adc_select_input(idx);
-        result[idx] = adc_read();
+    // Take average of all samples
+    std::array<uint16_t, 4> result{};
+    for (size_t idx = 0; idx < values.size(); ++idx) {
+        result[idx] = values[idx] / m_config.sample_count;
     }
 
     return result;
 }
 
-Drum::ExternalAdc::ExternalAdc(const Drum::Config::Spi &spi_config) : m_mcp3204(spi_config.block, spi_config.scsn_pin) {
+Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(config.spi_block, config.spi_scsn_pin) {
     // Enable level shifter
-    gpio_init(spi_config.level_shifter_enable_pin);
-    gpio_set_dir(spi_config.level_shifter_enable_pin, GPIO_OUT);
-    gpio_put(spi_config.level_shifter_enable_pin, true);
+    gpio_init(config.spi_level_shifter_enable_pin);
+    gpio_set_dir(config.spi_level_shifter_enable_pin, GPIO_OUT);
+    gpio_put(config.spi_level_shifter_enable_pin, true);
 
-    gpio_set_function(spi_config.miso_pin, GPIO_FUNC_SPI);
-    gpio_set_function(spi_config.mosi_pin, GPIO_FUNC_SPI);
-    gpio_set_function(spi_config.sclk_pin, GPIO_FUNC_SPI);
-    spi_init(spi_config.block, spi_config.speed_hz);
+    // Set up SPI
+    gpio_set_function(config.spi_miso_pin, GPIO_FUNC_SPI);
+    gpio_set_function(config.spi_mosi_pin, GPIO_FUNC_SPI);
+    gpio_set_function(config.spi_sclk_pin, GPIO_FUNC_SPI);
+    spi_init(config.spi_block, config.spi_speed_hz);
 
-    gpio_init(spi_config.scsn_pin);
-    gpio_set_dir(spi_config.scsn_pin, GPIO_OUT);
+    gpio_init(config.spi_scsn_pin);
+    gpio_set_dir(config.spi_scsn_pin, GPIO_OUT);
 
     m_mcp3204.run();
 }
@@ -67,19 +73,28 @@ void Drum::Pad::setState(const bool state, const uint16_t debounce_delay) {
 }
 
 Drum::Drum(const Config &config) : m_config(config) {
-    if (m_config.use_external_adc) {
-        m_adc = std::make_unique<ExternalAdc>(config.external_adc_spi_config);
-    } else {
-        m_adc = std::make_unique<InternalAdc>(config.adc_inputs);
-    }
 
-    m_pads.emplace(Id::DON_LEFT, config.adc_inputs.don_left);
-    m_pads.emplace(Id::KA_LEFT, config.adc_inputs.ka_left);
-    m_pads.emplace(Id::DON_RIGHT, config.adc_inputs.don_right);
-    m_pads.emplace(Id::KA_RIGHT, config.adc_inputs.ka_right);
+    std::visit(
+        [this](auto &&config) {
+            using T = std::decay_t<decltype(config)>;
+
+            if constexpr (std::is_same_v<T, Config::InternalAdc>) {
+                m_adc = std::make_unique<InternalAdc>(config);
+            } else if constexpr (std::is_same_v<T, Config::ExternalAdc>) {
+                m_adc = std::make_unique<ExternalAdc>(config);
+            } else {
+                static_assert(false, "Unknown ADC type!");
+            }
+        },
+        m_config.adc_config);
+
+    m_pads.emplace(Id::DON_LEFT, config.adc_channels.don_left);
+    m_pads.emplace(Id::KA_LEFT, config.adc_channels.ka_left);
+    m_pads.emplace(Id::DON_RIGHT, config.adc_channels.don_right);
+    m_pads.emplace(Id::KA_RIGHT, config.adc_channels.ka_right);
 }
 
-std::map<Drum::Id, uint16_t> Drum::sampleInputs() {
+std::map<Drum::Id, uint16_t> Drum::readInputs() {
     std::map<Id, uint16_t> result;
 
     const auto adc_values = m_adc->read();
@@ -270,7 +285,7 @@ void Drum::updateAnalogInputState(Utils::InputState &input_state, const std::map
 }
 
 void Drum::updateInputState(Utils::InputState &input_state) {
-    const auto raw_values = sampleInputs();
+    const auto raw_values = readInputs();
 
     input_state.drum.don_left.raw = raw_values.at(Id::DON_LEFT);
     input_state.drum.don_right.raw = raw_values.at(Id::DON_RIGHT);
