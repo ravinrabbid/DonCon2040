@@ -10,7 +10,7 @@ If you have any questions about the project in general or need hints how to buil
 ## Features
 
 - Various controller emulation modes
-  - HORI PS4-095 Taiko Drum for PS4 (will timeout after ~8 minutes, replug before each song)
+  - HORI PS4-095 Taiko Drum for PS4 (will work on PS4, see [PS4 Authentication](#ps4-authentication) for details)
   - HORI NSW-079 Taiko Drum for Switch (compatible with Taiko no Tatsujin Rhythm Festival / Drum'n'Fun on Switch)
   - Dualshock 4 (Only for PC/Steam, will not work on an actual PS4!)
   - Dualshock 3
@@ -66,6 +66,16 @@ Defaults and everything else are compiled statically into the firmware. You can 
 The debounce delay also implicitly serves as the hold time of the input after a hit. On some platforms inputs won't be registered properly if this time is too short. For example Taiko no Tatsujin on Switch needs at least 25 milliseconds.
 
 If you notice dropped inputs even if the controller signals a hit on the LED/Display, try to increase this value.
+
+### PS4 Authentication
+
+The PS4 needs a controller to sign a cryptographic challenge every few seconds, otherwise it will stop working after around 8 minutes after plugging in. For the Taiko no Tatsujin games this is somewhat bearable, since you can re-plug the controller before starting each song to avoid running into the timeout during gameplay. Still, this is annoying.
+
+DonCon2040 can sign those challenges, but you will need to obtain some data from an original DS4 and compile it into the firmware. You will need a serial, signature and private key file. I can't and won't help you how to obtain those, you'll need to figure this out yourself.
+
+To build the firmware run `scripts/generateAuthConfig.py` in the folder where you placed the required files. Copy the resulting `PS4AuthConfiguration.h` to the `include` directory, replacing the existing header. Then build the firmware as described in [Building](#building).
+
+Signing the challenge will block the second core of the rp2040 for 2-3 seconds, so the display, external controller and LED will appear stuck from time to time. Input handling of the drum is unaffected.
 
 ## Hardware
 

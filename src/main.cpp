@@ -2,11 +2,14 @@
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
+#include "usb/device/hid/ps4_auth.h"
 #include "usb/device_driver.h"
 #include "utils/Menu.h"
+#include "utils/PS4AuthProvider.h"
 #include "utils/SettingsStore.h"
 
 #include "GlobalConfiguration.h"
+#include "PS4AuthConfiguration.h"
 
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
@@ -20,6 +23,9 @@ queue_t control_queue;
 queue_t menu_display_queue;
 queue_t drum_input_queue;
 queue_t controller_input_queue;
+
+queue_t auth_challenge_queue;
+queue_t auth_signed_challenge_queue;
 
 enum class ControlCommand {
     SetUsbMode,
@@ -54,6 +60,9 @@ void core1_task() {
     Peripherals::Buttons buttons(Config::Default::button_config);
     Peripherals::StatusLed led(Config::Default::led_config);
     Peripherals::Display display(Config::Default::display_config);
+
+    Utils::PS4AuthProvider ps4authprovider;
+    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge;
 
     Utils::InputState input_state;
     Utils::Menu::State menu_display_msg;
@@ -97,6 +106,11 @@ void core1_task() {
         if (queue_try_remove(&menu_display_queue, &menu_display_msg)) {
             display.setMenuState(menu_display_msg);
         }
+        if (queue_try_remove(&auth_challenge_queue, auth_challenge.data())) {
+            const auto signed_challenge = ps4authprovider.sign(auth_challenge);
+            queue_try_remove(&auth_signed_challenge_queue, nullptr); // clear queue first
+            queue_try_add(&auth_signed_challenge_queue, &signed_challenge);
+        }
 
         led.setInputState(input_state);
         display.setInputState(input_state);
@@ -111,8 +125,11 @@ int main() {
     queue_init(&menu_display_queue, sizeof(Utils::Menu::State), 1);
     queue_init(&drum_input_queue, sizeof(Utils::InputState::Drum), 1);
     queue_init(&controller_input_queue, sizeof(Utils::InputState::Controller), 1);
+    queue_init(&auth_challenge_queue, sizeof(std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH>), 1);
+    queue_init(&auth_signed_challenge_queue, sizeof(std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH>), 1);
 
     Utils::InputState input_state;
+    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge_response;
 
     auto settings_store = std::make_shared<Utils::SettingsStore>();
     Utils::Menu menu(settings_store);
@@ -126,8 +143,14 @@ int main() {
     usbd_driver_init(mode);
     usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
         const auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
-        queue_add_blocking(&control_queue, &ctrl_message);
+        queue_try_add(&control_queue, &ctrl_message);
     });
+
+    if (Config::PS4Auth::config.enabled) {
+        ps4_auth_init(Config::PS4Auth::config.key_pem.c_str(), Config::PS4Auth::config.key_pem.size() + 1,
+                      Config::PS4Auth::config.serial.data(), Config::PS4Auth::config.signature.data(),
+                      [](const uint8_t *challenge) { queue_try_add(&auth_challenge_queue, challenge); });
+    }
 
     stdio_init_all();
 
@@ -181,6 +204,10 @@ int main() {
         usbd_driver_task();
 
         queue_try_add(&drum_input_queue, &drum_message);
+
+        if (queue_try_remove(&auth_signed_challenge_queue, auth_challenge_response.data())) {
+            ps4_auth_set_signed_challenge(auth_challenge_response.data());
+        }
     }
 
     return 0;

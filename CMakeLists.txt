@@ -47,6 +47,8 @@ target_link_libraries(
          hardware_i2c
          hardware_spi
          pico_multicore
+         pico_rand
+         pico_mbedtls
          pio_ws2812
          pico_ssd1306
          mcp23017
