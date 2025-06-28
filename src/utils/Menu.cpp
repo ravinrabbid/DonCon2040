@@ -446,7 +446,7 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.up) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
-            if (current_state.selected_value < UINT8_MAX) {
+            if (current_state.selected_value < descriptor_it->second.max_value) {
                 current_state.selected_value++;
                 performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             }
