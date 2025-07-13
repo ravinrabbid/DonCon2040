@@ -23,8 +23,8 @@ namespace Default {
 const usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
 
 const I2c i2c_config = {
-    6,       // SDA Pin
-    7,       // SCL Pin
+    14,      // SDA Pin
+    15,      // SCL Pin
     i2c1,    // Block
     1000000, // Speed
 };
@@ -32,20 +32,20 @@ const I2c i2c_config = {
 const Peripherals::Drum::Config drum_config = {
     // Trigger thresholds
     {
-        30, // Don Left
-        10, // Ka Left
-        30, // Don Right
-        10, // Ka Right
+        10, // Don Left
+        5,  // Ka Left
+        10, // Don Right
+        5,  // Ka Right
     },
     25,  // Debounce delay in milliseconds
     500, // Roll Counter Timeout in Milliseconds
 
     // ADC Channel config
     {
-        1, // Don Left
-        0, // Ka Left
-        2, // Don Right
-        3, // Ka Right
+        3, // Don Left
+        2, // Ka Left
+        0, // Don Right
+        1, // Ka Right
     },
 
     // ADC Config, either InternalAdc or ExternalAdc
@@ -55,13 +55,13 @@ const Peripherals::Drum::Config drum_config = {
     // },
 
     Peripherals::Drum::Config::ExternalAdc{
-        spi0,    // Block
+        spi1,    // Block
         2000000, // Speed
-        3,       // MOSI Pin
-        4,       // MISO Pin
-        2,       // SCLK Pin
-        1,       // SCSn Pin
-        0,       // Level Shifter Enable Pin
+        11,      // MOSI Pin
+        12,      // MISO Pin
+        10,      // SCLK Pin
+        13,      // SCSn Pin
+        9,       // Level Shifter Enable Pin
     },
 };
 
@@ -104,8 +104,8 @@ const Peripherals::StatusLed::Config led_config = {
     {255, 255, 0},   // Don Right Color
     {0, 255, 255},   // Ka Right Color
 
-    11,    // LED Enable Pin,
-    12,    // LED Pin
+    25,    // LED Enable Pin,
+    16,    // LED Pin
     false, // Is RGBW
 
     255,  // Brightness
