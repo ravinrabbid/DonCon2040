@@ -81,7 +81,7 @@ Signing the challenge will block the second core of the rp2040 for 2-3 seconds, 
 
 ### IO Board
 
-The [DonConIO](/pcb/DonConIO) board in the pcb subfolder is designed to be close to the original arcade hardware. It hosts a Seeed Studio XIAO RP2040 and provides signal conditioning for Sensatec GSS-4S* piezo impact sensors. See its [README](/pcb/DonConIO/README.md) for details.
+The [DonConIOmini](/pcb/DonConIOmini) board in the pcb subfolder is designed to be close to the original arcade hardware. It hosts a Waveshare RP2040-Zero and provides signal conditioning for Sensatec GSS-4S* piezo impact sensors. See its [README](/pcb/DonConIOmini/README.md) for details.
 
 If you don't want to use this board, the firmware should be usable on most RP2040 boards with appropriate configuration. You may also use a more simple trigger solution, it only has to provide an analog trigger level to the ADC inputs to be compatible.
 

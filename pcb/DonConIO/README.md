@@ -1,5 +1,15 @@
 # DonConIO - Signal Conditioning for the DonCon2040
 
+---
+
+## NOTICE
+
+**DEPRECATED.**
+
+While this board will still work fine, I recommend using the [DonConIOmini](/pcb/DonConIOmini). It hosts the same circuit using mainly SMD parts, resulting in a smaller footprint and better noise characteristics.
+
+---
+
 This board hosts a Seeed Studio XIAO RP2040 microcontroller unit and provides signal conditioning for the piezo drum triggers. The conditioning circuit is reverse engineered from the *V260 SIF PCB* found in the original arcades. This is also the main reason why this board uses mainly through hole parts ... for *authenticity*.
 
 ![DonConIO PCB](board.jpg)
