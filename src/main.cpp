@@ -57,7 +57,7 @@ void core1_task() {
     gpio_pull_up(Config::Default::i2c_config.scl_pin);
     i2c_init(Config::Default::i2c_config.block, Config::Default::i2c_config.speed_hz);
 
-    Peripherals::Buttons buttons(Config::Default::button_config);
+    Peripherals::Controller controller(Config::Default::controller_config);
     Peripherals::StatusLed led(Config::Default::led_config);
     Peripherals::Display display(Config::Default::display_config);
 
@@ -69,7 +69,7 @@ void core1_task() {
     ControlMessage control_msg;
 
     while (true) {
-        buttons.updateInputState(input_state);
+        controller.updateInputState(input_state);
 
         queue_try_add(&controller_input_queue, &input_state.controller);
         queue_try_remove(&drum_input_queue, &input_state.drum);

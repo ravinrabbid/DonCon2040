@@ -9,18 +9,14 @@
 #include <map>
 #include <memory>
 #include <stdint.h>
+#include <variant>
 
 namespace Doncon::Peripherals {
 
-class Buttons {
+class Controller {
   public:
     struct Config {
-        struct {
-            i2c_inst_t *block;
-            uint8_t address;
-        } i2c;
-
-        struct {
+        struct Pins {
             struct {
                 uint8_t up;
                 uint8_t down;
@@ -42,9 +38,21 @@ class Buttons {
                 uint8_t home;
                 uint8_t share;
             } buttons;
-        } pins;
+        };
 
+        struct InternalGpio {};
+
+        struct ExternalGpio {
+            struct {
+                i2c_inst_t *block;
+                uint8_t address;
+            } i2c;
+        };
+
+        Pins pins;
         uint8_t debounce_delay_ms;
+
+        std::variant<InternalGpio, ExternalGpio> gpio_config;
     };
 
   private:
@@ -68,7 +76,7 @@ class Buttons {
     class Button {
       private:
         uint8_t gpio_pin;
-        uint16_t gpio_mask;
+        uint32_t gpio_mask;
 
         uint32_t last_change;
         bool active;
@@ -77,7 +85,7 @@ class Buttons {
         Button(uint8_t pin);
 
         uint8_t getGpioPin() const { return gpio_pin; };
-        uint16_t getGpioMask() const { return gpio_mask; };
+        uint32_t getGpioMask() const { return gpio_mask; };
 
         bool getState() const { return active; };
         void setState(bool state, uint8_t debounce_delay);
@@ -88,16 +96,36 @@ class Buttons {
         Id lastHorizontal;
     };
 
+    class GpioInterface {
+      public:
+        virtual uint32_t read() = 0;
+    };
+
+    class InternalGpio : public GpioInterface {
+      public:
+        InternalGpio(const std::map<Id, Button> &buttons);
+        virtual uint32_t read() final;
+    };
+
+    class ExternalGpio : public GpioInterface {
+      private:
+        Mcp23017 m_mcp23017;
+
+      public:
+        ExternalGpio(const Config::ExternalGpio &config);
+        virtual uint32_t read() final;
+    };
+
     Config m_config;
     SocdState m_socd_state;
     std::map<Id, Button> m_buttons;
 
-    std::unique_ptr<Mcp23017> m_mcp23017;
+    std::unique_ptr<GpioInterface> m_gpio;
 
     void socdClean(Utils::InputState &input_state);
 
   public:
-    Buttons(const Config &config);
+    Controller(const Config &config);
 
     void updateInputState(Utils::InputState &input_state);
 };

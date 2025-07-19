@@ -65,12 +65,7 @@ const Peripherals::Drum::Config drum_config = {
     },
 };
 
-const Peripherals::Buttons::Config button_config = {
-    // I2c config
-    {
-        i2c_config.block, // Block
-        0x20,             // Address
-    },
+const Peripherals::Controller::Config controller_config = {
 
     // Pins
     {{
@@ -95,6 +90,17 @@ const Peripherals::Buttons::Config button_config = {
      }},
 
     25, // Debounce delay in milliseconds
+
+    // GPIO Config, either InternalGpio or ExternalGpio
+    //
+    // Peripherals::Controller::Config::InternalGpio{},
+
+    Peripherals::Controller::Config::ExternalGpio{
+        {
+            i2c_config.block, // Block
+            0x20,             // Address
+        },
+    },
 };
 
 const Peripherals::StatusLed::Config led_config = {

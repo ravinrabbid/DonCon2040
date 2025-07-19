@@ -1,12 +1,13 @@
 #include "peripherals/Controller.h"
 
+#include "hardware/gpio.h"
 #include "pico/time.h"
 
 namespace Doncon::Peripherals {
 
-Buttons::Button::Button(uint8_t pin) : gpio_pin(pin), gpio_mask(1 << pin), last_change(0), active(false) {}
+Controller::Button::Button(uint8_t pin) : gpio_pin(pin), gpio_mask(1 << pin), last_change(0), active(false) {}
 
-void Buttons::Button::setState(bool state, uint8_t debounce_delay) {
+void Controller::Button::setState(bool state, uint8_t debounce_delay) {
     if (active == state) {
         return;
     }
@@ -19,7 +20,26 @@ void Buttons::Button::setState(bool state, uint8_t debounce_delay) {
     }
 }
 
-void Buttons::socdClean(Utils::InputState &input_state) {
+Controller::InternalGpio::InternalGpio(const std::map<Id, Button> &buttons) {
+    for (const auto &button : buttons) {
+        gpio_init(button.second.getGpioPin());
+        gpio_set_dir(button.second.getGpioPin(), GPIO_IN);
+        gpio_pull_up(button.second.getGpioPin());
+    }
+}
+
+uint32_t Controller::InternalGpio::read() { return ~gpio_get_all(); }
+
+Controller::ExternalGpio::ExternalGpio(const Config::ExternalGpio &config)
+    : m_mcp23017(config.i2c.address, config.i2c.block) {
+    m_mcp23017.setDirection(0xFFFF);       // All inputs
+    m_mcp23017.setPullup(0xFFFF);          // All on
+    m_mcp23017.setReversePolarity(0xFFFF); // All reversed
+}
+
+uint32_t Controller::ExternalGpio::read() { return m_mcp23017.read(); }
+
+void Controller::socdClean(Utils::InputState &input_state) {
 
     // Last input has priority
     if (input_state.controller.dpad.up && input_state.controller.dpad.down) {
@@ -47,12 +67,7 @@ void Buttons::socdClean(Utils::InputState &input_state) {
     }
 }
 
-Buttons::Buttons(const Config &config) : m_config(config), m_socd_state{Id::DOWN, Id::RIGHT} {
-    m_mcp23017 = std::make_unique<Mcp23017>(m_config.i2c.address, m_config.i2c.block);
-    m_mcp23017->setDirection(0xFFFF);       // All inputs
-    m_mcp23017->setPullup(0xFFFF);          // All on
-    m_mcp23017->setReversePolarity(0xFFFF); // All reversed
-
+Controller::Controller(const Config &config) : m_config(config), m_socd_state{Id::DOWN, Id::RIGHT} {
     m_buttons.emplace(Id::UP, config.pins.dpad.up);
     m_buttons.emplace(Id::DOWN, config.pins.dpad.down);
     m_buttons.emplace(Id::LEFT, config.pins.dpad.left);
@@ -67,10 +82,24 @@ Buttons::Buttons(const Config &config) : m_config(config), m_socd_state{Id::DOWN
     m_buttons.emplace(Id::SELECT, config.pins.buttons.select);
     m_buttons.emplace(Id::HOME, config.pins.buttons.home);
     m_buttons.emplace(Id::SHARE, config.pins.buttons.share);
+
+    std::visit(
+        [this](auto &&config) {
+            using T = std::decay_t<decltype(config)>;
+
+            if constexpr (std::is_same_v<T, Config::InternalGpio>) {
+                m_gpio = std::make_unique<InternalGpio>(m_buttons);
+            } else if constexpr (std::is_same_v<T, Config::ExternalGpio>) {
+                m_gpio = std::make_unique<ExternalGpio>(config);
+            } else {
+                static_assert(false, "Unknown GPIO type!");
+            }
+        },
+        m_config.gpio_config);
 }
 
-void Buttons::updateInputState(Utils::InputState &input_state) {
-    uint16_t gpio_state = m_mcp23017->read();
+void Controller::updateInputState(Utils::InputState &input_state) {
+    uint32_t gpio_state = m_gpio->read();
 
     for (auto &button : m_buttons) {
         button.second.setState(gpio_state & button.second.getGpioMask(), m_config.debounce_delay_ms);
