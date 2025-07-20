@@ -288,7 +288,7 @@ void Menu::gotoParent(bool do_restore) {
     m_state_stack.pop();
 }
 
-void Menu::performAction(Descriptor::Action action, uint8_t value) {
+void Menu::performAction(Descriptor::Action action, uint16_t value) {
     switch (action) {
     case Descriptor::Action::None:
         break;

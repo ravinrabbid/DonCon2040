@@ -101,7 +101,7 @@ class Menu {
     void gotoPage(Page page);
     void gotoParent(bool do_restore);
 
-    void performAction(Descriptor::Action action, uint8_t value);
+    void performAction(Descriptor::Action action, uint16_t value);
 
   public:
     Menu(std::shared_ptr<SettingsStore> settings_store);
