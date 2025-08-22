@@ -19,6 +19,4 @@
 #define MBEDTLS_PK_C
 #define MBEDTLS_RSA_C
 
-#include "mbedtls/check_config.h"
-
 #endif

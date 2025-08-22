@@ -8,20 +8,13 @@
 
 #include "usb/device_driver.h"
 
+#include <cstring>
+
 namespace {
-int rng(void *p_rng, unsigned char *p, size_t len) {
+int const_rng(void *p_rng, unsigned char *p, size_t len) {
     (void)p_rng;
 
-    uint64_t rand = 0;
-    size_t rand_byte = get_rand_64();
-
-    for (size_t idx = 0; idx < len; ++idx) {
-        if (rand_byte >= sizeof(uint64_t)) {
-            rand = get_rand_64();
-            rand_byte = 0;
-        }
-        p[idx] = rand >> (++rand_byte * 8);
-    }
+    std::memset(p, 0x39, len);
 
     return 0;
 }
@@ -37,7 +30,7 @@ PS4AuthProvider::PS4AuthProvider() : m_key_valid(false) {
     mbedtls_pk_init(&m_pk_context);
 
     if (mbedtls_pk_parse_key(&m_pk_context, (unsigned char *)Doncon::Config::PS4Auth::config.key_pem.c_str(),
-                             Doncon::Config::PS4Auth::config.key_pem.size() + 1, nullptr, 0)) {
+                             Doncon::Config::PS4Auth::config.key_pem.size() + 1, nullptr, 0, const_rng, nullptr)) {
         return;
     }
 
@@ -59,12 +52,12 @@ PS4AuthProvider::sign(const std::array<uint8_t, PS4AuthProvider::SIGNATURE_LENGT
 
     const auto rsa_context = mbedtls_pk_rsa(m_pk_context);
 
-    if (mbedtls_sha256_ret(challenge.data(), challenge.size(), hashed_challenge.data(), 0)) {
+    if (mbedtls_sha256(challenge.data(), challenge.size(), hashed_challenge.data(), 0)) {
         return std::nullopt;
     }
 
-    if (mbedtls_rsa_rsassa_pss_sign(rsa_context, rng, nullptr, MBEDTLS_RSA_PRIVATE, MBEDTLS_MD_SHA256,
-                                    hashed_challenge.size(), hashed_challenge.data(), signed_challenge.data())) {
+    if (mbedtls_rsa_rsassa_pss_sign(rsa_context, const_rng, nullptr, MBEDTLS_MD_SHA256, hashed_challenge.size(),
+                                    hashed_challenge.data(), signed_challenge.data())) {
         return std::nullopt;
     }
 

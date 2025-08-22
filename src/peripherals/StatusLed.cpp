@@ -16,8 +16,8 @@ StatusLed::StatusLed(const Config &config) : m_config(config), m_input_state({})
 void StatusLed::setBrightness(const uint8_t brightness) { m_config.brightness = brightness; }
 void StatusLed::setEnablePlayerColor(const bool do_enable) { m_config.enable_player_color = do_enable; }
 
-void StatusLed::setInputState(const Utils::InputState input_state) { m_input_state = input_state; }
-void StatusLed::setPlayerColor(const Config::Color color) { m_player_color = color; }
+void StatusLed::setInputState(const Utils::InputState &input_state) { m_input_state = input_state; }
+void StatusLed::setPlayerColor(const Config::Color &color) { m_player_color = color; }
 
 void StatusLed::update() {
     float brightness_factor = (float)m_config.brightness / static_cast<float>(UINT8_MAX);
