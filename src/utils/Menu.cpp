@@ -123,6 +123,7 @@ static InputState::Controller checkPressed(const InputState::Controller &control
             Idle,
             RepeatDelay,
             Repeat,
+            FastRepeat,
         };
         State state;
         uint32_t pressed_since;
@@ -131,6 +132,8 @@ static InputState::Controller checkPressed(const InputState::Controller &control
 
     static const uint32_t repeat_delay = 1000;
     static const uint32_t repeat_interval = 20;
+    static const uint32_t fast_repeat_delay = 5000;
+    static const uint32_t fast_repeat_interval = 2;
 
     static ButtonState state_north = {ButtonState::State::Idle, 0, 0};
     static ButtonState state_east = {ButtonState::State::Idle, 0, 0};
@@ -165,7 +168,19 @@ static InputState::Controller checkPressed(const InputState::Controller &control
                 }
                 break;
             case ButtonState::State::Repeat:
-                if ((now - button_state.last_repeat) > repeat_interval) {
+                if ((now - button_state.pressed_since) > fast_repeat_delay) {
+                    result = true;
+                    button_state.state = ButtonState::State::FastRepeat;
+                    button_state.last_repeat = now;
+                } else if ((now - button_state.last_repeat) > repeat_interval) {
+                    result = true;
+                    button_state.last_repeat = now;
+                } else {
+                    result = false;
+                }
+                break;
+            case ButtonState::State::FastRepeat:
+                if ((now - button_state.last_repeat) > fast_repeat_interval) {
                     result = true;
                     button_state.last_repeat = now;
                 } else {
