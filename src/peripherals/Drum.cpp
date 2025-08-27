@@ -150,80 +150,96 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
 }
 
 void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::map<Drum::Id, uint16_t> &raw_values) {
-
-    std::map<Drum::Id, uint16_t> filtered_raw_values;
-
-    // First zero everything below its threshold.
-    const auto value_if_above_threshold = [](const auto &values, const auto &thresholds, Id target) {
-        const auto get_threshold = [&](const Id target) {
-            switch (target) {
-            case Id::DON_LEFT:
-                return thresholds.don_left;
-            case Id::DON_RIGHT:
-                return thresholds.don_right;
-            case Id::KA_LEFT:
-                return thresholds.ka_left;
-            case Id::KA_RIGHT:
-                return thresholds.ka_right;
-            }
-            assert(false);
-            return (uint16_t)0;
+    const auto resolve_twin_pads = [&](Id left, Id right) {
+        const auto is_over_threshold = [&raw_values](const Id target, const auto &thresholds) {
+            const auto get_threshold = [&thresholds](const Id target) {
+                switch (target) {
+                case Id::DON_LEFT:
+                    return thresholds.don_left;
+                case Id::DON_RIGHT:
+                    return thresholds.don_right;
+                case Id::KA_LEFT:
+                    return thresholds.ka_left;
+                case Id::KA_RIGHT:
+                    return thresholds.ka_right;
+                }
+                assert(false);
+                return (uint16_t)0;
+            };
+            return (raw_values.at(target) > get_threshold(target));
         };
-        return (values.at(target) > get_threshold(target)) ? values.at(target) : (uint16_t)0;
+
+        const auto resolve_single_trigger = [&]() {
+            if (!is_over_threshold(left, m_config.trigger_thresholds) &&
+                !is_over_threshold(right, m_config.trigger_thresholds)) {
+
+                m_pads.at(left).setState(false, m_config.debounce_delay_ms);
+                m_pads.at(right).setState(false, m_config.debounce_delay_ms);
+                return;
+            }
+
+            // Trigger twin pad if within 50% of hit strength to allow
+            // simultaneous hits while still rejecting unintended double hits.
+            if (raw_values.at(left) > raw_values.at(right)) {
+                m_pads.at(left).setState(true, m_config.debounce_delay_ms);
+
+                if (raw_values.at(right) > (raw_values.at(left) >> 1)) {
+                    m_pads.at(right).setState(true, m_config.debounce_delay_ms);
+                } else {
+                    m_pads.at(right).setState(false, m_config.debounce_delay_ms);
+                }
+            } else {
+                m_pads.at(right).setState(true, m_config.debounce_delay_ms);
+
+                if (raw_values.at(left) > (raw_values.at(right) >> 1)) {
+                    m_pads.at(left).setState(true, m_config.debounce_delay_ms);
+                } else {
+                    m_pads.at(left).setState(false, m_config.debounce_delay_ms);
+                }
+            }
+        };
+
+        switch (m_config.double_trigger_mode) {
+        case Config::DoubleTriggerMode::Off:
+            resolve_single_trigger();
+            break;
+        case Config::DoubleTriggerMode::Threshold:
+            if (is_over_threshold(left, m_config.double_trigger_thresholds) ||
+                is_over_threshold(right, m_config.double_trigger_thresholds)) {
+
+                m_pads.at(left).setState(true, m_config.debounce_delay_ms);
+                m_pads.at(right).setState(true, m_config.debounce_delay_ms);
+            } else {
+                resolve_single_trigger();
+            }
+            break;
+        case Config::DoubleTriggerMode::Always:
+            if (is_over_threshold(left, m_config.trigger_thresholds) ||
+                is_over_threshold(right, m_config.trigger_thresholds)) {
+
+                m_pads.at(left).setState(true, m_config.debounce_delay_ms);
+                m_pads.at(right).setState(true, m_config.debounce_delay_ms);
+            } else {
+                m_pads.at(left).setState(false, m_config.debounce_delay_ms);
+                m_pads.at(right).setState(false, m_config.debounce_delay_ms);
+            }
+            break;
+        }
     };
 
-    for (const auto &entry : raw_values) {
-        filtered_raw_values.insert(
-            {entry.first, value_if_above_threshold(raw_values, m_config.trigger_thresholds, entry.first)});
-    }
+    // Either DON or KA can be active at a time
+    if (std::max(raw_values.at(Id::DON_LEFT), raw_values.at(Id::DON_RIGHT)) >
+        std::max(raw_values.at(Id::KA_LEFT), raw_values.at(Id::KA_RIGHT))) {
 
-    // Only DON or KA can be active at a time, zero the lesser
-    if (std::max(filtered_raw_values.at(Id::DON_LEFT), filtered_raw_values.at(Id::DON_RIGHT)) >
-        std::max(filtered_raw_values.at(Id::KA_LEFT), filtered_raw_values.at(Id::KA_RIGHT))) {
+        resolve_twin_pads(Id::DON_LEFT, Id::DON_RIGHT);
 
-        filtered_raw_values.at(Id::KA_LEFT) = 0;
-        filtered_raw_values.at(Id::KA_RIGHT) = 0;
+        m_pads.at(Id::KA_LEFT).setState(false, m_config.debounce_delay_ms);
+        m_pads.at(Id::KA_RIGHT).setState(false, m_config.debounce_delay_ms);
     } else {
-        filtered_raw_values.at(Id::DON_LEFT) = 0;
-        filtered_raw_values.at(Id::DON_RIGHT) = 0;
-    }
+        resolve_twin_pads(Id::KA_LEFT, Id::KA_RIGHT);
 
-    // Check same same with regard to current debounce state
-    if (m_pads.at(Id::DON_LEFT).getState() || m_pads.at(Id::DON_RIGHT).getState()) {
-        filtered_raw_values.at(Id::KA_LEFT) = 0;
-        filtered_raw_values.at(Id::KA_RIGHT) = 0;
-    } else if (m_pads.at(Id::KA_LEFT).getState() || m_pads.at(Id::KA_RIGHT).getState()) {
-        filtered_raw_values.at(Id::DON_LEFT) = 0;
-        filtered_raw_values.at(Id::DON_RIGHT) = 0;
-    }
-
-    // Zero values which are not within +/- 50% of their twin pad
-    const auto zero_if_not_within_twin = [](auto &values, Id a, Id b) {
-        if (values.at(a) == 0 || values.at(b) == 0) {
-            return;
-        }
-
-        if (values.at(a) > values.at(b)) {
-            if (values.at(b) < (values.at(a) >> 1)) {
-                values.at(b) = 0;
-            }
-        } else {
-            if (values.at(a) < (values.at(b) >> 1)) {
-                values.at(a) = 0;
-            }
-        }
-    };
-
-    zero_if_not_within_twin(filtered_raw_values, Id::DON_LEFT, Id::DON_RIGHT);
-    zero_if_not_within_twin(filtered_raw_values, Id::KA_LEFT, Id::KA_RIGHT);
-
-    // All values != 0 are already over their threshold.
-    for (const auto &entry : filtered_raw_values) {
-        if (entry.second != 0) {
-            m_pads.at(entry.first).setState(true, m_config.debounce_delay_ms);
-        } else {
-            m_pads.at(entry.first).setState(false, m_config.debounce_delay_ms);
-        }
+        m_pads.at(Id::DON_LEFT).setState(false, m_config.debounce_delay_ms);
+        m_pads.at(Id::DON_RIGHT).setState(false, m_config.debounce_delay_ms);
     }
 
     input_state.drum.don_left.triggered = m_pads.at(Id::DON_LEFT).getState();
@@ -298,6 +314,12 @@ void Drum::updateInputState(Utils::InputState &input_state) {
 
 void Drum::setDebounceDelay(const uint16_t delay) { m_config.debounce_delay_ms = delay; }
 
-void Drum::setThresholds(const Config::Thresholds &thresholds) { m_config.trigger_thresholds = thresholds; }
+void Drum::setTriggerThresholds(const Config::Thresholds &thresholds) { m_config.trigger_thresholds = thresholds; }
+
+void Drum::setDoubleTriggerMode(const Config::DoubleTriggerMode mode) { m_config.double_trigger_mode = mode; }
+
+void Drum::setDoubleThresholds(const Config::Thresholds &thresholds) {
+    m_config.double_trigger_thresholds = thresholds;
+}
 
 } // namespace Doncon::Peripherals

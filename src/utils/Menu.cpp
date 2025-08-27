@@ -1,5 +1,7 @@
 #include "utils/Menu.h"
 
+#include "peripherals/Drum.h"
+
 namespace Doncon::Utils {
 
 const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
@@ -30,15 +32,39 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
        {"Debug", Menu::Descriptor::Action::SetUsbMode}},     //
       0}},                                                   //
 
-    {Menu::Page::Drum,                                                                //
+    {Menu::Page::Drum,                                                          //
+     {Menu::Descriptor::Type::Menu,                                             //
+      "Drum Settings",                                                          //
+      {{"Hold Time", Menu::Descriptor::Action::GotoPageDrumDebounceDelay},      //
+       {"Thresholds", Menu::Descriptor::Action::GotoPageDrumTriggerThresholds}, //
+       {"Double Trg", Menu::Descriptor::Action::GotoPageDrumDoubleTrigger}},    //
+      0}},                                                                      //
+
+    {Menu::Page::DrumTriggerThresholds,                                               //
      {Menu::Descriptor::Type::Menu,                                                   //
-      "Drum Settings",                                                                //
-      {{"Hold Time", Menu::Descriptor::Action::GotoPageDrumDebounceDelay},            //
-       {"Left Ka", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdKaLeft},     //
+      "Thresholds",                                                                   //
+      {{"Left Ka", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdKaLeft},     //
        {"Left Don", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdDonLeft},   //
        {"Right Don", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdDonRight}, //
        {"Right Ka", Menu::Descriptor::Action::GotoPageDrumTriggerThresholdKaRight}},  //
       0}},                                                                            //
+
+    {Menu::Page::DrumDoubleTrigger,                                                  //
+     {Menu::Descriptor::Type::Menu,                                                  //
+      "Double Hit Mode",                                                             //
+      {{"Off", Menu::Descriptor::Action::SetDoubleTriggerOff},                       //
+       {"Threshold", Menu::Descriptor::Action::GotoPageDrumDoubleTriggerThresholds}, //
+       {"Always", Menu::Descriptor::Action::SetDoubleTriggerAlways}},                //
+      0}},                                                                           //
+
+    {Menu::Page::DrumDoubleTriggerThresholds,                                               //
+     {Menu::Descriptor::Type::Menu,                                                         //
+      "Double Thresholds",                                                                  //
+      {{"Left Ka", Menu::Descriptor::Action::GotoPageDrumDoubleTriggerThresholdKaLeft},     //
+       {"Left Don", Menu::Descriptor::Action::GotoPageDrumDoubleTriggerThresholdDonLeft},   //
+       {"Right Don", Menu::Descriptor::Action::GotoPageDrumDoubleTriggerThresholdDonRight}, //
+       {"Right Ka", Menu::Descriptor::Action::GotoPageDrumDoubleTriggerThresholdKaRight}},  //
+      0}},
 
     {Menu::Page::DrumDebounceDelay,                           //
      {Menu::Descriptor::Type::Value,                          //
@@ -68,6 +94,30 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
      {Menu::Descriptor::Type::Value,                                    //
       "Trg Level Right Ka",                                             //
       {{"", Menu::Descriptor::Action::SetDrumTriggerThresholdKaRight}}, //
+      4095}},
+
+    {Menu::Page::DrumDoubleTriggerThresholdKaLeft,                           //
+     {Menu::Descriptor::Type::Value,                                         //
+      "Trg Level Left Ka",                                                   //
+      {{"", Menu::Descriptor::Action::SetDrumDoubleTriggerThresholdKaLeft}}, //
+      4095}},
+
+    {Menu::Page::DrumDoubleTriggerThresholdDonLeft,                           //
+     {Menu::Descriptor::Type::Value,                                          //
+      "Trg Level Left Don",                                                   //
+      {{"", Menu::Descriptor::Action::SetDrumDoubleTriggerThresholdDonLeft}}, //
+      4095}},
+
+    {Menu::Page::DrumDoubleTriggerThresholdDonRight,                           //
+     {Menu::Descriptor::Type::Value,                                           //
+      "Trg Level Right Don",                                                   //
+      {{"", Menu::Descriptor::Action::SetDrumDoubleTriggerThresholdDonRight}}, //
+      4095}},
+
+    {Menu::Page::DrumDoubleTriggerThresholdKaRight,                           //
+     {Menu::Descriptor::Type::Value,                                          //
+      "Trg Level Right Ka",                                                   //
+      {{"", Menu::Descriptor::Action::SetDrumDoubleTriggerThresholdKaRight}}, //
       4095}},
 
     {Menu::Page::Led,                                                           //
@@ -215,6 +265,8 @@ uint16_t Menu::getCurrentValue(Menu::Page page) {
         return static_cast<uint16_t>(m_store->getUsbMode());
     case Page::DrumDebounceDelay:
         return m_store->getDebounceDelay();
+    case Page::DrumDoubleTrigger:
+        return static_cast<uint16_t>(m_store->getDoubleTriggerMode());
     case Page::DrumTriggerThresholdKaLeft:
         return m_store->getTriggerThresholds().ka_left;
     case Page::DrumTriggerThresholdDonLeft:
@@ -223,12 +275,22 @@ uint16_t Menu::getCurrentValue(Menu::Page page) {
         return m_store->getTriggerThresholds().don_right;
     case Page::DrumTriggerThresholdKaRight:
         return m_store->getTriggerThresholds().ka_right;
+    case Page::DrumDoubleTriggerThresholdKaLeft:
+        return m_store->getDoubleTriggerThresholds().ka_left;
+    case Page::DrumDoubleTriggerThresholdDonLeft:
+        return m_store->getDoubleTriggerThresholds().don_left;
+    case Page::DrumDoubleTriggerThresholdDonRight:
+        return m_store->getDoubleTriggerThresholds().don_right;
+    case Page::DrumDoubleTriggerThresholdKaRight:
+        return m_store->getDoubleTriggerThresholds().ka_right;
     case Page::LedBrightness:
         return m_store->getLedBrightness();
     case Page::LedEnablePlayerColor:
         return static_cast<uint16_t>(m_store->getLedEnablePlayerColor());
     case Page::Main:
     case Page::Drum:
+    case Page::DrumTriggerThresholds:
+    case Page::DrumDoubleTriggerThresholds:
     case Page::Led:
     case Page::Reset:
     case Page::Bootsel:
@@ -284,6 +346,34 @@ void Menu::gotoParent(bool do_restore) {
             thresholds.ka_right = current_state.original_value;
             m_store->setTriggerThresholds(thresholds);
         } break;
+        case Page::DrumDoubleTrigger:
+            m_store->setDoubleTriggerMode(
+                static_cast<Peripherals::Drum::Config::DoubleTriggerMode>(current_state.original_value));
+            break;
+        case Page::DrumDoubleTriggerThresholdKaLeft: {
+            auto thresholds = m_store->getDoubleTriggerThresholds();
+
+            thresholds.ka_left = current_state.original_value;
+            m_store->setDoubleTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumDoubleTriggerThresholdDonLeft: {
+            auto thresholds = m_store->getDoubleTriggerThresholds();
+
+            thresholds.don_left = current_state.original_value;
+            m_store->setDoubleTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumDoubleTriggerThresholdDonRight: {
+            auto thresholds = m_store->getDoubleTriggerThresholds();
+
+            thresholds.don_right = current_state.original_value;
+            m_store->setDoubleTriggerThresholds(thresholds);
+        } break;
+        case Page::DrumDoubleTriggerThresholdKaRight: {
+            auto thresholds = m_store->getDoubleTriggerThresholds();
+
+            thresholds.ka_right = current_state.original_value;
+            m_store->setDoubleTriggerThresholds(thresholds);
+        } break;
         case Page::LedBrightness:
             m_store->setLedBrightness(current_state.original_value);
             break;
@@ -292,6 +382,8 @@ void Menu::gotoParent(bool do_restore) {
             break;
         case Page::Main:
         case Page::Drum:
+        case Page::DrumTriggerThresholds:
+        case Page::DrumDoubleTriggerThresholds:
         case Page::Led:
         case Page::Reset:
         case Page::Bootsel:
@@ -315,6 +407,16 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
         break;
     case Descriptor::Action::GotoPageDrum:
         gotoPage(Page::Drum);
+        break;
+    case Descriptor::Action::GotoPageDrumDoubleTrigger:
+        gotoPage(Page::DrumDoubleTrigger);
+        break;
+    case Descriptor::Action::GotoPageDrumTriggerThresholds:
+        gotoPage(Page::DrumTriggerThresholds);
+        break;
+    case Descriptor::Action::GotoPageDrumDoubleTriggerThresholds:
+        m_store->setDoubleTriggerMode(Peripherals::Drum::Config::DoubleTriggerMode::Threshold);
+        gotoPage(Page::DrumDoubleTriggerThresholds);
         break;
     case Descriptor::Action::GotoPageLed:
         gotoPage(Page::Led);
@@ -340,6 +442,18 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
     case Descriptor::Action::GotoPageDrumTriggerThresholdKaRight:
         gotoPage(Page::DrumTriggerThresholdKaRight);
         break;
+    case Descriptor::Action::GotoPageDrumDoubleTriggerThresholdKaLeft:
+        gotoPage(Page::DrumDoubleTriggerThresholdKaLeft);
+        break;
+    case Descriptor::Action::GotoPageDrumDoubleTriggerThresholdDonLeft:
+        gotoPage(Page::DrumDoubleTriggerThresholdDonLeft);
+        break;
+    case Descriptor::Action::GotoPageDrumDoubleTriggerThresholdDonRight:
+        gotoPage(Page::DrumDoubleTriggerThresholdDonRight);
+        break;
+    case Descriptor::Action::GotoPageDrumDoubleTriggerThresholdKaRight:
+        gotoPage(Page::DrumDoubleTriggerThresholdKaRight);
+        break;
     case Descriptor::Action::GotoPageLedBrightness:
         gotoPage(Page::LedBrightness);
         break;
@@ -351,6 +465,14 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
         break;
     case Descriptor::Action::SetDrumDebounceDelay:
         m_store->setDebounceDelay(value);
+        break;
+    case Descriptor::Action::SetDoubleTriggerOff:
+        m_store->setDoubleTriggerMode(Peripherals::Drum::Config::DoubleTriggerMode::Off);
+        gotoParent(false);
+        break;
+    case Descriptor::Action::SetDoubleTriggerAlways:
+        m_store->setDoubleTriggerMode(Peripherals::Drum::Config::DoubleTriggerMode::Always);
+        gotoParent(false);
         break;
     case Descriptor::Action::SetDrumTriggerThresholdKaLeft: {
         auto thresholds = m_store->getTriggerThresholds();
@@ -375,6 +497,30 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
 
         thresholds.ka_right = value;
         m_store->setTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumDoubleTriggerThresholdKaLeft: {
+        auto thresholds = m_store->getDoubleTriggerThresholds();
+
+        thresholds.ka_left = value;
+        m_store->setDoubleTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumDoubleTriggerThresholdDonLeft: {
+        auto thresholds = m_store->getDoubleTriggerThresholds();
+
+        thresholds.don_left = value;
+        m_store->setDoubleTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumDoubleTriggerThresholdDonRight: {
+        auto thresholds = m_store->getDoubleTriggerThresholds();
+
+        thresholds.don_right = value;
+        m_store->setDoubleTriggerThresholds(thresholds);
+    } break;
+    case Descriptor::Action::SetDrumDoubleTriggerThresholdKaRight: {
+        auto thresholds = m_store->getDoubleTriggerThresholds();
+
+        thresholds.ka_right = value;
+        m_store->setDoubleTriggerThresholds(thresholds);
     } break;
     case Descriptor::Action::SetLedBrightness:
         m_store->setLedBrightness(value);

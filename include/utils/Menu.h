@@ -24,10 +24,20 @@ class Menu {
         Bootsel,
 
         DrumDebounceDelay,
+        DrumTriggerThresholds,
+        DrumDoubleTrigger,
+
         DrumTriggerThresholdKaLeft,
         DrumTriggerThresholdDonLeft,
         DrumTriggerThresholdDonRight,
         DrumTriggerThresholdKaRight,
+
+        DrumDoubleTriggerThresholds,
+
+        DrumDoubleTriggerThresholdKaLeft,
+        DrumDoubleTriggerThresholdDonLeft,
+        DrumDoubleTriggerThresholdDonRight,
+        DrumDoubleTriggerThresholdKaRight,
 
         LedBrightness,
         LedEnablePlayerColor,
@@ -61,10 +71,19 @@ class Menu {
             GotoPageBootsel,
 
             GotoPageDrumDebounceDelay,
+            GotoPageDrumDoubleTrigger,
+            GotoPageDrumTriggerThresholds,
+            GotoPageDrumDoubleTriggerThresholds,
+
             GotoPageDrumTriggerThresholdKaLeft,
             GotoPageDrumTriggerThresholdDonLeft,
             GotoPageDrumTriggerThresholdDonRight,
             GotoPageDrumTriggerThresholdKaRight,
+
+            GotoPageDrumDoubleTriggerThresholdKaLeft,
+            GotoPageDrumDoubleTriggerThresholdDonLeft,
+            GotoPageDrumDoubleTriggerThresholdDonRight,
+            GotoPageDrumDoubleTriggerThresholdKaRight,
 
             GotoPageLedBrightness,
             GotoPageLedEnablePlayerColor,
@@ -72,10 +91,19 @@ class Menu {
             SetUsbMode,
 
             SetDrumDebounceDelay,
+
+            SetDoubleTriggerOff,
+            SetDoubleTriggerAlways,
+
             SetDrumTriggerThresholdKaLeft,
             SetDrumTriggerThresholdDonLeft,
             SetDrumTriggerThresholdDonRight,
             SetDrumTriggerThresholdKaRight,
+
+            SetDrumDoubleTriggerThresholdKaLeft,
+            SetDrumDoubleTriggerThresholdDonLeft,
+            SetDrumDoubleTriggerThresholdDonRight,
+            SetDrumDoubleTriggerThresholdKaRight,
 
             SetLedBrightness,
             SetLedEnablePlayerColor,

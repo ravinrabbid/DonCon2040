@@ -167,7 +167,9 @@ int main() {
         queue_add_blocking(&control_queue, &ctrl_message);
 
         drum.setDebounceDelay(settings_store->getDebounceDelay());
-        drum.setThresholds(settings_store->getTriggerThresholds());
+        drum.setTriggerThresholds(settings_store->getTriggerThresholds());
+        drum.setDoubleTriggerMode(settings_store->getDoubleTriggerMode());
+        drum.setDoubleThresholds(settings_store->getDoubleTriggerThresholds());
     };
 
     readSettings();

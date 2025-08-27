@@ -17,6 +17,8 @@ SettingsStore::SettingsStore()
                      Config::Default::led_config.brightness,
                      Config::Default::led_config.enable_player_color,
                      Config::Default::drum_config.debounce_delay_ms,
+                     Config::Default::drum_config.double_trigger_mode,
+                     Config::Default::drum_config.double_trigger_thresholds,
                      {}}),
       m_dirty(true), m_scheduled_reboot(RebootType::None) {
     uint32_t current_page = m_flash_offset + m_flash_size - m_store_size;
@@ -58,6 +60,30 @@ void SettingsStore::setTriggerThresholds(const Peripherals::Drum::Config::Thresh
     }
 }
 Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() { return m_store_cache.trigger_thresholds; }
+
+void SettingsStore::setDoubleTriggerMode(const Peripherals::Drum::Config::DoubleTriggerMode &mode) {
+    if (m_store_cache.double_trigger_mode != mode) {
+        m_store_cache.double_trigger_mode = mode;
+        m_dirty = true;
+    }
+}
+Peripherals::Drum::Config::DoubleTriggerMode SettingsStore::getDoubleTriggerMode() {
+    return m_store_cache.double_trigger_mode;
+}
+
+void SettingsStore::setDoubleTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds) {
+    if (m_store_cache.double_trigger_thresholds.don_left != thresholds.don_left ||
+        m_store_cache.double_trigger_thresholds.don_right != thresholds.don_right ||
+        m_store_cache.double_trigger_thresholds.ka_left != thresholds.ka_left ||
+        m_store_cache.double_trigger_thresholds.ka_right != thresholds.ka_right) {
+
+        m_store_cache.double_trigger_thresholds = thresholds;
+        m_dirty = true;
+    }
+}
+Peripherals::Drum::Config::Thresholds SettingsStore::getDoubleTriggerThresholds() {
+    return m_store_cache.double_trigger_thresholds;
+}
 
 void SettingsStore::setLedBrightness(const uint8_t brightness) {
     if (m_store_cache.led_brightness != brightness) {

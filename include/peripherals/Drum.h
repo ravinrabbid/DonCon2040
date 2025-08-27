@@ -46,7 +46,17 @@ class Drum {
             uint8_t spi_level_shifter_enable_pin;
         };
 
+        enum class DoubleTriggerMode {
+            Off,
+            Threshold,
+            Always,
+        };
+
         Thresholds trigger_thresholds;
+
+        DoubleTriggerMode double_trigger_mode;
+        Thresholds double_trigger_thresholds;
+
         uint16_t debounce_delay_ms;
 
         uint32_t roll_counter_timeout_ms;
@@ -117,7 +127,10 @@ class Drum {
     void updateInputState(Utils::InputState &input_state);
 
     void setDebounceDelay(const uint16_t delay);
-    void setThresholds(const Config::Thresholds &thresholds);
+    void setTriggerThresholds(const Config::Thresholds &thresholds);
+
+    void setDoubleTriggerMode(const Config::DoubleTriggerMode mode);
+    void setDoubleThresholds(const Config::Thresholds &thresholds);
 };
 
 } // namespace Doncon::Peripherals

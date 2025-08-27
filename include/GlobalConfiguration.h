@@ -37,6 +37,16 @@ const Peripherals::Drum::Config drum_config = {
         10, // Don Right
         5,  // Ka Right
     },
+
+    // Double Trigger mode
+    Peripherals::Drum::Config::DoubleTriggerMode::Off,
+    // Double Trigger thresholds
+    {
+        2000, // Don Left
+        1500, // Ka Left
+        2000, // Don Right
+        1500, // Ka Right
+    },
     25,  // Debounce delay in milliseconds
     500, // Roll Counter Timeout in Milliseconds
 

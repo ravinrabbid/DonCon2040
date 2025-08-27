@@ -55,6 +55,7 @@ Few things which you probably want to change more regularly can be changed using
 - LED brightness
 - Trigger thresholds
 - Hold Time
+- Double Trigger Mode and Thresholds
 - Enter BOOTSEL mode for firmware flashing
 
 Those settings are persisted to flash memory if you choose 'Save' when exiting the Menu and will survive power cycles.
@@ -66,6 +67,14 @@ Defaults and everything else are compiled statically into the firmware. You can 
 The debounce delay also implicitly serves as the hold time of the input after a hit. On some platforms inputs won't be registered properly if this time is too short. For example Taiko no Tatsujin on Switch needs at least 25 milliseconds.
 
 If you notice dropped inputs even if the controller signals a hit on the LED/Display, try to increase this value.
+
+### Double Trigger (Large Notes)
+
+Home versions of Taiko no Tatsujin give higher scores for large notes when both sides are hit simultaneously. In contrast, arcade versions will only need a normal hit (or sometimes a harder hit). To emulate this behavior, the following modes are offered:
+
+- **Off**: Hit both sides to score large notes.
+- **Threshold**: Automatically trigger both sides if a hit is stronger than the configured double hit threshold.
+- **Always**: A hit on one side will always trigger the other side as well.
 
 ### PS4 Authentication
 

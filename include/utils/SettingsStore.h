@@ -23,10 +23,13 @@ class SettingsStore {
         uint8_t led_brightness;
         bool led_enable_player_color;
         uint16_t debounce_delay;
+        Peripherals::Drum::Config::DoubleTriggerMode double_trigger_mode;
+        Peripherals::Drum::Config::Thresholds double_trigger_thresholds;
 
         uint8_t _padding[m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
                          sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(bool) -
-                         sizeof(uint16_t)];
+                         sizeof(uint16_t) - sizeof(Peripherals::Drum::Config::DoubleTriggerMode) -
+                         sizeof(Peripherals::Drum::Config::Thresholds)];
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
@@ -52,6 +55,12 @@ class SettingsStore {
 
     void setTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds);
     Peripherals::Drum::Config::Thresholds getTriggerThresholds();
+
+    void setDoubleTriggerMode(const Peripherals::Drum::Config::DoubleTriggerMode &mode);
+    Peripherals::Drum::Config::DoubleTriggerMode getDoubleTriggerMode();
+
+    void setDoubleTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds);
+    Peripherals::Drum::Config::Thresholds getDoubleTriggerThresholds();
 
     void setLedBrightness(const uint8_t brightness);
     uint8_t getLedBrightness();
