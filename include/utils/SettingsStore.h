@@ -33,7 +33,7 @@ class SettingsStore {
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
-    enum class RebootType {
+    enum class RebootType : uint8_t {
         None,
         Normal,
         Bootsel,

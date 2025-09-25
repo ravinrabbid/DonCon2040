@@ -169,7 +169,7 @@ void Menu::activate() {
 
 static InputState::Controller checkPressed(const InputState::Controller &controller_state) {
     struct ButtonState {
-        enum State {
+        enum State : uint8_t {
             Idle,
             RepeatDelay,
             Repeat,

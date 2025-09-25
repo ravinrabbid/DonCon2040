@@ -27,7 +27,7 @@ queue_t controller_input_queue;
 queue_t auth_challenge_queue;
 queue_t auth_signed_challenge_queue;
 
-enum class ControlCommand {
+enum class ControlCommand : uint8_t {
     SetUsbMode,
     SetPlayerLed,
     SetLedBrightness,

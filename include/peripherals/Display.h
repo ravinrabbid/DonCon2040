@@ -22,7 +22,7 @@ class Display {
     };
 
   private:
-    enum class State {
+    enum class State : uint8_t {
         Idle,
         Menu,
     };

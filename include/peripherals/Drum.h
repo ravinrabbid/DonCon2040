@@ -46,7 +46,7 @@ class Drum {
             uint8_t spi_level_shifter_enable_pin;
         };
 
-        enum class DoubleTriggerMode {
+        enum class DoubleTriggerMode : uint8_t {
             Off,
             Threshold,
             Always,
@@ -66,7 +66,7 @@ class Drum {
     };
 
   private:
-    enum class Id {
+    enum class Id : uint8_t {
         DON_LEFT,
         KA_LEFT,
         DON_RIGHT,

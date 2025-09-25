@@ -7,7 +7,7 @@
 class Mcp23017 {
   public:
     // Registers in IOCON.BANK = 0 mode
-    enum class Register {
+    enum class Register : uint8_t {
         IODIRA = 0x00,
         IODIRB = 0x01,
         IPOLA = 0x02,
@@ -31,8 +31,8 @@ class Mcp23017 {
         OLATB = 0x15,
     };
 
-    enum class Port { A, B };
-    enum class Direction { IN, OUT };
+    enum class Port : uint8_t { A, B };
+    enum class Direction : uint8_t { IN, OUT };
 
   private:
     i2c_inst *m_i2c;

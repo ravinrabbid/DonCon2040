@@ -48,7 +48,7 @@ struct InputState {
     Controller controller;
 
   private:
-    enum class Player {
+    enum class Player : uint8_t {
         One,
         Two,
     };

@@ -14,7 +14,7 @@ namespace Doncon::Utils {
 
 class Menu {
   public:
-    enum class Page {
+    enum class Page : uint8_t {
         Main,
 
         DeviceMode,
@@ -52,7 +52,7 @@ class Menu {
     };
 
     struct Descriptor {
-        enum class Type {
+        enum class Type : uint8_t {
             Menu,
             Selection,
             Value,
@@ -60,7 +60,7 @@ class Menu {
             RebootInfo,
         };
 
-        enum class Action {
+        enum class Action : uint8_t {
             None,
             GotoParent,
 
