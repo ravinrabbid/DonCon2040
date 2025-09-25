@@ -1,5 +1,5 @@
-#ifndef _PERIPHERALS_CONTROLLER_H_
-#define _PERIPHERALS_CONTROLLER_H_
+#ifndef PERIPHERALS_CONTROLLER_H_
+#define PERIPHERALS_CONTROLLER_H_
 
 #include "utils/InputState.h"
 
@@ -132,4 +132,4 @@ class Controller {
 
 } // namespace Doncon::Peripherals
 
-#endif // _PERIPHERALS_CONTROLLER_H_
+#endif // PERIPHERALS_CONTROLLER_H_

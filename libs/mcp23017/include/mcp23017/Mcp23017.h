@@ -1,5 +1,5 @@
-#ifndef _MCP23017_MCP23017_H_
-#define _MCP23017_MCP23017_H_
+#ifndef MCP23017_MCP23017_H_
+#define MCP23017_MCP23017_H_
 
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
@@ -73,4 +73,4 @@ class Mcp23017 {
     void writeRegister16(Register reg, uint16_t value);
 };
 
-#endif // _MCP23017_MCP23017_H_
+#endif // MCP23017_MCP23017_H_

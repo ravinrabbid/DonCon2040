@@ -1,5 +1,5 @@
-#ifndef _UTILS_PS4AUTHPROVIDER_H_
-#define _UTILS_PS4AUTHPROVIDER_H_
+#ifndef UTILS_PS4AUTHPROVIDER_H_
+#define UTILS_PS4AUTHPROVIDER_H_
 
 #include "mbedtls/pk.h"
 
@@ -36,4 +36,4 @@ class PS4AuthProvider {
 
 } // namespace Doncon::Utils
 
-#endif // _UTILS_PS4AUTHPROVIDER_H_
+#endif // UTILS_PS4AUTHPROVIDER_H_

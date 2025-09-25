@@ -1,5 +1,5 @@
-#ifndef _WS2812_H_
-#define _WS2812_h_
+#ifndef PIO_WS2812_WS2812_H_
+#define PIO_WS2812_WS2812_H_
 
 #include "pico/stdlib.h"
 
@@ -19,4 +19,4 @@ void ws2812_put_frame(uint32_t *frame, size_t length);
 }
 #endif
 
-#endif // _WS2812_H_
+#endif // PIO_WS2812_WS2812_H_

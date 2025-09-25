@@ -1,5 +1,5 @@
-#ifndef _USB_DEVICE_HID_COMMON_H_
-#define _USB_DEVICE_HID_COMMON_H_
+#ifndef USB_DEVICE_HID_COMMON_H_
+#define USB_DEVICE_HID_COMMON_H_
 
 #include "device/usbd_pvt.h"
 
@@ -13,4 +13,4 @@ extern const usbd_class_driver_t hid_app_driver;
 }
 #endif
 
-#endif // _USB_DEVICE_HID_COMMON_H_
+#endif // USB_DEVICE_HID_COMMON_H_

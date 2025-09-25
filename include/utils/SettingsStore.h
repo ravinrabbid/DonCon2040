@@ -1,5 +1,5 @@
-#ifndef _UTILS_SETTINGSSTORE_H_
-#define _UTILS_SETTINGSSTORE_H_
+#ifndef UTILS_SETTINGSSTORE_H_
+#define UTILS_SETTINGSSTORE_H_
 
 #include "peripherals/Drum.h"
 #include "usb/device_driver.h"
@@ -78,4 +78,4 @@ class SettingsStore {
 };
 } // namespace Doncon::Utils
 
-#endif // _UTILS_SETTINGSSTORE_H_
+#endif // UTILS_SETTINGSSTORE_H_

@@ -28,8 +28,8 @@ SOFTWARE.
  * simple driver for ssd1306 displays
  */
 
-#ifndef _inc_ssd1306
-#define _inc_ssd1306
+#ifndef PICO_SSD1306_SSD1306_H_
+#define PICO_SSD1306_SSD1306_H_
 #include <hardware/i2c.h>
 #include <pico/stdlib.h>
 
@@ -263,4 +263,4 @@ void ssd1306_draw_string(ssd1306_t *p, uint32_t x, uint32_t y, uint32_t scale, c
 }
 #endif
 
-#endif
+#endif // PICO_SSD1306_SSD1306_H_

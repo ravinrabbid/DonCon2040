@@ -1,5 +1,5 @@
-#ifndef _MCP3204_MCP3204DMA_H_
-#define _MCP3204_MCP3204DMA_H_
+#ifndef MCP3204_MCP3204DMA_H_
+#define MCP3204_MCP3204DMA_H_
 
 #include "hardware/spi.h"
 
@@ -19,4 +19,4 @@ class Mcp3204Dma {
     std::array<uint16_t, channel_count> take_maximums();
 };
 
-#endif // _MCP3204_MCP3204DMA_H_
+#endif // MCP3204_MCP3204DMA_H_

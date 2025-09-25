@@ -1,5 +1,5 @@
-#ifndef _USB_DEVICE_HID_PS4_AUTH_H_
-#define _USB_DEVICE_HID_PS4_AUTH_H_
+#ifndef USB_DEVICE_HID_PS4_AUTH_H_
+#define USB_DEVICE_HID_PS4_AUTH_H_
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -30,4 +30,4 @@ void ps4_auth_set_signed_challenge(const uint8_t singed_challenge[PS4_AUTH_CHALL
 }
 #endif
 
-#endif // _USB_DEVICE_HID_PS4_AUTH_H_
+#endif // USB_DEVICE_HID_PS4_AUTH_H_

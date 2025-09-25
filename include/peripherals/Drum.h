@@ -1,5 +1,5 @@
-#ifndef _PERIPHERALS_DRUM_H_
-#define _PERIPHERALS_DRUM_H_
+#ifndef PERIPHERALS_DRUM_H_
+#define PERIPHERALS_DRUM_H_
 
 #include "utils/InputState.h"
 
@@ -135,4 +135,4 @@ class Drum {
 
 } // namespace Doncon::Peripherals
 
-#endif // _PERIPHERALS_DRUM_H_
+#endif // PERIPHERALS_DRUM_H_

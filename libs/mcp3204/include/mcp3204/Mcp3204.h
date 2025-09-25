@@ -1,5 +1,5 @@
-#ifndef _MCP3204_MCP3204_H_
-#define _MCP3204_MCP3204_H_
+#ifndef MCP3204_MCP3204_H_
+#define MCP3204_MCP3204_H_
 
 #include "hardware/spi.h"
 
@@ -14,4 +14,4 @@ class Mcp3204 {
     uint16_t read(uint8_t channel);
 };
 
-#endif // _MCP3204_MCP3204_H_
+#endif // MCP3204_MCP3204_H_

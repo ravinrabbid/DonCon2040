@@ -1,5 +1,5 @@
-#ifndef _USB_DEVICE_VENDOR_DEBUG_DRIVER_H_
-#define _USB_DEVICE_VENDOR_DEBUG_DRIVER_H_
+#ifndef USB_DEVICE_VENDOR_DEBUG_DRIVER_H_
+#define USB_DEVICE_VENDOR_DEBUG_DRIVER_H_
 
 #include "usb/device_driver.h"
 
@@ -17,4 +17,4 @@ bool debug_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t
 }
 #endif
 
-#endif // _USB_DEVICE_VENDOR_DEBUG_DRIVER_H_
+#endif // USB_DEVICE_VENDOR_DEBUG_DRIVER_H_

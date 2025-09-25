@@ -1,5 +1,5 @@
-#ifndef _USB_DEVICE_HID_PS4_DRIVER_H_
-#define _USB_DEVICE_HID_PS4_DRIVER_H_
+#ifndef USB_DEVICE_HID_PS4_DRIVER_H_
+#define USB_DEVICE_HID_PS4_DRIVER_H_
 
 #include "usb/device_driver.h"
 
@@ -56,4 +56,4 @@ void hid_ps4_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
 }
 #endif
 
-#endif // _USB_DEVICE_HID_PS4_DRIVER_H_
+#endif // USB_DEVICE_HID_PS4_DRIVER_H_

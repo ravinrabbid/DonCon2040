@@ -1,5 +1,5 @@
-#ifndef _PERIPHERALS_STATUSLED_H_
-#define _PERIPHERALS_STATUSLED_H_
+#ifndef PERIPHERALS_STATUSLED_H_
+#define PERIPHERALS_STATUSLED_H_
 
 #include "utils/InputState.h"
 
@@ -51,4 +51,4 @@ class StatusLed {
 
 } // namespace Doncon::Peripherals
 
-#endif // _PERIPHERALS_STATUSLED_H_
+#endif // PERIPHERALS_STATUSLED_H_

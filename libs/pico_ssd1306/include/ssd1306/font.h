@@ -1,5 +1,5 @@
-#ifndef _inc_font
-#define _inc_font
+#ifndef PICO_SSD1306_FONT_H_
+#define PICO_SSD1306_FONT_H_
 
 /*
  * Format
@@ -107,4 +107,4 @@ const uint8_t font_8x5[] =
 			0x02, 0x01, 0x02, 0x04, 0x02,
 };
 
-#endif
+#endif // PICO_SSD1306_FONT_H_

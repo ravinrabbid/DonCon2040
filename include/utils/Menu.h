@@ -1,5 +1,5 @@
-#ifndef _UTILS_MENU_H_
-#define _UTILS_MENU_H_
+#ifndef UTILS_MENU_H_
+#define UTILS_MENU_H_
 
 #include "utils/InputState.h"
 #include "utils/SettingsStore.h"
@@ -141,4 +141,4 @@ class Menu {
 };
 } // namespace Doncon::Utils
 
-#endif // _UTILS_MENU_H_
+#endif // UTILS_MENU_H_

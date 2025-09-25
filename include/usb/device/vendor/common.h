@@ -1,5 +1,5 @@
-#ifndef _USB_DEVICE_VENDOR_COMMON_H_
-#define _USB_DEVICE_VENDOR_COMMON_H_
+#ifndef USB_DEVICE_VENDOR_COMMON_H_
+#define USB_DEVICE_VENDOR_COMMON_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -9,4 +9,4 @@ extern "C" {
 }
 #endif
 
-#endif // _USB_DEVICE_VENDOR_COMMON_H_
+#endif // USB_DEVICE_VENDOR_COMMON_H_

@@ -1,5 +1,5 @@
-#ifndef _GLOBALCONFIGURATION_H_
-#define _GLOBALCONFIGURATION_H_
+#ifndef GLOBALCONFIGURATION_H_
+#define GLOBALCONFIGURATION_H_
 
 #include "peripherals/Controller.h"
 #include "peripherals/Display.h"
@@ -47,6 +47,7 @@ const Peripherals::Drum::Config drum_config = {
         2000, // Don Right
         1500, // Ka Right
     },
+
     25,  // Debounce delay in milliseconds
     500, // Roll Counter Timeout in Milliseconds
 
@@ -136,4 +137,4 @@ const Peripherals::Display::Config display_config = {
 } // namespace Default
 } // namespace Doncon::Config
 
-#endif // _GLOBALCONFIGURATION_H_
+#endif // GLOBALCONFIGURATION_H_

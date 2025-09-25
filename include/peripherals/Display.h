@@ -1,5 +1,5 @@
-#ifndef _PERIPHERALS_DISPLAY_H_
-#define _PERIPHERALS_DISPLAY_H_
+#ifndef PERIPHERALS_DISPLAY_H_
+#define PERIPHERALS_DISPLAY_H_
 
 #include "usb/device_driver.h"
 #include "utils/InputState.h"
@@ -58,4 +58,4 @@ class Display {
 
 } // namespace Doncon::Peripherals
 
-#endif // _PERIPHERALS_DISPLAY_H_
+#endif // PERIPHERALS_DISPLAY_H_
