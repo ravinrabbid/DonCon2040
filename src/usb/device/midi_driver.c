@@ -27,8 +27,10 @@ enum {
     USBD_ITF_MAX,
 };
 
-#define EPNUM_MIDI_OUT 0x01
-#define EPNUM_MIDI_IN 0x01
+enum {
+    EPNUM_MIDI_OUT = 0x01,
+    EPNUM_MIDI_IN = 0x01,
+};
 
 #define USBD_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_MIDI_DESC_LEN)
 
@@ -96,11 +98,14 @@ static const usbd_class_driver_t midi_app_driver = {
     .xfer_cb = midid_xfer_cb,
     .sof = NULL};
 
-const usbd_driver_t midi_device_driver = {
-    .name = "MIDI",
-    .app_driver = &midi_app_driver,
-    .desc_device = &midi_desc_device,
-    .desc_cfg = midi_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_midi_report,
-};
+const usbd_driver_t *get_midi_device_driver() {
+    static const usbd_driver_t midi_device_driver = {
+        .name = "MIDI",
+        .app_driver = &midi_app_driver,
+        .desc_device = &midi_desc_device,
+        .desc_cfg = midi_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_midi_report,
+    };
+    return &midi_device_driver;
+}

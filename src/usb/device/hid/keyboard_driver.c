@@ -50,7 +50,7 @@ uint8_t const keyboard_desc_cfg[] = {
                        CFG_TUD_HID_EP_BUFSIZE, 1),
 };
 
-static hid_keyboard_report_t last_report = {};
+static hid_nkro_keyboard_report_t last_report = {};
 
 bool send_hid_keyboard_report(usb_report_t report) {
     bool result = false;
@@ -71,8 +71,8 @@ uint16_t hid_keyboard_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_t
     (void)reqlen;
 
     if (report_type == HID_REPORT_TYPE_INPUT) {
-        memcpy(buffer, &last_report, sizeof(hid_keyboard_report_t));
-        return sizeof(hid_keyboard_report_t);
+        memcpy(buffer, &last_report, sizeof(hid_nkro_keyboard_report_t));
+        return sizeof(hid_nkro_keyboard_report_t);
     }
     return 0;
 }
@@ -86,11 +86,14 @@ void hid_keyboard_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_
     (void)bufsize;
 }
 
-const usbd_driver_t hid_keyboard_device_driver = {
-    .name = "Keyboard",
-    .app_driver = &hid_app_driver,
-    .desc_device = &keyboard_desc_device,
-    .desc_cfg = keyboard_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_hid_keyboard_report,
-};
+const usbd_driver_t *get_hid_keyboard_device_driver() {
+    static const usbd_driver_t hid_keyboard_device_driver = {
+        .name = "Keyboard",
+        .app_driver = &hid_app_driver,
+        .desc_device = &keyboard_desc_device,
+        .desc_cfg = keyboard_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_hid_keyboard_report,
+    };
+    return &hid_keyboard_device_driver;
+}

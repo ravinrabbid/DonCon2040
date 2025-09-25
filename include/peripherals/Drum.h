@@ -18,7 +18,7 @@ namespace Doncon::Peripherals {
 class Drum {
   public:
     struct Config {
-        struct Thresholds {
+        struct __attribute((packed, aligned(1))) Thresholds {
             uint16_t don_left;
             uint16_t ka_left;
             uint16_t don_right;
@@ -87,8 +87,11 @@ class Drum {
         void setState(const bool state, const uint16_t debounce_delay);
     };
 
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions): Class has no members
     class AdcInterface {
       public:
+        virtual ~AdcInterface() = default;
+
         // Those are expected to be 12bit values
         virtual std::array<uint16_t, 4> read() = 0;
     };

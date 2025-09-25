@@ -1,5 +1,3 @@
-#include "usb/device/vendor/common.h"
-
 #include "usb/device/vendor/debug_driver.h"
 #include "usb/device/vendor/xinput_driver.h"
 #include "usb/device_driver.h"
@@ -16,6 +14,7 @@ bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_requ
     case USB_MODE_DEBUG:
         return debug_control_xfer_cb(rhport, stage, request);
     default:
+        break;
     }
 
     return false;

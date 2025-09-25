@@ -27,15 +27,18 @@ enum {
     USBD_ITF_MAX,
 };
 
-#define XINPUT_INTERFACE_SUBCLASS 0x5D
-#define XINPUT_INTERFACE_PROTOCOL 0x01
-#define XINPUT_DESC_VENDOR 0x21
+enum {
+    XINPUT_INTERFACE_SUBCLASS = 0x5D,
+    XINPUT_INTERFACE_PROTOCOL = 0x01,
+    XINPUT_DESC_VENDOR = 0x21,
+};
 
-#define TUD_XINPUT_EP_BUFSIZE 32
-#define TUD_XINPUT_EP_OUT 0x01
-#define TUD_XINPUT_EP_IN 0x81
-
-#define TUD_XINPUT_DESC_LEN (9 + 16 + 7 + 7)
+enum {
+    TUD_XINPUT_EP_BUFSIZE = 32,
+    TUD_XINPUT_EP_OUT = 0x01,
+    TUD_XINPUT_EP_IN = 0x81,
+    TUD_XINPUT_DESC_LEN = 9 + 16 + 7 + 7,
+};
 
 #define TUD_XINPUT_DESCRIPTOR(_itfnum, _stridx, _epout, _epin, _epsize)                                                \
     9, TUSB_DESC_INTERFACE, _itfnum, 0, 2, TUSB_CLASS_VENDOR_SPECIFIC, XINPUT_INTERFACE_SUBCLASS,                      \
@@ -68,10 +71,10 @@ typedef struct {
     CFG_TUSB_MEM_ALIGN uint8_t epout_buf[TUD_XINPUT_EP_BUFSIZE];
 } xinput_interface_t;
 
-CFG_TUSB_MEM_SECTION static xinput_interface_t _xinput_itf;
+CFG_TUSB_MEM_SECTION static xinput_interface_t xinput_itf;
 
 static bool xinput_ready() {
-    uint8_t const ep_in = _xinput_itf.ep_in;
+    uint8_t const ep_in = xinput_itf.ep_in;
 
     return tud_ready() && (ep_in != 0) && !usbd_edpt_busy(0, ep_in);
 }
@@ -81,12 +84,12 @@ bool send_xinput_report(usb_report_t report) {
         return false;
     }
 
-    TU_VERIFY(usbd_edpt_claim(0, _xinput_itf.ep_in));
+    TU_VERIFY(usbd_edpt_claim(0, xinput_itf.ep_in));
 
     uint16_t size = tu_min16(report.size, TUD_XINPUT_EP_BUFSIZE);
-    memcpy(_xinput_itf.epin_buf, report.data, size);
+    memcpy(xinput_itf.epin_buf, report.data, size);
 
-    return usbd_edpt_xfer(0, _xinput_itf.ep_in, _xinput_itf.epin_buf, size);
+    return usbd_edpt_xfer(0, xinput_itf.ep_in, xinput_itf.epin_buf, size);
 }
 
 static bool receive_xinput_report(uint8_t const *buf, uint32_t size) {
@@ -163,6 +166,7 @@ static bool receive_xinput_report(uint8_t const *buf, uint32_t size) {
         usbd_driver_get_player_led_cb()(player_led);
     }
     default:
+        break;
     }
 
     return false;
@@ -171,7 +175,7 @@ static bool receive_xinput_report(uint8_t const *buf, uint32_t size) {
 static void xinput_reset(uint8_t rhport) {
     (void)rhport;
 
-    tu_memclr(&_xinput_itf, sizeof(_xinput_itf));
+    tu_memclr(&xinput_itf, sizeof(xinput_itf));
 }
 
 static void xinput_init(void) { xinput_reset(0); }
@@ -180,10 +184,10 @@ static uint16_t xinput_open(uint8_t rhport, tusb_desc_interface_t const *desc_it
     TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == desc_itf->bInterfaceClass, 0);
 
     uint16_t const drv_len =
-        (uint16_t)(sizeof(tusb_desc_interface_t) + desc_itf->bNumEndpoints * sizeof(tusb_desc_endpoint_t) + 16);
+        (uint16_t)(sizeof(tusb_desc_interface_t) + (desc_itf->bNumEndpoints * sizeof(tusb_desc_endpoint_t)) + 16);
     TU_ASSERT(max_len >= drv_len, 0);
 
-    _xinput_itf.itf_num = desc_itf->bInterfaceNumber;
+    xinput_itf.itf_num = desc_itf->bInterfaceNumber;
 
     // Unknown vendor specific descriptor
     uint8_t const *p_desc = tu_desc_next(desc_itf);
@@ -191,12 +195,12 @@ static uint16_t xinput_open(uint8_t rhport, tusb_desc_interface_t const *desc_it
 
     // Endpoint descriptors
     p_desc = tu_desc_next(p_desc);
-    TU_ASSERT(usbd_open_edpt_pair(rhport, p_desc, desc_itf->bNumEndpoints, TUSB_XFER_INTERRUPT, &_xinput_itf.ep_out,
-                                  &_xinput_itf.ep_in),
+    TU_ASSERT(usbd_open_edpt_pair(rhport, p_desc, desc_itf->bNumEndpoints, TUSB_XFER_INTERRUPT, &xinput_itf.ep_out,
+                                  &xinput_itf.ep_in),
               0);
 
-    if (_xinput_itf.ep_out) {
-        TU_ASSERT(usbd_edpt_xfer(rhport, _xinput_itf.ep_out, _xinput_itf.epout_buf, sizeof(_xinput_itf.epout_buf)), 0);
+    if (xinput_itf.ep_out) {
+        TU_ASSERT(usbd_edpt_xfer(rhport, xinput_itf.ep_out, xinput_itf.epout_buf, sizeof(xinput_itf.epout_buf)), 0);
     }
 
     return drv_len;
@@ -205,8 +209,9 @@ static uint16_t xinput_open(uint8_t rhport, tusb_desc_interface_t const *desc_it
 bool xinput_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const *request) {
     (void)rhport;
 
-    if (stage != CONTROL_STAGE_SETUP)
+    if (stage != CONTROL_STAGE_SETUP) {
         return true;
+    }
 
     // This is mainly to suppress a warning from the linux kernel:
     // https://github.com/torvalds/linux/blob/master/drivers/input/joystick/xpad.c#L1756
@@ -218,7 +223,7 @@ bool xinput_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_
     }
 
     uint8_t *dummy_data = calloc(request->wLength, sizeof(uint8_t));
-    bool success = tud_control_xfer(rhport, request, (void *)(uintptr_t)dummy_data, request->wLength);
+    bool success = tud_control_xfer(rhport, request, (void *)dummy_data, request->wLength);
     free(dummy_data);
 
     return success;
@@ -227,9 +232,9 @@ bool xinput_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_
 static bool xinput_xfer_cb(uint8_t rhport, uint8_t ep_addr, xfer_result_t result, uint32_t xferred_bytes) {
     TU_ASSERT(result == XFER_RESULT_SUCCESS);
 
-    if (ep_addr == _xinput_itf.ep_out) {
-        receive_xinput_report(_xinput_itf.epout_buf, xferred_bytes);
-        TU_ASSERT(usbd_edpt_xfer(rhport, _xinput_itf.ep_out, _xinput_itf.epout_buf, sizeof(_xinput_itf.epout_buf)));
+    if (ep_addr == xinput_itf.ep_out) {
+        receive_xinput_report(xinput_itf.epout_buf, xferred_bytes);
+        TU_ASSERT(usbd_edpt_xfer(rhport, xinput_itf.ep_out, xinput_itf.epout_buf, sizeof(xinput_itf.epout_buf)));
     }
 
     return true;
@@ -246,11 +251,14 @@ static const usbd_class_driver_t xinput_app_driver = {
     .xfer_cb = xinput_xfer_cb,
     .sof = NULL};
 
-const usbd_driver_t xinput_device_driver = {
-    .name = "XInput",
-    .app_driver = &xinput_app_driver,
-    .desc_device = &xinput_desc_device,
-    .desc_cfg = xinput_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_xinput_report,
-};
+const usbd_driver_t *get_xinput_device_driver() {
+    static const usbd_driver_t xinput_device_driver = {
+        .name = "XInput",
+        .app_driver = &xinput_app_driver,
+        .desc_device = &xinput_desc_device,
+        .desc_cfg = xinput_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_xinput_report,
+    };
+    return &xinput_device_driver;
+}

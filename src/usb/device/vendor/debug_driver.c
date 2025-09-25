@@ -7,11 +7,13 @@
 #include "pico/usb_reset_interface.h"
 #include "tusb.h"
 
-#define USBD_CDC_EP_CMD (0x81)
-#define USBD_CDC_EP_OUT (0x02)
-#define USBD_CDC_EP_IN (0x82)
-#define USBD_CDC_CMD_MAX_SIZE (8)
-#define USBD_CDC_IN_OUT_MAX_SIZE (64)
+enum {
+    USBD_CDC_EP_CMD = 0x81,
+    USBD_CDC_EP_OUT = 0x02,
+    USBD_CDC_EP_IN = 0x82,
+    USBD_CDC_CMD_MAX_SIZE = 8,
+    USBD_CDC_IN_OUT_MAX_SIZE = 64,
+};
 
 const tusb_desc_device_t debug_desc_device = {
     .bLength = sizeof(tusb_desc_device_t),
@@ -37,7 +39,12 @@ enum {
     USBD_ITF_MAX,
 };
 
-#define TUD_RPI_RESET_DESC_LEN 9
+enum {
+    TUD_RPI_RESET_DESC_LEN = 9,
+    TUD_DEBUG_MS_OS_20_DESC_LEN = 166,
+    TUD_PDLOADER_BOS_VENDOR_REQUEST_MICROSOFT = 1,
+};
+
 #define USBD_DESC_LEN (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_RPI_RESET_DESC_LEN)
 #define TUD_RPI_RESET_DESCRIPTOR(_itfnum, _stridx)                                                                     \
     9, TUSB_DESC_INTERFACE, _itfnum, 0, 0, TUSB_CLASS_VENDOR_SPECIFIC, RESET_INTERFACE_SUBCLASS,                       \
@@ -49,8 +56,6 @@ const uint8_t debug_desc_cfg[USBD_DESC_LEN] = {
                        USBD_CDC_IN_OUT_MAX_SIZE),
     TUD_RPI_RESET_DESCRIPTOR(USBD_ITF_RPI_RESET, 0),
 };
-
-#define TUD_DEBUG_MS_OS_20_DESC_LEN 166
 
 static const uint8_t debug_desc_ms_os_20[] = {
     // Set header: length, type, windows version, total length
@@ -75,7 +80,6 @@ static const uint8_t debug_desc_ms_os_20[] = {
     0, '4', 0, 'c', 0, 'b', 0, '7', 0, '-', 0, '9', 0, '8', 0, 'b', 0, '8', 0, '-', 0, '9', 0, '1', 0, '3', 0, 'a', 0,
     '8', 0, 'f', 0, 'c', 0, 'a', 0, '7', 0, 'b', 0, 'f', 0, '6', 0, '}', 0, 0, 0};
 
-#define TUD_PDLOADER_BOS_VENDOR_REQUEST_MICROSOFT 1
 #define TUD_DEBUG_BOS_TOTAL_LEN (TUD_BOS_DESC_LEN + TUD_BOS_MICROSOFT_OS_DESC_LEN)
 
 const uint8_t debug_desc_bos[] = {
@@ -117,13 +121,16 @@ static uint16_t debug_open(uint8_t rhport, tusb_desc_interface_t const *itf_desc
 // Support for parameterized reset via vendor interface control request
 bool debug_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const *request) {
     // nothing to do with DATA & ACK stage
-    if (stage != CONTROL_STAGE_SETUP)
+    if (stage != CONTROL_STAGE_SETUP) {
         return true;
+    }
 
     if (request->bRequest == 1 && request->wIndex == 7) {
         // Get Microsoft OS 2.0 compatible descriptor
-        return tud_control_xfer(rhport, request, (void *)(uintptr_t)debug_desc_ms_os_20, sizeof(debug_desc_ms_os_20));
-    } else if (request->wIndex == itf_num) {
+        return tud_control_xfer(rhport, request, (void *)debug_desc_ms_os_20, sizeof(debug_desc_ms_os_20));
+    }
+
+    if (request->wIndex == itf_num) {
         if (request->bRequest == RESET_REQUEST_BOOTSEL) {
             reset_usb_boot(0, (request->wValue & 0x7f) | PICO_STDIO_USB_RESET_BOOTSEL_INTERFACE_DISABLE_MASK);
             // does not return, otherwise we'd return true
@@ -158,14 +165,17 @@ static usbd_class_driver_t const debug_app_driver = {
     .xfer_cb = debug_xfer_cb,
     .sof = NULL};
 
-const usbd_driver_t debug_device_driver = {
-    .name = "Debug",
-    .app_driver = &debug_app_driver,
-    .desc_device = &debug_desc_device,
-    .desc_cfg = debug_desc_cfg,
-    .desc_bos = debug_desc_bos,
-    .send_report = send_debug_report,
-};
+const usbd_driver_t *get_debug_device_driver() {
+    static const usbd_driver_t debug_device_driver = {
+        .name = "Debug",
+        .app_driver = &debug_app_driver,
+        .desc_device = &debug_desc_device,
+        .desc_cfg = debug_desc_cfg,
+        .desc_bos = debug_desc_bos,
+        .send_report = send_debug_report,
+    };
+    return &debug_device_driver;
+}
 
 // Support for default BOOTSEL reset by changing baud rate
 void tud_cdc_line_coding_cb(uint8_t itf, cdc_line_coding_t const *p_line_coding) {

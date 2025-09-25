@@ -6,7 +6,9 @@
 
 #include <string.h>
 
-#define CHALLENGE_CHUNK_LENGTH (56)
+enum {
+    CHALLENGE_CHUNK_LENGTH = 56,
+};
 
 typedef struct __attribute((packed, aligned(1))) {
     uint8_t report_id;
@@ -52,14 +54,6 @@ static const uint32_t crc32_table[] = {0x00000000, 0x1db71064, 0x3b6e20c8, 0x26d
 
 static ps4_auth_state_t auth_state = {};
 
-static int const_rng(void *p_rng, unsigned char *p, size_t len) {
-    (void)p_rng;
-
-    memset(p, 0x39, len);
-
-    return 0;
-}
-
 static uint32_t crc32(const uint8_t *data, size_t length) {
     uint32_t crc = ~0L;
 
@@ -73,6 +67,14 @@ static uint32_t crc32(const uint8_t *data, size_t length) {
     }
 
     return ~crc;
+}
+
+static int const_rng(void *p_rng, unsigned char *p, size_t len) {
+    (void)p_rng;
+
+    memset(p, 0x39, len);
+
+    return 0;
 }
 
 void ps4_auth_init(const char *private_key, size_t private_key_len, const uint8_t serial[PS4_AUTH_SERIAL_LENGTH],

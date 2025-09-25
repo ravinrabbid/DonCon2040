@@ -25,7 +25,7 @@ typedef struct __attribute((packed, aligned(1))) {
     } velocity;
 } midi_report_t;
 
-extern const usbd_driver_t midi_device_driver;
+const usbd_driver_t *get_midi_device_driver();
 
 #ifdef __cplusplus
 }

@@ -19,20 +19,22 @@ Drum::InternalAdc::InternalAdc(const Config::InternalAdc &config) : m_config(con
 }
 
 std::array<uint16_t, 4> Drum::InternalAdc::read() {
+    if (m_config.sample_count == 0) {
+        return {};
+    }
+
     // Oversample ADC inputs to get rid of ADC noise
     std::array<uint32_t, 4> values{};
     for (uint8_t sample_number = 0; sample_number < m_config.sample_count; ++sample_number) {
         for (size_t idx = 0; idx < values.size(); ++idx) {
             adc_select_input(idx);
-            values[idx] += adc_read();
+            values.at(idx) += adc_read();
         }
     }
 
     // Take average of all samples
     std::array<uint16_t, 4> result{};
-    for (size_t idx = 0; idx < values.size(); ++idx) {
-        result[idx] = values[idx] / m_config.sample_count;
-    }
+    std::ranges::transform(values, result.begin(), [&](const auto &sample) { return sample / m_config.sample_count; });
 
     return result;
 }

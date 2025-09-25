@@ -128,20 +128,28 @@ void hid_switch_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t 
     (void)buffer;
 }
 
-const usbd_driver_t hid_switch_horipad_device_driver = {
-    .name = "Switch",
-    .app_driver = &hid_app_driver,
-    .desc_device = &switch_horipad_desc_device,
-    .desc_cfg = switch_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_hid_switch_report,
-};
+const usbd_driver_t *get_hid_switch_horipad_device_driver() {
+    static const usbd_driver_t hid_switch_horipad_device_driver = {
+        .name = "Switch",
+        .app_driver = &hid_app_driver,
+        .desc_device = &switch_horipad_desc_device,
+        .desc_cfg = switch_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_hid_switch_report,
+    };
 
-const usbd_driver_t hid_switch_tatacon_device_driver = {
-    .name = "Switch Tatacon",
-    .app_driver = &hid_app_driver,
-    .desc_device = &switch_tatacon_desc_device,
-    .desc_cfg = switch_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_hid_switch_report,
-};
+    return &hid_switch_horipad_device_driver;
+}
+
+const usbd_driver_t *get_hid_switch_tatacon_device_driver() {
+    static const usbd_driver_t hid_switch_tatacon_device_driver = {
+        .name = "Switch Tatacon",
+        .app_driver = &hid_app_driver,
+        .desc_device = &switch_tatacon_desc_device,
+        .desc_cfg = switch_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_hid_switch_report,
+    };
+
+    return &hid_switch_tatacon_device_driver;
+}

@@ -14,10 +14,12 @@
 
 #include <string.h>
 
-#define DESC_STR_MAX (127)
+enum {
+    DESC_STR_MAX = 127,
+};
 
 static usb_mode_t usbd_mode = USB_MODE_DEBUG;
-static usbd_driver_t usbd_driver = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static const usbd_driver_t *usbd_driver = NULL;
 static usbd_player_led_cb_t usbd_player_led_cb = NULL;
 
 #define USBD_SERIAL_STR_SIZE (PICO_UNIQUE_BOARD_ID_SIZE_BYTES * 2 + 1 + 3)
@@ -35,34 +37,34 @@ void usbd_driver_init(usb_mode_t mode) {
 
     switch (mode) {
     case USB_MODE_SWITCH_TATACON:
-        usbd_driver = hid_switch_tatacon_device_driver;
+        usbd_driver = get_hid_switch_tatacon_device_driver();
         break;
     case USB_MODE_SWITCH_HORIPAD:
-        usbd_driver = hid_switch_horipad_device_driver;
+        usbd_driver = get_hid_switch_horipad_device_driver();
         break;
     case USB_MODE_DUALSHOCK3:
-        usbd_driver = hid_ds3_device_driver;
+        usbd_driver = get_hid_ds3_device_driver();
         break;
     case USB_MODE_PS4_TATACON:
-        usbd_driver = hid_ps4_tatacon_device_driver;
+        usbd_driver = get_hid_ps4_tatacon_device_driver();
         break;
     case USB_MODE_DUALSHOCK4:
-        usbd_driver = hid_ds4_device_driver;
+        usbd_driver = get_hid_ds4_device_driver();
         break;
     case USB_MODE_KEYBOARD_P1:
     case USB_MODE_KEYBOARD_P2:
-        usbd_driver = hid_keyboard_device_driver;
+        usbd_driver = get_hid_keyboard_device_driver();
         break;
     case USB_MODE_XBOX360_ANALOG_P1:
     case USB_MODE_XBOX360_ANALOG_P2:
     case USB_MODE_XBOX360:
-        usbd_driver = xinput_device_driver;
+        usbd_driver = get_xinput_device_driver();
         break;
     case USB_MODE_MIDI:
-        usbd_driver = midi_device_driver;
+        usbd_driver = get_midi_device_driver();
         break;
     case USB_MODE_DEBUG:
-        usbd_driver = debug_device_driver;
+        usbd_driver = get_debug_device_driver();
         break;
     }
 
@@ -86,20 +88,20 @@ void usbd_driver_send_report(usb_report_t report) {
         tud_remote_wakeup();
     }
 
-    if (usbd_driver.send_report) {
-        usbd_driver.send_report(report);
+    if (usbd_driver->send_report) {
+        usbd_driver->send_report(report);
     }
 }
 
 void usbd_driver_set_player_led_cb(usbd_player_led_cb_t cb) { usbd_player_led_cb = cb; };
 usbd_player_led_cb_t usbd_driver_get_player_led_cb() { return usbd_player_led_cb; };
 
-const uint8_t *tud_descriptor_device_cb(void) { return (const uint8_t *)usbd_driver.desc_device; }
+const uint8_t *tud_descriptor_device_cb(void) { return (const uint8_t *)usbd_driver->desc_device; }
 
 const uint8_t *tud_descriptor_configuration_cb(uint8_t index) {
     (void)index;
 
-    return usbd_driver.desc_cfg;
+    return usbd_driver->desc_cfg;
 }
 
 const uint16_t *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
@@ -117,13 +119,13 @@ const uint16_t *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     }
 
     if (!usbd_product_str[0]) {
-        strcpy(usbd_product_str, USBD_PRODUCT_BASE);
-        strcat(usbd_product_str, " (");
-        strcat(usbd_product_str, usbd_driver.name);
-        strcat(usbd_product_str, ")");
+        strlcpy(usbd_product_str, USBD_PRODUCT_BASE, DESC_STR_MAX);
+        strlcat(usbd_product_str, " (", DESC_STR_MAX);
+        strlcat(usbd_product_str, usbd_driver->name, DESC_STR_MAX);
+        strlcat(usbd_product_str, ")", DESC_STR_MAX);
     }
 
-    uint8_t len;
+    uint8_t len = 0;
     if (index == USBD_STR_LANGUAGE) {
         desc_str[1] = 0x0409; // Supported language is English
         len = 1;
@@ -143,10 +145,10 @@ const uint16_t *tud_descriptor_string_cb(uint8_t index, uint16_t langid) {
     return desc_str;
 }
 
-uint8_t const *tud_descriptor_bos_cb(void) { return usbd_driver.desc_bos; }
+uint8_t const *tud_descriptor_bos_cb(void) { return usbd_driver->desc_bos; }
 
 // Implement callback to add our custom driver
 const usbd_class_driver_t *usbd_app_driver_get_cb(uint8_t *driver_count) {
     *driver_count = 1;
-    return usbd_driver.app_driver;
+    return usbd_driver->app_driver;
 }

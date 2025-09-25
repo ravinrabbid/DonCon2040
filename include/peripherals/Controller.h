@@ -96,8 +96,10 @@ class Controller {
         Id lastHorizontal;
     };
 
+    // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions): Class has no members
     class GpioInterface {
       public:
+        virtual ~GpioInterface() = default;
         virtual uint32_t read() = 0;
     };
 

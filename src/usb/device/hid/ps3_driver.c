@@ -132,7 +132,7 @@ static const uint8_t ps3_report_0x01[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-static int8_t ps3_report_0xef[] = {
+static uint8_t ps3_report_0xef[] = {
     0xef, 0x04, 0x00, 0x0b, 0x03, 0x01, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x01, 0xff, 0x01, 0xff, 0x01, 0xff, 0x01, 0xff, 0x01, 0xff, 0x01, 0xff, 0x01, 0xff, 0x01, 0xff,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06,
@@ -171,7 +171,9 @@ uint16_t hid_ps3_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t
     if (report_type == HID_REPORT_TYPE_INPUT) {
         memcpy(buffer, &last_report, sizeof(hid_ps3_report_t));
         return sizeof(hid_ps3_report_t);
-    } else if (report_type == HID_REPORT_TYPE_FEATURE) {
+    }
+
+    if (report_type == HID_REPORT_TYPE_FEATURE) {
         switch (report_id) {
         case 0x01:
             memcpy(buffer, ps3_report_0x01, sizeof(ps3_report_0x01));
@@ -201,6 +203,7 @@ uint16_t hid_ps3_get_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t
             memcpy(buffer, ps3_report_0xf8, sizeof(ps3_report_0xf8));
             return sizeof(ps3_report_0xf8);
         default:
+            break;
         }
     }
     return 0;
@@ -223,6 +226,8 @@ void hid_ps3_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
         case 0xef:
             ps3_report_0xef[6] = buffer[6];
             ps3_report_0xf8[6] = buffer[6];
+            break;
+        default:
             break;
         }
     } break;
@@ -247,26 +252,28 @@ void hid_ps3_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t rep
                 hid_ps3_ouput_report_t *report = (hid_ps3_ouput_report_t *)buffer;
 
                 usb_player_led_t player_led = {.type = USB_PLAYER_LED_ID, .id = 0};
-                player_led.id = 0 | ((report->leds_bitmap & 0x02) ? (1 << 0) : 0) //
-                                | ((report->leds_bitmap & 0x04) ? (1 << 1) : 0)   //
-                                | ((report->leds_bitmap & 0x08) ? (1 << 2) : 0)   //
-                                | ((report->leds_bitmap & 0x10) ? (1 << 3) : 0);
+                player_led.id = (report->leds_bitmap >> 1) & 0x0F;
 
                 usbd_driver_get_player_led_cb()(player_led);
             }
         } break;
         default:
+            break;
         }
     } break;
     default:
+        break;
     }
 }
 
-const usbd_driver_t hid_ds3_device_driver = {
-    .name = "DS3",
-    .app_driver = &hid_app_driver,
-    .desc_device = &ds3_desc_device,
-    .desc_cfg = ps3_desc_cfg,
-    .desc_bos = NULL,
-    .send_report = send_hid_ps3_report,
-};
+const usbd_driver_t *get_hid_ds3_device_driver() {
+    static const usbd_driver_t hid_ds3_device_driver = {
+        .name = "DS3",
+        .app_driver = &hid_app_driver,
+        .desc_device = &ds3_desc_device,
+        .desc_cfg = ps3_desc_cfg,
+        .desc_bos = NULL,
+        .send_report = send_hid_ps3_report,
+    };
+    return &hid_ds3_device_driver;
+}
