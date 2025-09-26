@@ -9,6 +9,7 @@
 
 #include <array>
 #include <cstdint>
+#include <deque>
 #include <map>
 #include <memory>
 #include <variant>
@@ -75,9 +76,15 @@ class Drum {
 
     class Pad {
       private:
+        struct analog_buffer_entry {
+            uint16_t value;
+            uint32_t timestamp;
+        };
+
         uint8_t m_channel;
         uint32_t m_last_change{0};
         bool m_active{false};
+        std::deque<analog_buffer_entry> m_analog_buffer;
 
       public:
         Pad(uint8_t channel);
@@ -85,6 +92,31 @@ class Drum {
         [[nodiscard]] uint8_t getChannel() const { return m_channel; };
         [[nodiscard]] bool getState() const { return m_active; };
         void setState(bool state, uint16_t debounce_delay);
+        uint16_t getAnalog();
+        void setAnalog(uint16_t value, uint16_t debounce_delay);
+    };
+
+    class RollCounter {
+      private:
+        uint32_t m_timeout_ms;
+
+        uint32_t m_last_hit_time{0};
+        uint16_t m_current_roll{0};
+        uint16_t m_previous_roll{0};
+
+        struct {
+            bool don_left;
+            bool ka_left;
+            bool don_right;
+            bool ka_right;
+        } m_previous_pad_state{};
+
+      public:
+        RollCounter(uint32_t timeout_ms);
+        void update(Utils::InputState &input_state);
+
+        [[nodiscard]] uint16_t getCurrentRoll() const { return m_current_roll; };
+        [[nodiscard]] uint16_t getPreviousRoll() const { return m_previous_roll; };
     };
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions): Class has no members
@@ -117,8 +149,8 @@ class Drum {
     Config m_config;
     std::unique_ptr<AdcInterface> m_adc;
     std::map<Id, Pad> m_pads;
+    RollCounter m_roll_counter;
 
-    void updateRollCounter(Utils::InputState &input_state) const;
     void updateDigitalInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     void updateAnalogInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     std::map<Id, uint16_t> readInputs();

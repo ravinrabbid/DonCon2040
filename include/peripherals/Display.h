@@ -36,6 +36,7 @@ class Display {
     Utils::Menu::State m_menu_state{};
 
     ssd1306_t m_display{};
+    uint32_t m_next_frame_time{0};
 
     void drawIdleScreen();
     void drawMenuScreen();

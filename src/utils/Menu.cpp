@@ -4,102 +4,6 @@
 
 namespace Doncon::Utils {
 
-namespace {
-
-InputState::Controller checkPressed(const InputState::Controller &controller_state) {
-    struct ButtonState {
-        enum State : uint8_t {
-            Idle,
-            RepeatDelay,
-            Repeat,
-            FastRepeat,
-        };
-        State state;
-        uint32_t pressed_since;
-        uint32_t last_repeat;
-    };
-
-    static const uint32_t repeat_delay = 1000;
-    static const uint32_t repeat_interval = 20;
-    static const uint32_t fast_repeat_delay = 5000;
-    static const uint32_t fast_repeat_interval = 2;
-
-    static const ButtonState state_default = {.state = ButtonState::State::Idle, .pressed_since = 0, .last_repeat = 0};
-    static ButtonState state_north = state_default;
-    static ButtonState state_east = state_default;
-    static ButtonState state_south = state_default;
-    static ButtonState state_west = state_default;
-
-    static ButtonState state_up = state_default;
-    static ButtonState state_down = state_default;
-    static ButtonState state_left = state_default;
-    static ButtonState state_right = state_default;
-
-    InputState::Controller result{};
-
-    auto handle_button = [](ButtonState &button_state, bool input_state) {
-        bool result = false;
-        if (input_state) {
-            const uint32_t now = to_ms_since_boot(get_absolute_time());
-            switch (button_state.state) {
-            case ButtonState::State::Idle:
-                result = true;
-                button_state.state = ButtonState::State::RepeatDelay;
-                button_state.pressed_since = now;
-                break;
-            case ButtonState::State::RepeatDelay:
-                if ((now - button_state.pressed_since) > repeat_delay) {
-                    result = true;
-                    button_state.state = ButtonState::State::Repeat;
-                    button_state.last_repeat = now;
-                } else {
-                    result = false;
-                }
-                break;
-            case ButtonState::State::Repeat:
-                if ((now - button_state.pressed_since) > fast_repeat_delay) {
-                    result = true;
-                    button_state.state = ButtonState::State::FastRepeat;
-                    button_state.last_repeat = now;
-                } else if ((now - button_state.last_repeat) > repeat_interval) {
-                    result = true;
-                    button_state.last_repeat = now;
-                } else {
-                    result = false;
-                }
-                break;
-            case ButtonState::State::FastRepeat:
-                if ((now - button_state.last_repeat) > fast_repeat_interval) {
-                    result = true;
-                    button_state.last_repeat = now;
-                } else {
-                    result = false;
-                }
-                break;
-            }
-        } else {
-            result = false;
-            button_state.state = ButtonState::State::Idle;
-        }
-
-        return result;
-    };
-
-    result.buttons.north = handle_button(state_north, controller_state.buttons.north);
-    result.buttons.east = handle_button(state_east, controller_state.buttons.east);
-    result.buttons.south = handle_button(state_south, controller_state.buttons.south);
-    result.buttons.west = handle_button(state_west, controller_state.buttons.west);
-
-    result.dpad.up = handle_button(state_up, controller_state.dpad.up);
-    result.dpad.down = handle_button(state_down, controller_state.dpad.down);
-    result.dpad.left = handle_button(state_left, controller_state.dpad.left);
-    result.dpad.right = handle_button(state_right, controller_state.dpad.right);
-
-    return result;
-}
-
-} // namespace
-
 // NOLINTBEGIN(modernize-use-designated-initializers)
 const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
     {Menu::Page::Main,                                            //
@@ -256,6 +160,70 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       0}},                                           //
 };
 // NOLINTEND(modernize-use-designated-initializers)
+
+Menu::Buttons::Buttons()
+    : m_states({{Id::Up, {}}, {Id::Down, {}}, {Id::Left, {}}, {Id::Right, {}}, {Id::Confirm, {}}, {Id::Back, {}}}) {}
+
+void Menu::Buttons::update(const InputState::Controller &controller_state) {
+    static const uint32_t repeat_delay = 1000;
+    static const uint32_t repeat_interval = 20;
+    static const uint32_t fast_repeat_delay = 5000;
+    static const uint32_t fast_repeat_interval = 2;
+
+    auto handle_button = [](State &button_state, bool input_state) {
+        if (input_state) {
+            const uint32_t now = to_ms_since_boot(get_absolute_time());
+            switch (button_state.repeat) {
+            case State::Repeat::Idle:
+                button_state.pressed = true;
+                button_state.repeat = State::Repeat::RepeatDelay;
+                button_state.pressed_since = now;
+                break;
+            case State::Repeat::RepeatDelay:
+                if ((now - button_state.pressed_since) > repeat_delay) {
+                    button_state.pressed = true;
+                    button_state.repeat = State::Repeat::Repeat;
+                    button_state.last_repeat = now;
+                } else {
+                    button_state.pressed = false;
+                }
+                break;
+            case State::Repeat::Repeat:
+                if ((now - button_state.pressed_since) > fast_repeat_delay) {
+                    button_state.pressed = true;
+                    button_state.repeat = State::Repeat::FastRepeat;
+                    button_state.last_repeat = now;
+                } else if ((now - button_state.last_repeat) > repeat_interval) {
+                    button_state.pressed = true;
+                    button_state.last_repeat = now;
+                } else {
+                    button_state.pressed = false;
+                }
+                break;
+            case State::Repeat::FastRepeat:
+                if ((now - button_state.last_repeat) > fast_repeat_interval) {
+                    button_state.pressed = true;
+                    button_state.last_repeat = now;
+                } else {
+                    button_state.pressed = false;
+                }
+                break;
+            }
+        } else {
+            button_state.pressed = false;
+            button_state.repeat = State::Repeat::Idle;
+        }
+    };
+
+    handle_button(m_states.at(Id::Up), controller_state.dpad.up);
+    handle_button(m_states.at(Id::Down), controller_state.dpad.down);
+    handle_button(m_states.at(Id::Left), controller_state.dpad.left);
+    handle_button(m_states.at(Id::Right), controller_state.dpad.right);
+    handle_button(m_states.at(Id::Confirm), controller_state.buttons.east);
+    handle_button(m_states.at(Id::Back), controller_state.buttons.south);
+}
+
+bool Menu::Buttons::getPressed(Id id) const { return m_states.at(id).pressed; }
 
 Menu::Menu(std::shared_ptr<SettingsStore> settings_store) : m_store(std::move(settings_store)) {};
 
@@ -544,7 +512,8 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
 }
 
 void Menu::update(const InputState::Controller &controller_state) {
-    const InputState::Controller pressed = checkPressed(controller_state);
+    m_buttons.update(controller_state);
+
     State &current_state = m_state_stack.top();
 
     auto descriptor_it = descriptors.find(current_state.page);
@@ -555,7 +524,7 @@ void Menu::update(const InputState::Controller &controller_state) {
 
     if (descriptor_it->second.type == Descriptor::Type::RebootInfo) {
         m_active = false;
-    } else if (pressed.dpad.left) {
+    } else if (m_buttons.getPressed(Buttons::Id::Left)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Toggle:
             current_state.selected_value = current_state.selected_value == 0 ? 1 : 0;
@@ -581,7 +550,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.dpad.right) {
+    } else if (m_buttons.getPressed(Buttons::Id::Right)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Toggle:
             current_state.selected_value = current_state.selected_value == 0 ? 1 : 0;
@@ -607,7 +576,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.dpad.up) {
+    } else if (m_buttons.getPressed(Buttons::Id::Up)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             if (current_state.selected_value < descriptor_it->second.max_value) {
@@ -621,7 +590,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.dpad.down) {
+    } else if (m_buttons.getPressed(Buttons::Id::Down)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
             if (current_state.selected_value > 0) {
@@ -635,7 +604,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.south) { // Back/Exit
+    } else if (m_buttons.getPressed(Buttons::Id::Back)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
@@ -648,7 +617,7 @@ void Menu::update(const InputState::Controller &controller_state) {
         case Descriptor::Type::RebootInfo:
             break;
         }
-    } else if (pressed.buttons.east) { // Select
+    } else if (m_buttons.getPressed(Buttons::Id::Confirm)) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Value:
         case Descriptor::Type::Toggle:
