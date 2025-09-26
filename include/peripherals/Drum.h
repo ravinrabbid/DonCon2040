@@ -5,8 +5,6 @@
 
 #include "hardware/spi.h"
 
-#include <mcp3204/Mcp3204Dma.h>
-
 #include <array>
 #include <cstdint>
 #include <deque>
@@ -138,9 +136,6 @@ class Drum {
     };
 
     class ExternalAdc : public AdcInterface {
-      private:
-        Mcp3204Dma m_mcp3204;
-
       public:
         ExternalAdc(const Config::ExternalAdc &config);
         std::array<uint16_t, 4> read() final;

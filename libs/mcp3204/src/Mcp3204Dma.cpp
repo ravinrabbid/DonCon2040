@@ -2,18 +2,14 @@
 
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
-#include "pico/time.h"
 
-namespace {
-constexpr size_t transfer_length = 3;
+#include <algorithm>
 
-volatile uint cs_pin = 0;
+int Mcp3204Dma::m_rx_channel = -1;
+int Mcp3204Dma::m_tx_channel = -1;
 
-volatile int rx_channel = -1;
-volatile int tx_channel = -1;
-
-volatile uint8_t rx_buffer[transfer_length] = {};
-volatile uint8_t tx_buffer[transfer_length] = {
+std::array<uint8_t, Mcp3204Dma::TRANSFER_LENGTH> Mcp3204Dma::m_rx_buffer = {};
+std::array<uint8_t, Mcp3204Dma::TRANSFER_LENGTH> Mcp3204Dma::m_tx_buffer = {
     0x06, // '00000' to align the ADC's output,
           // '1' as start bit,
           // '1' for single-ended read,
@@ -22,21 +18,25 @@ volatile uint8_t tx_buffer[transfer_length] = {
     0x00, // Further '0's to receive result
 };
 
-volatile uint8_t current_channel = 0;
-volatile uint16_t current_max_readings[Mcp3204Dma::channel_count] = {};
+uint8_t Mcp3204Dma::m_current_channel = 0;
+std::array<uint16_t, Mcp3204Dma::CHANNEL_COUNT> Mcp3204Dma::m_current_max_readings = {};
+
+uint8_t Mcp3204Dma::m_cs_pin = UINT8_MAX;
+
+bool Mcp3204Dma::m_is_running = false;
 
 // Alarm handler to instantly (re)start DMA reading of the next channel.
-int64_t start_dma_read(alarm_id_t id, void *user_data) {
+int64_t Mcp3204Dma::alarmHandler(alarm_id_t id, void *user_data) {
     (void)user_data;
     (void)id;
 
     // Reset addresses
-    dma_channel_set_read_addr(tx_channel, tx_buffer, false);
-    dma_channel_set_write_addr(rx_channel, rx_buffer, false);
+    dma_channel_set_read_addr(m_tx_channel, m_tx_buffer.data(), false);
+    dma_channel_set_write_addr(m_rx_channel, m_rx_buffer.data(), false);
 
     // Pull down CS pin and start both TX and RX at the same time
-    gpio_put(cs_pin, false);
-    dma_start_channel_mask((1 << tx_channel) | (1 << rx_channel));
+    gpio_put(m_cs_pin, false);
+    dma_start_channel_mask((1 << m_tx_channel) | (1 << m_rx_channel));
 
     // Do not reschedule alarm
     return 0;
@@ -44,90 +44,91 @@ int64_t start_dma_read(alarm_id_t id, void *user_data) {
 
 // Pull up CS pin and start DMA reading after a 1us delay, this is because MCP3204
 // needs to be the CS pin high for at least 500ns.
-void trigger_dma_read() {
-    gpio_put(cs_pin, true);
+void Mcp3204Dma::triggerDmaRead() {
+    gpio_put(m_cs_pin, true);
 
-    add_alarm_in_us(2, start_dma_read, nullptr, true);
+    add_alarm_in_us(2, alarmHandler, nullptr, true);
 }
 
-void read_handler() {
+void Mcp3204Dma::dmaReadHandler() {
     // The 12 result bits are at the end of the ADC's output.
-    const uint16_t value = (static_cast<uint16_t>(rx_buffer[1] & 0x0F) << 8) | rx_buffer[2];
+    const uint16_t value = (static_cast<uint16_t>(m_rx_buffer[1] & 0x0F) << 8) | m_rx_buffer[2];
 
     // We only care for the maximum value since the last read
-    if (value > current_max_readings[current_channel]) {
-        current_max_readings[current_channel] = value;
-    }
+    m_current_max_readings.at(m_current_channel) = std::max(m_current_max_readings.at(m_current_channel), value);
 
     // Advance to the next channel
-    current_channel = (current_channel + 1) % Mcp3204Dma::channel_count;
-    tx_buffer[1] = static_cast<uint8_t>(current_channel << 6);
+    m_current_channel = (m_current_channel + 1) % CHANNEL_COUNT;
+    m_tx_buffer[1] = static_cast<uint8_t>(m_current_channel << 6);
 
-    dma_channel_acknowledge_irq0(rx_channel);
+    dma_channel_acknowledge_irq0(m_rx_channel);
 
-    trigger_dma_read();
+    triggerDmaRead();
 }
 
-} // namespace
-
-Mcp3204Dma::Mcp3204Dma(spi_inst *spi, uint8_t cs_pin) {
-
-    ::cs_pin = cs_pin;
-    ::tx_channel = dma_claim_unused_channel(true);
-    ::rx_channel = dma_claim_unused_channel(true);
+void Mcp3204Dma::initialize(spi_inst *spi, uint8_t cs_pin) {
+    Mcp3204Dma::m_cs_pin = cs_pin;
+    Mcp3204Dma::m_tx_channel = dma_claim_unused_channel(true);
+    Mcp3204Dma::m_rx_channel = dma_claim_unused_channel(true);
 
     // Configure TX Channel
-    dma_channel_config tx_channel_config = dma_channel_get_default_config(tx_channel);
+    dma_channel_config tx_channel_config = dma_channel_get_default_config(m_tx_channel);
     channel_config_set_transfer_data_size(&tx_channel_config, DMA_SIZE_8);
     channel_config_set_dreq(&tx_channel_config, spi_get_dreq(spi, true));
     channel_config_set_read_increment(&tx_channel_config, true);
     channel_config_set_write_increment(&tx_channel_config, false);
-    dma_channel_configure(tx_channel, &tx_channel_config, &spi_get_hw(spi)->dr, tx_buffer, transfer_length, false);
+    dma_channel_configure(m_tx_channel, &tx_channel_config, &spi_get_hw(spi)->dr, m_tx_buffer.data(), TRANSFER_LENGTH,
+                          false);
 
     // Configure RX Channel
-    dma_channel_config rx_channel_config = dma_channel_get_default_config(rx_channel);
+    dma_channel_config rx_channel_config = dma_channel_get_default_config(m_rx_channel);
     channel_config_set_transfer_data_size(&rx_channel_config, DMA_SIZE_8);
     channel_config_set_dreq(&rx_channel_config, spi_get_dreq(spi, false));
     channel_config_set_read_increment(&rx_channel_config, false);
     channel_config_set_write_increment(&rx_channel_config, true);
-    dma_channel_configure(rx_channel, &rx_channel_config, rx_buffer, &spi_get_hw(spi)->dr, transfer_length, false);
+    dma_channel_configure(m_rx_channel, &rx_channel_config, m_rx_buffer.data(), &spi_get_hw(spi)->dr, TRANSFER_LENGTH,
+                          false);
 
-    irq_set_exclusive_handler(DMA_IRQ_0, read_handler);
+    irq_set_exclusive_handler(DMA_IRQ_0, dmaReadHandler);
 }
 
-Mcp3204Dma::~Mcp3204Dma() {
-    stop();
+void Mcp3204Dma::run(spi_inst *spi, uint8_t cs_pin) {
+    if (m_is_running) {
+        stop();
+    }
 
-    dma_channel_unclaim(rx_channel);
-    dma_channel_unclaim(tx_channel);
-}
+    initialize(spi, cs_pin);
 
-void Mcp3204Dma::run() {
-    stop();
+    m_is_running = true;
 
-    dma_channel_set_irq0_enabled(rx_channel, true);
+    dma_channel_set_irq0_enabled(m_rx_channel, true);
     irq_set_enabled(DMA_IRQ_0, true);
 
-    trigger_dma_read();
+    triggerDmaRead();
 }
 
 void Mcp3204Dma::stop() {
-    irq_set_enabled(DMA_IRQ_0, false);
-    dma_channel_set_irq0_enabled(rx_channel, false);
+    if (!m_is_running) {
+        return;
+    }
 
-    dma_channel_wait_for_finish_blocking(rx_channel);
-    dma_channel_wait_for_finish_blocking(tx_channel);
+    irq_set_enabled(DMA_IRQ_0, false);
+    dma_channel_set_irq0_enabled(m_rx_channel, false);
+
+    dma_channel_wait_for_finish_blocking(m_rx_channel);
+    dma_channel_wait_for_finish_blocking(m_tx_channel);
+
+    dma_channel_unclaim(m_rx_channel);
+    dma_channel_unclaim(m_tx_channel);
 }
 
-std::array<uint16_t, Mcp3204Dma::channel_count> Mcp3204Dma::take_maximums() {
+std::array<uint16_t, Mcp3204Dma::CHANNEL_COUNT> Mcp3204Dma::take_maximums() {
     // TODO: theoretically we should need to pause conversion for reading the values,
     //       but so far this does not seem to pose any issue.
-
-    std::array<uint16_t, Mcp3204Dma::channel_count> result;
-    std::copy(std::begin(current_max_readings), std::end(current_max_readings), std::begin(result));
+    std::array<uint16_t, Mcp3204Dma::CHANNEL_COUNT> result{m_current_max_readings};
 
     // Reset values to zero
-    std::fill(std::begin(current_max_readings), std::end(current_max_readings), 0);
+    std::ranges::fill(m_current_max_readings, 0);
 
     return result;
 }

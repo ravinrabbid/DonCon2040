@@ -2,6 +2,7 @@
 
 #include "hardware/adc.h"
 #include "pico/time.h"
+#include <mcp3204/Mcp3204Dma.h>
 
 #include <algorithm>
 
@@ -38,7 +39,7 @@ std::array<uint16_t, 4> Drum::InternalAdc::read() {
     return result;
 }
 
-Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(config.spi_block, config.spi_scsn_pin) {
+Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) {
     // Enable level shifter
     gpio_init(config.spi_level_shifter_enable_pin);
     gpio_set_dir(config.spi_level_shifter_enable_pin, (bool)GPIO_OUT);
@@ -53,10 +54,10 @@ Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(co
     gpio_init(config.spi_scsn_pin);
     gpio_set_dir(config.spi_scsn_pin, (bool)GPIO_OUT);
 
-    m_mcp3204.run();
+    Mcp3204Dma::run(config.spi_block, config.spi_scsn_pin);
 }
 
-std::array<uint16_t, 4> Drum::ExternalAdc::read() { return m_mcp3204.take_maximums(); }
+std::array<uint16_t, 4> Drum::ExternalAdc::read() { return Mcp3204Dma::take_maximums(); }
 
 Drum::Pad::Pad(const uint8_t channel) : m_channel(channel) {}
 
