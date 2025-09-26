@@ -18,7 +18,7 @@ set(PICO_USE_FASTEST_SUPPORTED_CLOCK 1)
 pico_sdk_init()
 
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 add_compile_options(-Wall -Wextra -Werror)
 
