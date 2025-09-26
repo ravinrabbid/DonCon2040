@@ -122,8 +122,8 @@ class Menu {
 
   private:
     std::shared_ptr<SettingsStore> m_store;
-    bool m_active;
-    std::stack<State> m_state_stack;
+    bool m_active{false};
+    std::stack<State> m_state_stack{{{.page = Page::Main, .selected_value = 0, .original_value = 0}}};
 
     uint16_t getCurrentValue(Page page);
     void gotoPage(Page page);

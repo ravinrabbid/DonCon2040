@@ -59,18 +59,18 @@ Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(co
 
 std::array<uint16_t, 4> Drum::ExternalAdc::read() { return m_mcp3204.take_maximums(); }
 
-Drum::Pad::Pad(const uint8_t channel) : channel(channel), last_change(0), active(false) {}
+Drum::Pad::Pad(const uint8_t channel) : m_channel(channel) {}
 
 void Drum::Pad::setState(const bool state, const uint16_t debounce_delay) {
-    if (active == state) {
+    if (m_active == state) {
         return;
     }
 
     // Immediately change the input state, but only allow a change every debounce_delay milliseconds.
     uint32_t now = to_ms_since_boot(get_absolute_time());
-    if (last_change + debounce_delay <= now) {
-        active = state;
-        last_change = now;
+    if (m_last_change + debounce_delay <= now) {
+        m_active = state;
+        m_last_change = now;
     }
 }
 
@@ -262,7 +262,7 @@ void Drum::updateAnalogInputState(Utils::InputState &input_state, const std::map
 
     uint32_t now = to_ms_since_boot(get_absolute_time());
 
-    std::for_each(raw_values.cbegin(), raw_values.cend(), [&](const auto &entry) {
+    std::ranges::for_each(raw_values, [&](const auto &entry) {
         const auto &id = entry.first;
         const auto &raw = entry.second;
         auto &buf = buffer[id];
@@ -277,8 +277,7 @@ void Drum::updateAnalogInputState(Utils::InputState &input_state, const std::map
 
         // Set maximum value for each pads buffer window.
         const auto get_max = [](const auto &input) {
-            return std::max_element(input.cbegin(), input.cend(),
-                                    [](const auto &a, const auto &b) { return a.value < b.value; })
+            return std::ranges::max_element(input, [](const auto &a, const auto &b) { return a.value < b.value; })
                 ->value;
         };
 

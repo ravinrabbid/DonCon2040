@@ -23,115 +23,118 @@ namespace Default {
 const usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
 
 const I2c i2c_config = {
-    14,      // SDA Pin
-    15,      // SCL Pin
-    i2c1,    // Block
-    1000000, // Speed
+    .sda_pin = 14,
+    .scl_pin = 15,
+    .block = i2c1,
+    .speed_hz = 1000000,
 };
 
 const Peripherals::Drum::Config drum_config = {
-    // Trigger thresholds
-    {
-        10, // Don Left
-        5,  // Ka Left
-        10, // Don Right
-        5,  // Ka Right
-    },
+    .trigger_thresholds =
+        {
+            .don_left = 10,
+            .ka_left = 5,
+            .don_right = 10,
+            .ka_right = 5,
+        },
 
-    // Double Trigger mode
-    Peripherals::Drum::Config::DoubleTriggerMode::Off,
-    // Double Trigger thresholds
-    {
-        2000, // Don Left
-        1500, // Ka Left
-        2000, // Don Right
-        1500, // Ka Right
-    },
+    .double_trigger_mode = Peripherals::Drum::Config::DoubleTriggerMode::Off,
+    .double_trigger_thresholds =
+        {
+            .don_left = 2000,
+            .ka_left = 1500,
+            .don_right = 2000,
+            .ka_right = 1500,
+        },
 
-    25,  // Debounce delay in milliseconds
-    500, // Roll Counter Timeout in Milliseconds
+    .debounce_delay_ms = 25,
+    .roll_counter_timeout_ms = 500,
 
-    // ADC Channel config
-    {
-        3, // Don Left
-        2, // Ka Left
-        0, // Don Right
-        1, // Ka Right
-    },
+    .adc_channels =
+        {
+            .don_left = 3,
+            .ka_left = 2,
+            .don_right = 0,
+            .ka_right = 1,
+        },
 
     // ADC Config, either InternalAdc or ExternalAdc
-    //
-    // Peripherals::Drum::Config::InternalAdc{
-    //     16, // ADC sample count
-    // },
+    // .adc_config =
+    //     Peripherals::Drum::Config::InternalAdc{
+    //         .sample_count = 16,
+    //     },
 
-    Peripherals::Drum::Config::ExternalAdc{
-        spi1,    // Block
-        2000000, // Speed
-        11,      // MOSI Pin
-        12,      // MISO Pin
-        10,      // SCLK Pin
-        13,      // SCSn Pin
-        9,       // Level Shifter Enable Pin
-    },
+    .adc_config =
+        Peripherals::Drum::Config::ExternalAdc{
+            .spi_block = spi1,
+            .spi_speed_hz = 2000000,
+            .spi_mosi_pin = 11,
+            .spi_miso_pin = 12,
+            .spi_sclk_pin = 10,
+            .spi_scsn_pin = 13,
+            .spi_level_shifter_enable_pin = 9,
+        },
 };
 
 const Peripherals::Controller::Config controller_config = {
+    .pins =
+        {
+            .dpad =
+                {
+                    .up = 8,
+                    .down = 9,
+                    .left = 10,
+                    .right = 11,
+                },
+            .buttons =
+                {
+                    .north = 0,
+                    .east = 3,
+                    .south = 1,
+                    .west = 2,
 
-    // Pins
-    {{
-         8,  // Up
-         9,  // Down
-         10, // Left
-         11, // Right
-     },
-     {
-         0, // North
-         3, // East
-         1, // South
-         2, // West
+                    .l = 12,
+                    .r = 4,
 
-         12, // L
-         4,  // R
+                    .start = 5,
+                    .select = 13,
+                    .home = 6,
+                    .share = 14,
+                },
+        },
 
-         5,  // Start
-         13, // Select
-         6,  // Home
-         14, // Share
-     }},
-
-    25, // Debounce delay in milliseconds
+    .debounce_delay_ms = 25,
 
     // GPIO Config, either InternalGpio or ExternalGpio
-    //
-    // Peripherals::Controller::Config::InternalGpio{},
-
-    Peripherals::Controller::Config::ExternalGpio{
-        {
-            i2c_config.block, // Block
-            0x20,             // Address
+    // .gpio_config = Peripherals::Controller::Config::InternalGpio{},
+    .gpio_config =
+        Peripherals::Controller::Config::ExternalGpio{
+            .i2c =
+                {
+                    .block = i2c_config.block,
+                    .address = 0x20,
+                },
         },
-    },
 };
 
 const Peripherals::StatusLed::Config led_config = {
-    {128, 128, 128}, // Idle Color
-    {255, 0, 0},     // Don Left Color
-    {0, 0, 255},     // Ka Left Color
-    {255, 255, 0},   // Don Right Color
-    {0, 255, 255},   // Ka Right Color
+    .idle_color = {.r = 128, .g = 128, .b = 128},
+    .don_left_color = {.r = 255, .g = 0, .b = 0},
+    .ka_left_color = {.r = 0, .g = 0, .b = 255},
+    .don_right_color = {.r = 255, .g = 255, .b = 0},
+    .ka_right_color = {.r = 0, .g = 255, .b = 255},
 
-    25,    // LED Enable Pin,
-    16,    // LED Pin
-    false, // Is RGBW
+    .led_enable_pin = 25,
+    .led_pin = 16,
+    .is_rgbw = false,
 
-    255,  // Brightness
-    true, // Idle Color is DS4 light bar color
+    .brightness = 255,
+    .enable_player_color = true,
 };
 
 const Peripherals::Display::Config display_config = {
-    i2c_config.block, // Block
-    0x3C,             // Address
+    .i2c_block = i2c_config.block,
+    .i2c_address = 0x3C,
 };
 
 } // namespace Default

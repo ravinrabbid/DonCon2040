@@ -8,7 +8,7 @@ namespace Doncon::Peripherals {
 StatusLed::StatusLed(const Config &config) : m_config(config), m_input_state({}), m_player_color(std::nullopt) {
     gpio_init(m_config.led_enable_pin);
     gpio_set_dir(m_config.led_enable_pin, GPIO_OUT);
-    gpio_put(m_config.led_enable_pin, 1);
+    gpio_put(m_config.led_enable_pin, true);
 
     ws2812_init(config.led_pin, m_config.is_rgbw);
 }
@@ -22,7 +22,7 @@ void StatusLed::setPlayerColor(const Config::Color &color) { m_player_color = co
 void StatusLed::update() {
     float brightness_factor = (float)m_config.brightness / static_cast<float>(UINT8_MAX);
 
-    Config::Color mixed = {0, 0, 0};
+    Config::Color mixed = {};
     bool triggered = false;
 
     const auto add_color = [](Config::Color &base, const Config::Color &add) {

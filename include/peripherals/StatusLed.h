@@ -3,8 +3,8 @@
 
 #include "utils/InputState.h"
 
+#include <cstdint>
 #include <optional>
-#include <stdint.h>
 
 namespace Doncon::Peripherals {
 

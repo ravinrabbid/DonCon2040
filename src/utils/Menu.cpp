@@ -4,6 +4,7 @@
 
 namespace Doncon::Utils {
 
+// NOLINTBEGIN(modernize-use-designated-initializers)
 const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
     {Menu::Page::Main,                                            //
      {Menu::Descriptor::Type::Menu,                               //
@@ -158,12 +159,12 @@ const std::map<Menu::Page, const Menu::Descriptor> Menu::descriptors = {
       {{"BOOTSEL", Menu::Descriptor::Action::None}}, //
       0}},                                           //
 };
+// NOLINTEND(modernize-use-designated-initializers)
 
-Menu::Menu(std::shared_ptr<SettingsStore> settings_store)
-    : m_store(settings_store), m_active(false), m_state_stack({{Page::Main, 0, 0}}) {};
+Menu::Menu(std::shared_ptr<SettingsStore> settings_store) : m_store(std::move(settings_store)) {};
 
 void Menu::activate() {
-    m_state_stack = std::stack<State>({{Page::Main, 0, 0}});
+    m_state_stack = std::stack<State>({{.page = Page::Main, .selected_value = 0, .original_value = 0}});
     m_active = true;
 }
 
@@ -185,18 +186,18 @@ static InputState::Controller checkPressed(const InputState::Controller &control
     static const uint32_t fast_repeat_delay = 5000;
     static const uint32_t fast_repeat_interval = 2;
 
-    static ButtonState state_north = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_east = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_south = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_west = {ButtonState::State::Idle, 0, 0};
+    static const ButtonState state_default = {.state = ButtonState::State::Idle, .pressed_since = 0, .last_repeat = 0};
+    static ButtonState state_north = state_default;
+    static ButtonState state_east = state_default;
+    static ButtonState state_south = state_default;
+    static ButtonState state_west = state_default;
 
-    static ButtonState state_up = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_down = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_left = {ButtonState::State::Idle, 0, 0};
-    static ButtonState state_right = {ButtonState::State::Idle, 0, 0};
+    static ButtonState state_up = state_default;
+    static ButtonState state_down = state_default;
+    static ButtonState state_left = state_default;
+    static ButtonState state_right = state_default;
 
-    InputState::Controller result{{false, false, false, false},
-                                  {false, false, false, false, false, false, false, false, false, false}};
+    InputState::Controller result{};
 
     auto handle_button = [](ButtonState &button_state, bool input_state) {
         bool result = false;

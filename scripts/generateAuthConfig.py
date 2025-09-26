@@ -3,17 +3,22 @@
 import sys
 from textwrap import wrap
 
-HEADER_TEMPLATE = """#include "utils/PS4AuthProvider.h"
+HEADER_TEMPLATE = """#ifndef PS4AUTHCONFIGURATION_H_
+#define PS4AUTHCONFIGURATION_H_
+
+#include "utils/PS4AuthProvider.h"
 
 namespace Doncon::Config::PS4Auth {{
 
 const Utils::PS4AuthProvider::Config config = {{
-    true,                                                                                             // Enabled
-    {{{serial}}}, // Serial
-    {{{sig}}}, // Signature
-    R"pem({pem})pem"}};                        // Pem
+    .enabled = true,                                                                                             //
+    .serial = {{{serial}}}, //
+    .signature = {{{sig}}}, //
+    .key_pem = R"pem({pem})pem"}};                        //
 
-}} // namespace Doncon::Config::PS4Auth"""
+}} // namespace Doncon::Config::PS4Auth
+
+#endif // PS4AUTHCONFIGURATION_H_"""
 
 
 def read_key():

@@ -5,18 +5,18 @@
 
 namespace Doncon::Peripherals {
 
-Controller::Button::Button(uint8_t pin) : gpio_pin(pin), gpio_mask(1 << pin), last_change(0), active(false) {}
+Controller::Button::Button(uint8_t pin) : m_gpio_pin(pin), m_gpio_mask(1 << pin) {}
 
 void Controller::Button::setState(bool state, uint8_t debounce_delay) {
-    if (active == state) {
+    if (m_active == state) {
         return;
     }
 
     // Immediately change the input state, but only allow a change every debounce_delay milliseconds.
     uint32_t now = to_ms_since_boot(get_absolute_time());
-    if (last_change + debounce_delay <= now) {
-        active = state;
-        last_change = now;
+    if (m_last_change + debounce_delay <= now) {
+        m_active = state;
+        m_last_change = now;
     }
 }
 
@@ -67,7 +67,7 @@ void Controller::socdClean(Utils::InputState &input_state) {
     }
 }
 
-Controller::Controller(const Config &config) : m_config(config), m_socd_state{Id::DOWN, Id::RIGHT} {
+Controller::Controller(const Config &config) : m_config(config) {
     m_buttons.emplace(Id::UP, config.pins.dpad.up);
     m_buttons.emplace(Id::DOWN, config.pins.dpad.down);
     m_buttons.emplace(Id::LEFT, config.pins.dpad.left);

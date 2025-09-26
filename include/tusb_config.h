@@ -55,7 +55,7 @@ extern "C" {
 #define CFG_TUD_CDC_TX_BUFSIZE (TUD_OPT_HIGH_SPEED ? 512 : 64)
 #define CFG_TUD_CDC_EP_BUFSIZE (TUD_OPT_HIGH_SPEED ? 512 : 64)
 
-#define CFG_TUD_HID_EP_BUFSIZE (64)
+#define CFG_TUD_HID_EP_BUFSIZE (64) // NOLINT(cppcoreguidelines-macro-to-enum,modernize-macro-to-enum)
 
 #define CFG_TUD_MIDI_RX_BUFSIZE (TUD_OPT_HIGH_SPEED ? 512 : 64)
 #define CFG_TUD_MIDI_TX_BUFSIZE (TUD_OPT_HIGH_SPEED ? 512 : 64)

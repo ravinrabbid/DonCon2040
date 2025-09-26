@@ -9,7 +9,7 @@
 #include "usb/device/vendor/xinput_driver.h"
 #include "usb/device_driver.h"
 
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 
 namespace Doncon::Utils {
@@ -57,7 +57,7 @@ struct InputState {
     hid_switch_report_t m_switch_report;
     hid_ps3_report_t m_ps3_report;
     hid_ps4_report_t m_ps4_report;
-    hid_nkro_keyboard_report_t m_keyboard_report;
+    hid_nkro_keyboard_report_t m_keyboard_report{};
     xinput_report_t m_xinput_report;
     midi_report_t m_midi_report;
     std::string m_debug_report;
@@ -73,7 +73,7 @@ struct InputState {
     usb_report_t getDebugReport();
 
   public:
-    InputState();
+    InputState() = default;
 
     usb_report_t getReport(usb_mode_t mode);
 

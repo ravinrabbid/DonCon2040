@@ -8,9 +8,9 @@
 #include <mcp3204/Mcp3204Dma.h>
 
 #include <array>
+#include <cstdint>
 #include <map>
 #include <memory>
-#include <stdint.h>
 #include <variant>
 
 namespace Doncon::Peripherals {
@@ -75,15 +75,15 @@ class Drum {
 
     class Pad {
       private:
-        uint8_t channel;
-        uint32_t last_change;
-        bool active;
+        uint8_t m_channel;
+        uint32_t m_last_change{0};
+        bool m_active{false};
 
       public:
         Pad(const uint8_t channel);
 
-        uint8_t getChannel() const { return channel; };
-        bool getState() const { return active; };
+        [[nodiscard]] uint8_t getChannel() const { return m_channel; };
+        [[nodiscard]] bool getState() const { return m_active; };
         void setState(const bool state, const uint16_t debounce_delay);
     };
 
@@ -102,7 +102,7 @@ class Drum {
 
       public:
         InternalAdc(const Config::InternalAdc &config);
-        virtual std::array<uint16_t, 4> read() final;
+        std::array<uint16_t, 4> read() final;
     };
 
     class ExternalAdc : public AdcInterface {
@@ -111,7 +111,7 @@ class Drum {
 
       public:
         ExternalAdc(const Config::ExternalAdc &config);
-        virtual std::array<uint16_t, 4> read() final;
+        std::array<uint16_t, 4> read() final;
     };
 
     Config m_config;

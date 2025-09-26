@@ -5,14 +5,6 @@
 
 namespace Doncon::Utils {
 
-InputState::InputState()
-    : drum({{false, 0, 0}, {false, 0, 0}, {false, 0, 0}, {false, 0, 0}, 0, 0}),
-      controller(
-          {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}}),
-      m_switch_report({}), m_ps3_report({}), m_ps4_report({}), m_keyboard_report({}),
-      m_xinput_report({0x00, sizeof(xinput_report_t), 0, 0, 0, 0, 0, 0, 0, 0, {}}),
-      m_midi_report({{false, false, false, false}, {0, 0, 0, 0}}) {}
-
 usb_report_t InputState::getReport(usb_mode_t mode) {
     switch (mode) {
     case USB_MODE_SWITCH_TATACON:
@@ -266,6 +258,8 @@ usb_report_t InputState::getXinputBaseReport() {
     m_xinput_report.rx = 0;
     m_xinput_report.ry = 0;
 
+    m_xinput_report.report_size = sizeof(xinput_report_t);
+
     return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
 }
 
@@ -390,8 +384,8 @@ usb_report_t InputState::getDebugReport() {
 }
 
 void InputState::releaseAll() {
-    drum = {{false, 0, 0}, {false, 0, 0}, {false, 0, 0}, {false, 0, 0}, 0, 0};
-    controller = {{false, false, false, false}, {false, false, false, false, false, false, false, false, false, false}};
+    drum = {};
+    controller = {};
 }
 
 bool InputState::checkHotkey() {

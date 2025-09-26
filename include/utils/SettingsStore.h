@@ -6,6 +6,8 @@
 
 #include "hardware/flash.h"
 
+#include <array>
+
 namespace Doncon::Utils {
 
 class SettingsStore {
@@ -26,10 +28,11 @@ class SettingsStore {
         Peripherals::Drum::Config::DoubleTriggerMode double_trigger_mode;
         Peripherals::Drum::Config::Thresholds double_trigger_thresholds;
 
-        uint8_t _padding[m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
-                         sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(bool) -
-                         sizeof(uint16_t) - sizeof(Peripherals::Drum::Config::DoubleTriggerMode) -
-                         sizeof(Peripherals::Drum::Config::Thresholds)];
+        std::array<uint8_t, m_store_size - sizeof(uint8_t) - sizeof(usb_mode_t) -
+                                sizeof(Peripherals::Drum::Config::Thresholds) - sizeof(uint8_t) - sizeof(bool) -
+                                sizeof(uint16_t) - sizeof(Peripherals::Drum::Config::DoubleTriggerMode) -
+                                sizeof(Peripherals::Drum::Config::Thresholds)>
+            _padding;
     };
     static_assert(sizeof(Storecache) == m_store_size);
 
@@ -40,9 +43,8 @@ class SettingsStore {
     };
 
     Storecache m_store_cache;
-    bool m_dirty;
-
-    RebootType m_scheduled_reboot;
+    bool m_dirty{true};
+    RebootType m_scheduled_reboot{RebootType::None};
 
   private:
     Storecache read();

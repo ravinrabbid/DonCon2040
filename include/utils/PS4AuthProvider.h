@@ -4,8 +4,8 @@
 #include "mbedtls/pk.h"
 
 #include <array>
+#include <cstdint>
 #include <optional>
-#include <stdint.h>
 #include <string>
 
 namespace Doncon::Utils {
@@ -23,7 +23,7 @@ class PS4AuthProvider {
     };
 
   private:
-    bool m_key_valid;
+    bool m_key_valid{false};
 
     mbedtls_pk_context m_pk_context;
 

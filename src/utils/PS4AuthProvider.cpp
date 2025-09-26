@@ -22,7 +22,7 @@ int const_rng(void *p_rng, unsigned char *p, size_t len) {
 
 namespace Doncon::Utils {
 
-PS4AuthProvider::PS4AuthProvider() : m_key_valid(false) {
+PS4AuthProvider::PS4AuthProvider() {
     if (!Doncon::Config::PS4Auth::config.enabled) {
         return;
     }

@@ -15,7 +15,7 @@
 #include "pico/stdlib.h"
 #include "pico/util/queue.h"
 
-#include <stdio.h>
+#include <cstdio>
 
 using namespace Doncon;
 
@@ -85,8 +85,9 @@ void core1_task() {
                     display.setPlayerId(control_msg.data.player_led.id);
                     break;
                 case USB_PLAYER_LED_COLOR:
-                    led.setPlayerColor({control_msg.data.player_led.red, control_msg.data.player_led.green,
-                                        control_msg.data.player_led.blue});
+                    led.setPlayerColor({.r = control_msg.data.player_led.red,
+                                        .g = control_msg.data.player_led.green,
+                                        .b = control_msg.data.player_led.blue});
                 }
                 break;
             case ControlCommand::SetLedBrightness:
@@ -142,7 +143,8 @@ int main() {
 
     usbd_driver_init(mode);
     usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
-        const auto ctrl_message = ControlMessage{ControlCommand::SetPlayerLed, {.player_led = player_led}};
+        const auto ctrl_message =
+            ControlMessage{.command = ControlCommand::SetPlayerLed, .data = {.player_led = player_led}};
         queue_try_add(&control_queue, &ctrl_message);
     });
 
@@ -155,16 +157,13 @@ int main() {
     stdio_init_all();
 
     const auto readSettings = [&]() {
-        ControlMessage ctrl_message;
+        const auto sendCtrlMessage = [&](const ControlMessage &msg) { queue_add_blocking(&control_queue, &msg); };
 
-        ctrl_message = {ControlCommand::SetUsbMode, {.usb_mode = mode}};
-        queue_add_blocking(&control_queue, &ctrl_message);
-
-        ctrl_message = {ControlCommand::SetLedBrightness, {.led_brightness = settings_store->getLedBrightness()}};
-        queue_add_blocking(&control_queue, &ctrl_message);
-        ctrl_message = {ControlCommand::SetLedEnablePlayerColor,
-                        {.led_enable_player_color = settings_store->getLedEnablePlayerColor()}};
-        queue_add_blocking(&control_queue, &ctrl_message);
+        sendCtrlMessage({.command = ControlCommand::SetUsbMode, .data = {.usb_mode = mode}});
+        sendCtrlMessage({.command = ControlCommand::SetLedBrightness,
+                         .data = {.led_brightness = settings_store->getLedBrightness()}});
+        sendCtrlMessage({.command = ControlCommand::SetLedEnablePlayerColor,
+                         .data = {.led_enable_player_color = settings_store->getLedEnablePlayerColor()}});
 
         drum.setDebounceDelay(settings_store->getDebounceDelay());
         drum.setTriggerThresholds(settings_store->getTriggerThresholds());
@@ -188,7 +187,7 @@ int main() {
             } else {
                 settings_store->store();
 
-                ControlMessage ctrl_message = {ControlCommand::ExitMenu, {}};
+                ControlMessage ctrl_message = {.command = ControlCommand::ExitMenu, .data = {}};
                 queue_add_blocking(&control_queue, &ctrl_message);
             }
 
@@ -198,7 +197,7 @@ int main() {
         } else if (input_state.checkHotkey()) {
             menu.activate();
 
-            ControlMessage ctrl_message{ControlCommand::EnterMenu, {}};
+            ControlMessage ctrl_message{.command = ControlCommand::EnterMenu, .data = {}};
             queue_add_blocking(&control_queue, &ctrl_message);
         }
 

@@ -11,8 +11,7 @@
 
 namespace Doncon::Peripherals {
 
-Display::Display(const Config &config)
-    : m_config(config), m_state(State::Idle), m_input_state({}), m_usb_mode(USB_MODE_DEBUG), m_player_id(0) {
+Display::Display(const Config &config) : m_config(config) {
     m_display.external_vcc = false;
     ssd1306_init(&m_display, 128, 64, m_config.i2c_address, m_config.i2c_block);
     ssd1306_clear(&m_display);

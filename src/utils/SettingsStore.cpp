@@ -11,16 +11,15 @@ namespace Doncon::Utils {
 static uint8_t read_byte(uint32_t offset) { return *(reinterpret_cast<uint8_t *>(XIP_BASE + offset)); }
 
 SettingsStore::SettingsStore()
-    : m_store_cache({m_magic_byte,
-                     Config::Default::usb_mode,
-                     Config::Default::drum_config.trigger_thresholds,
-                     Config::Default::led_config.brightness,
-                     Config::Default::led_config.enable_player_color,
-                     Config::Default::drum_config.debounce_delay_ms,
-                     Config::Default::drum_config.double_trigger_mode,
-                     Config::Default::drum_config.double_trigger_thresholds,
-                     {}}),
-      m_dirty(true), m_scheduled_reboot(RebootType::None) {
+    : m_store_cache({.in_use = m_magic_byte,
+                     .usb_mode = Config::Default::usb_mode,
+                     .trigger_thresholds = Config::Default::drum_config.trigger_thresholds,
+                     .led_brightness = Config::Default::led_config.brightness,
+                     .led_enable_player_color = Config::Default::led_config.enable_player_color,
+                     .debounce_delay = Config::Default::drum_config.debounce_delay_ms,
+                     .double_trigger_mode = Config::Default::drum_config.double_trigger_mode,
+                     .double_trigger_thresholds = Config::Default::drum_config.double_trigger_thresholds,
+                     ._padding = {}}) {
     uint32_t current_page = m_flash_offset + m_flash_size - m_store_size;
     bool found_valid = false;
     for (uint8_t i = 0; i < m_store_pages; ++i) {

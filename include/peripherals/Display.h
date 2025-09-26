@@ -5,12 +5,11 @@
 #include "utils/InputState.h"
 #include "utils/Menu.h"
 
+#include "hardware/i2c.h"
 #include <ssd1306/ssd1306.h>
 
-#include "hardware/i2c.h"
-
+#include <cstdint>
 #include <memory>
-#include <stdint.h>
 
 namespace Doncon::Peripherals {
 
@@ -28,15 +27,15 @@ class Display {
     };
 
     Config m_config;
-    State m_state;
+    State m_state{State::Idle};
 
-    Utils::InputState m_input_state;
-    usb_mode_t m_usb_mode;
-    uint8_t m_player_id;
+    Utils::InputState m_input_state{};
+    usb_mode_t m_usb_mode{USB_MODE_DEBUG};
+    uint8_t m_player_id{0};
 
-    Utils::Menu::State m_menu_state;
+    Utils::Menu::State m_menu_state{};
 
-    ssd1306_t m_display;
+    ssd1306_t m_display{};
 
     void drawIdleScreen();
     void drawMenuScreen();
