@@ -1,4 +1,4 @@
-#include "utils/InputState.h"
+#include "utils/InputReport.h"
 
 #include <iomanip>
 #include <sstream>
@@ -38,36 +38,10 @@ uint8_t getHidHat(const InputState::Controller::DPad dpad) {
 
 } // namespace
 
-usb_report_t InputState::getReport(usb_mode_t mode) {
-    switch (mode) {
-    case USB_MODE_SWITCH_TATACON:
-    case USB_MODE_SWITCH_HORIPAD:
-        return getSwitchReport();
-    case USB_MODE_DUALSHOCK3:
-        return getPS3InputReport();
-    case USB_MODE_PS4_TATACON:
-    case USB_MODE_DUALSHOCK4:
-        return getPS4InputReport();
-    case USB_MODE_KEYBOARD_P1:
-        return getKeyboardReport(Player::One);
-    case USB_MODE_KEYBOARD_P2:
-        return getKeyboardReport(Player::Two);
-    case USB_MODE_XBOX360:
-        return getXinputDigitalReport();
-    case USB_MODE_XBOX360_ANALOG_P1:
-        return getXinputAnalogReport(Player::One);
-    case USB_MODE_XBOX360_ANALOG_P2:
-        return getXinputAnalogReport(Player::Two);
-    case USB_MODE_MIDI:
-        return getMidiReport();
-    case USB_MODE_DEBUG:
-        return getDebugReport();
-    }
+usb_report_t InputReport::getSwitchReport(const InputState &state) {
+    const auto &controller = state.controller;
+    const auto &drum = state.drum;
 
-    return getDebugReport();
-}
-
-usb_report_t InputState::getSwitchReport() {
     m_switch_report.buttons = 0                                             //
                               | (controller.buttons.west ? (1 << 0) : 0)    // Y
                               | (controller.buttons.south ? (1 << 1) : 0)   // B
@@ -86,19 +60,12 @@ usb_report_t InputState::getSwitchReport() {
 
     m_switch_report.hat = getHidHat(controller.dpad);
 
-    // Center all sticks
-    m_switch_report.lx = 0x80;
-    m_switch_report.ly = 0x80;
-    m_switch_report.rx = 0x80;
-    m_switch_report.ry = 0x80;
-
     return {reinterpret_cast<uint8_t *>(&m_switch_report), sizeof(hid_switch_report_t)};
 }
 
-usb_report_t InputState::getPS3InputReport() {
-    memset(&m_ps3_report, 0, sizeof(m_ps3_report));
-
-    m_ps3_report.report_id = 0x01;
+usb_report_t InputReport::getPS3Report(const InputState &state) {
+    const auto &controller = state.controller;
+    const auto &drum = state.drum;
 
     m_ps3_report.buttons1 = 0                                             //
                             | (controller.buttons.select ? (1 << 0) : 0)  // Select
@@ -119,46 +86,15 @@ usb_report_t InputState::getPS3InputReport() {
                             | (controller.buttons.west ? (1 << 7) : 0);   // Square
     m_ps3_report.buttons3 = 0 | (controller.buttons.home ? (1 << 0) : 0); // Home
 
-    // Center all sticks
-    m_ps3_report.lx = 0x80;
-    m_ps3_report.ly = 0x80;
-    m_ps3_report.rx = 0x80;
-    m_ps3_report.ry = 0x80;
-
     m_ps3_report.lt = (drum.ka_left.triggered ? 0xff : 0);
     m_ps3_report.rt = (drum.ka_right.triggered ? 0xff : 0);
-
-    m_ps3_report.unknown_0x02_1 = 0x02;
-    m_ps3_report.battery = 0xef;
-    m_ps3_report.unknown_0x12 = 0x12;
-
-    m_ps3_report.unknown[0] = 0x12;
-    m_ps3_report.unknown[1] = 0xf8;
-    m_ps3_report.unknown[2] = 0x77;
-    m_ps3_report.unknown[3] = 0x00;
-    m_ps3_report.unknown[4] = 0x40;
-
-    m_ps3_report.acc_x = 511;
-    m_ps3_report.acc_y = 511;
-    m_ps3_report.acc_z = 511;
-
-    m_ps3_report.unknown_0x02_2 = 0x02;
 
     return {reinterpret_cast<uint8_t *>(&m_ps3_report), sizeof(hid_ps3_report_t)};
 }
 
-usb_report_t InputState::getPS4InputReport() {
-    static uint8_t report_counter = 0;
-
-    memset(&m_ps4_report, 0, sizeof(m_ps4_report));
-
-    m_ps4_report.report_id = 0x01;
-
-    // Center all sticks
-    m_ps4_report.lx = 0x80;
-    m_ps4_report.ly = 0x80;
-    m_ps4_report.rx = 0x80;
-    m_ps4_report.ry = 0x80;
+usb_report_t InputReport::getPS4Report(const InputState &state) {
+    const auto &controller = state.controller;
+    const auto &drum = state.drum;
 
     m_ps4_report.buttons1 = getHidHat(controller.dpad)                    //
                             | (controller.buttons.west ? (1 << 4) : 0)    // Square
@@ -174,30 +110,28 @@ usb_report_t InputState::getPS4InputReport() {
                             | (controller.buttons.start ? (1 << 5) : 0)   // Option
                             | (drum.don_left.triggered ? (1 << 6) : 0)    // L3
                             | (drum.don_right.triggered ? (1 << 7) : 0);  // R3
-    m_ps4_report.buttons3 = (report_counter << 2)                         //
+    m_ps4_report.buttons3 = (m_ps4_report_counter << 2)                   //
                             | (controller.buttons.home ? (1 << 0) : 0)    // PS
                             | (controller.buttons.select ? (1 << 1) : 0); // T-Pad
 
     m_ps4_report.lt = (drum.ka_left.triggered ? 0xFF : 0);
     m_ps4_report.rt = (drum.ka_right.triggered ? 0xFF : 0);
 
-    m_ps4_report.battery = 0 | (1 << 4) | 11; // Cable connected and fully charged
-    m_ps4_report.peripheral = 0x01;
-    m_ps4_report.touch_report_count = 0;
-
     // This method actually gets called more often than the report is sent,
     // so counters are not consecutive ... let's see if this turns out to
     // be a problem.
-    report_counter++;
-    if (report_counter > (UINT8_MAX >> 2)) {
-        report_counter = 0;
+    if (++m_ps4_report_counter > (UINT8_MAX >> 2)) {
+        m_ps4_report_counter = 0;
     }
 
     return {reinterpret_cast<uint8_t *>(&m_ps4_report), sizeof(hid_ps4_report_t)};
 }
 
-usb_report_t InputState::getKeyboardReport(InputState::Player player) {
-    m_keyboard_report = {.keycodes = {0}};
+usb_report_t InputReport::getKeyboardReport(const InputState &state, InputReport::Player player) {
+    const auto &controller = state.controller;
+    const auto &drum = state.drum;
+
+    m_keyboard_report = {};
 
     auto set_key = [&](const bool input, const uint8_t keycode) {
         if (input) {
@@ -241,7 +175,9 @@ usb_report_t InputState::getKeyboardReport(InputState::Player player) {
     return {reinterpret_cast<uint8_t *>(&m_keyboard_report), sizeof(hid_nkro_keyboard_report_t)};
 }
 
-usb_report_t InputState::getXinputBaseReport() {
+usb_report_t InputReport::getXinputBaseReport(const InputState &state) {
+    const auto &controller = state.controller;
+
     m_xinput_report.buttons1 = 0                                            //
                                | (controller.dpad.up ? (1 << 0) : 0)        // Dpad Up
                                | (controller.dpad.down ? (1 << 1) : 0)      // Dpad Down
@@ -251,7 +187,6 @@ usb_report_t InputState::getXinputBaseReport() {
                                | (controller.buttons.select ? (1 << 5) : 0) // Select
                                | (false ? (1 << 6) : 0)                     // L3
                                | (false ? (1 << 7) : 0);                    // R3
-
     m_xinput_report.buttons2 = 0                                            //
                                | (controller.buttons.l ? (1 << 0) : 0)      // L1
                                | (controller.buttons.r ? (1 << 1) : 0)      // R1
@@ -261,21 +196,13 @@ usb_report_t InputState::getXinputBaseReport() {
                                | (controller.buttons.west ? (1 << 6) : 0)   // X
                                | (controller.buttons.north ? (1 << 7) : 0); // Y
 
-    m_xinput_report.lt = 0;
-    m_xinput_report.rt = 0;
-
-    m_xinput_report.lx = 0;
-    m_xinput_report.ly = 0;
-    m_xinput_report.rx = 0;
-    m_xinput_report.ry = 0;
-
-    m_xinput_report.report_size = sizeof(xinput_report_t);
-
     return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
-usb_report_t InputState::getXinputDigitalReport() {
-    getXinputBaseReport();
+usb_report_t InputReport::getXinputDigitalReport(const InputState &state) {
+    const auto &drum = state.drum;
+
+    getXinputBaseReport(state);
 
     m_xinput_report.buttons1 |= (drum.don_left.triggered ? (1 << 1) : 0)   // Dpad Down
                                 | (drum.ka_left.triggered ? (1 << 2) : 0); // Dpad Left
@@ -286,8 +213,10 @@ usb_report_t InputState::getXinputDigitalReport() {
     return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
-usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
-    getXinputBaseReport();
+usb_report_t InputReport::getXinputAnalogReport(const InputState &state, InputReport::Player player) {
+    const auto &drum = state.drum;
+
+    getXinputBaseReport(state);
 
     int16_t x = 0;
     int16_t y = 0;
@@ -320,59 +249,30 @@ usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
     return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
-usb_report_t InputState::getMidiReport() {
-    struct state {
-        bool last_triggered;
-        bool on;
-        uint16_t velocity;
-    };
+usb_report_t InputReport::getMidiReport(const InputState &state) {
+    const auto &drum = state.drum;
 
-    static state acoustic_bass_drum = {};
-    static state electric_bass_drum = {};
-    static state drumsticks = {};
-    static state side_stick = {};
-
-    auto set_state = [](state &target, const Drum::Pad &new_state) {
-        if (new_state.triggered && !target.last_triggered) {
-            target.velocity = 0;
-            target.on = false;
-        } else if (!new_state.triggered && target.last_triggered) {
-            target.on = true;
-        } else if (!new_state.triggered && !target.last_triggered) {
-            target.on = false;
-        }
-
-        if (new_state.triggered && new_state.analog > target.velocity) {
-            target.velocity = new_state.analog;
-        }
-
-        target.last_triggered = new_state.triggered;
-    };
-
-    set_state(acoustic_bass_drum, drum.don_left);
-    set_state(electric_bass_drum, drum.don_right);
-    set_state(drumsticks, drum.ka_left);
-    set_state(side_stick, drum.ka_right);
-
-    m_midi_report.status.acoustic_bass_drum = acoustic_bass_drum.on;
-    m_midi_report.status.electric_bass_drum = electric_bass_drum.on;
-    m_midi_report.status.drumsticks = drumsticks.on;
-    m_midi_report.status.side_stick = side_stick.on;
+    m_midi_report.status.acoustic_bass_drum = drum.don_left.triggered;
+    m_midi_report.status.electric_bass_drum = drum.don_right.triggered;
+    m_midi_report.status.drumsticks = drum.ka_left.triggered;
+    m_midi_report.status.side_stick = drum.ka_right.triggered;
 
     auto convert_range = [](uint16_t in) {
         const uint16_t out = in / 256;
         return uint8_t(out > 127 ? 127 : out);
     };
 
-    m_midi_report.velocity.acoustic_bass_drum = convert_range(acoustic_bass_drum.velocity);
-    m_midi_report.velocity.electric_bass_drum = convert_range(electric_bass_drum.velocity);
-    m_midi_report.velocity.drumsticks = convert_range(drumsticks.velocity);
-    m_midi_report.velocity.side_stick = convert_range(side_stick.velocity);
+    m_midi_report.velocity.acoustic_bass_drum = convert_range(drum.don_left.analog);
+    m_midi_report.velocity.electric_bass_drum = convert_range(drum.don_right.analog);
+    m_midi_report.velocity.drumsticks = convert_range(drum.ka_left.analog);
+    m_midi_report.velocity.side_stick = convert_range(drum.ka_right.analog);
 
     return {reinterpret_cast<uint8_t *>(&m_midi_report), sizeof(midi_report_t)};
 }
 
-usb_report_t InputState::getDebugReport() {
+usb_report_t InputReport::getDebugReport(const InputState &state) {
+    const auto &drum = state.drum;
+
     std::stringstream out;
 
     auto bar = [](uint16_t val) { return std::string(val / 511, '#'); };
@@ -394,29 +294,33 @@ usb_report_t InputState::getDebugReport() {
     return {reinterpret_cast<uint8_t *>(m_debug_report.data()), static_cast<uint16_t>(m_debug_report.size() + 1)};
 }
 
-void InputState::releaseAll() {
-    drum = {};
-    controller = {};
-}
-
-bool InputState::checkHotkey() const {
-    static uint32_t hold_since = 0;
-    static bool hold_active = false;
-    static const uint32_t hold_timeout = 2000;
-
-    if (controller.buttons.start && controller.buttons.select) {
-        const uint32_t now = to_ms_since_boot(get_absolute_time());
-        if (!hold_active) {
-            hold_active = true;
-            hold_since = now;
-        } else if ((now - hold_since) > hold_timeout) {
-            hold_active = false;
-            return true;
-        }
-    } else {
-        hold_active = false;
+usb_report_t InputReport::getReport(const InputState &state, usb_mode_t mode) {
+    switch (mode) {
+    case USB_MODE_SWITCH_TATACON:
+    case USB_MODE_SWITCH_HORIPAD:
+        return getSwitchReport(state);
+    case USB_MODE_DUALSHOCK3:
+        return getPS3Report(state);
+    case USB_MODE_PS4_TATACON:
+    case USB_MODE_DUALSHOCK4:
+        return getPS4Report(state);
+    case USB_MODE_KEYBOARD_P1:
+        return getKeyboardReport(state, Player::One);
+    case USB_MODE_KEYBOARD_P2:
+        return getKeyboardReport(state, Player::Two);
+    case USB_MODE_XBOX360:
+        return getXinputDigitalReport(state);
+    case USB_MODE_XBOX360_ANALOG_P1:
+        return getXinputAnalogReport(state, Player::One);
+    case USB_MODE_XBOX360_ANALOG_P2:
+        return getXinputAnalogReport(state, Player::Two);
+    case USB_MODE_MIDI:
+        return getMidiReport(state);
+    case USB_MODE_DEBUG:
+        return getDebugReport(state);
     }
-    return false;
+
+    return getDebugReport(state);
 }
 
 } // namespace Doncon::Utils

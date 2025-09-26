@@ -3,6 +3,8 @@
 #include "hardware/gpio.h"
 #include "pio_ws2812/ws2812.h"
 
+#include <algorithm>
+
 namespace Doncon::Peripherals {
 
 StatusLed::StatusLed(const Config &config) : m_config(config) {

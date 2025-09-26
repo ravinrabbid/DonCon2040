@@ -54,22 +54,24 @@ static void set_note(uint8_t channel, bool on, uint8_t pitch, uint8_t velocity) 
 }
 
 bool send_midi_report(usb_report_t report) {
-    static uint8_t percussion_channel = 9;
+    static const uint8_t percussion_channel = 9;
 
     midi_report_t *midi_report = (midi_report_t *)report.data;
 
-    if (midi_report->status.acoustic_bass_drum != last_report.status.acoustic_bass_drum) {
+    if (midi_report->status.acoustic_bass_drum ||
+        midi_report->status.acoustic_bass_drum != last_report.status.acoustic_bass_drum) {
         set_note(percussion_channel, midi_report->status.acoustic_bass_drum, 35,
                  midi_report->velocity.acoustic_bass_drum);
     }
-    if (midi_report->status.electric_bass_drum != last_report.status.electric_bass_drum) {
+    if (midi_report->status.electric_bass_drum ||
+        midi_report->status.electric_bass_drum != last_report.status.electric_bass_drum) {
         set_note(percussion_channel, midi_report->status.electric_bass_drum, 36,
                  midi_report->velocity.electric_bass_drum);
     }
-    if (midi_report->status.drumsticks != last_report.status.drumsticks) {
+    if (midi_report->status.drumsticks || midi_report->status.drumsticks != last_report.status.drumsticks) {
         set_note(percussion_channel, midi_report->status.drumsticks, 31, midi_report->velocity.drumsticks);
     }
-    if (midi_report->status.side_stick != last_report.status.side_stick) {
+    if (midi_report->status.side_stick || midi_report->status.side_stick != last_report.status.side_stick) {
         set_note(percussion_channel, midi_report->status.side_stick, 37, midi_report->velocity.side_stick);
     }
 

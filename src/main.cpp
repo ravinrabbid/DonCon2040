@@ -4,6 +4,8 @@
 #include "peripherals/StatusLed.h"
 #include "usb/device/hid/ps4_auth.h"
 #include "usb/device_driver.h"
+#include "utils/InputReport.h"
+#include "utils/InputState.h"
 #include "utils/Menu.h"
 #include "utils/PS4AuthProvider.h"
 #include "utils/SettingsStore.h"
@@ -13,6 +15,7 @@
 
 #include "pico/multicore.h"
 #include "pico/stdlib.h"
+#include "pico/time.h"
 #include "pico/util/queue.h"
 
 #include <cstdio>
@@ -133,33 +136,34 @@ int main() {
     queue_init(&auth_challenge_queue, sizeof(std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH>), 1);
     queue_init(&auth_signed_challenge_queue, sizeof(std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH>), 1);
 
-    Utils::InputState input_state;
-    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge_response{};
-
-    auto settings_store = std::make_shared<Utils::SettingsStore>();
-    Utils::Menu menu(settings_store);
-
-    const auto mode = settings_store->getUsbMode();
+    stdio_init_all();
 
     Peripherals::Drum drum(Config::Default::drum_config);
 
-    multicore_launch_core1(core1_task);
+    Utils::InputReport input_report;
+    Utils::InputState input_state;
+    const auto checkHotkey = [&input_state]() {
+        static const uint32_t hold_timeout = 2000;
+        static uint32_t hold_since = 0;
+        static bool hold_active = false;
 
-    usbd_driver_init(mode);
-    usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
-        const auto ctrl_message =
-            ControlMessage{.command = ControlCommand::SetPlayerLed, .data = {.player_led = player_led}};
-        queue_try_add(&control_queue, &ctrl_message);
-    });
+        if (input_state.controller.buttons.start && input_state.controller.buttons.select) {
+            const uint32_t now = to_ms_since_boot(get_absolute_time());
+            if (!hold_active) {
+                hold_active = true;
+                hold_since = now;
+            } else if ((now - hold_since) > hold_timeout) {
+                hold_active = false;
+                return true;
+            }
+        } else {
+            hold_active = false;
+        }
+        return false;
+    };
 
-    if (Config::PS4Auth::config.enabled) {
-        ps4_auth_init(Config::PS4Auth::config.key_pem.c_str(), Config::PS4Auth::config.key_pem.size() + 1,
-                      Config::PS4Auth::config.serial.data(), Config::PS4Auth::config.signature.data(),
-                      [](const uint8_t *challenge) { queue_try_add(&auth_challenge_queue, challenge); });
-    }
-
-    stdio_init_all();
-
+    auto settings_store = std::make_shared<Utils::SettingsStore>();
+    const auto mode = settings_store->getUsbMode();
     const auto readSettings = [&]() {
         const auto sendCtrlMessage = [&](const ControlMessage &msg) { queue_add_blocking(&control_queue, &msg); };
 
@@ -174,6 +178,24 @@ int main() {
         drum.setDoubleTriggerMode(settings_store->getDoubleTriggerMode());
         drum.setDoubleThresholds(settings_store->getDoubleTriggerThresholds());
     };
+
+    Utils::Menu menu(settings_store);
+
+    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge_response{};
+    if (Config::PS4Auth::config.enabled) {
+        ps4_auth_init(Config::PS4Auth::config.key_pem.c_str(), Config::PS4Auth::config.key_pem.size() + 1,
+                      Config::PS4Auth::config.serial.data(), Config::PS4Auth::config.signature.data(),
+                      [](const uint8_t *challenge) { queue_try_add(&auth_challenge_queue, challenge); });
+    }
+
+    multicore_launch_core1(core1_task);
+
+    usbd_driver_init(mode);
+    usbd_driver_set_player_led_cb([](usb_player_led_t player_led) {
+        const auto ctrl_message =
+            ControlMessage{.command = ControlCommand::SetPlayerLed, .data = {.player_led = player_led}};
+        queue_try_add(&control_queue, &ctrl_message);
+    });
 
     readSettings();
 
@@ -198,14 +220,14 @@ int main() {
             readSettings();
             input_state.releaseAll();
 
-        } else if (input_state.checkHotkey()) {
+        } else if (checkHotkey()) {
             menu.activate();
 
             ControlMessage ctrl_message{.command = ControlCommand::EnterMenu, .data = {}};
             queue_add_blocking(&control_queue, &ctrl_message);
         }
 
-        usbd_driver_send_report(input_state.getReport(mode));
+        usbd_driver_send_report(input_report.getReport(input_state, mode));
         usbd_driver_task();
 
         queue_try_add(&drum_input_queue, &drum_message);

@@ -1,16 +1,7 @@
 #ifndef UTILS_INPUTSTATE_H_
 #define UTILS_INPUTSTATE_H_
 
-#include "usb/device/hid/keyboard_driver.h"
-#include "usb/device/hid/ps3_driver.h"
-#include "usb/device/hid/ps4_driver.h"
-#include "usb/device/hid/switch_driver.h"
-#include "usb/device/midi_driver.h"
-#include "usb/device/vendor/xinput_driver.h"
-#include "usb/device_driver.h"
-
 #include <cstdint>
-#include <string>
 
 namespace Doncon::Utils {
 
@@ -43,41 +34,13 @@ struct InputState {
         Buttons buttons;
     };
 
-    Drum drum{};             // NOLINT
-    Controller controller{}; // NOLINT
+    Drum drum{};
+    Controller controller{};
 
-  private:
-    enum class Player : uint8_t {
-        One,
-        Two,
+    void releaseAll() {
+        drum = {};
+        controller = {};
     };
-
-    hid_switch_report_t m_switch_report{};
-    hid_ps3_report_t m_ps3_report{};
-    hid_ps4_report_t m_ps4_report{};
-    hid_nkro_keyboard_report_t m_keyboard_report{};
-    xinput_report_t m_xinput_report{};
-    midi_report_t m_midi_report{};
-    std::string m_debug_report;
-
-    usb_report_t getSwitchReport();
-    usb_report_t getPS3InputReport();
-    usb_report_t getPS4InputReport();
-    usb_report_t getKeyboardReport(Player player);
-    usb_report_t getXinputBaseReport();
-    usb_report_t getXinputDigitalReport();
-    usb_report_t getXinputAnalogReport(Player player);
-    usb_report_t getMidiReport();
-    usb_report_t getDebugReport();
-
-  public:
-    InputState() = default;
-
-    usb_report_t getReport(usb_mode_t mode);
-
-    void releaseAll();
-
-    [[nodiscard]] bool checkHotkey() const;
 };
 
 } // namespace Doncon::Utils
