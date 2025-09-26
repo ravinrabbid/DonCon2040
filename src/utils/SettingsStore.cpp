@@ -10,7 +10,9 @@ namespace Doncon::Utils {
 
 namespace {
 
-uint8_t read_byte(uint32_t offset) { return *(reinterpret_cast<uint8_t *>(XIP_BASE + offset)); }
+uint8_t read_byte(uint32_t offset) {
+    return *(reinterpret_cast<uint8_t *>(XIP_BASE + offset)); // NOLINT(performance-no-int-to-ptr)
+}
 
 } // namespace
 
@@ -35,7 +37,7 @@ SettingsStore::SettingsStore()
     }
 
     if (found_valid) {
-        m_store_cache = *(reinterpret_cast<Storecache *>(XIP_BASE + current_page));
+        m_store_cache = *(reinterpret_cast<Storecache *>(XIP_BASE + current_page)); // NOLINT(performance-no-int-to-ptr)
         m_dirty = false;
     }
 }
@@ -49,7 +51,7 @@ void SettingsStore::setUsbMode(const usb_mode_t mode) {
     }
 }
 
-usb_mode_t SettingsStore::getUsbMode() { return m_store_cache.usb_mode; }
+usb_mode_t SettingsStore::getUsbMode() const { return m_store_cache.usb_mode; }
 
 void SettingsStore::setTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds) {
     if (m_store_cache.trigger_thresholds.don_left != thresholds.don_left ||
@@ -61,7 +63,9 @@ void SettingsStore::setTriggerThresholds(const Peripherals::Drum::Config::Thresh
         m_dirty = true;
     }
 }
-Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() { return m_store_cache.trigger_thresholds; }
+Peripherals::Drum::Config::Thresholds SettingsStore::getTriggerThresholds() const {
+    return m_store_cache.trigger_thresholds;
+}
 
 void SettingsStore::setDoubleTriggerMode(const Peripherals::Drum::Config::DoubleTriggerMode &mode) {
     if (m_store_cache.double_trigger_mode != mode) {
@@ -69,7 +73,7 @@ void SettingsStore::setDoubleTriggerMode(const Peripherals::Drum::Config::Double
         m_dirty = true;
     }
 }
-Peripherals::Drum::Config::DoubleTriggerMode SettingsStore::getDoubleTriggerMode() {
+Peripherals::Drum::Config::DoubleTriggerMode SettingsStore::getDoubleTriggerMode() const {
     return m_store_cache.double_trigger_mode;
 }
 
@@ -83,7 +87,7 @@ void SettingsStore::setDoubleTriggerThresholds(const Peripherals::Drum::Config::
         m_dirty = true;
     }
 }
-Peripherals::Drum::Config::Thresholds SettingsStore::getDoubleTriggerThresholds() {
+Peripherals::Drum::Config::Thresholds SettingsStore::getDoubleTriggerThresholds() const {
     return m_store_cache.double_trigger_thresholds;
 }
 
@@ -93,7 +97,7 @@ void SettingsStore::setLedBrightness(const uint8_t brightness) {
         m_dirty = true;
     }
 }
-uint8_t SettingsStore::getLedBrightness() { return m_store_cache.led_brightness; }
+uint8_t SettingsStore::getLedBrightness() const { return m_store_cache.led_brightness; }
 
 void SettingsStore::setLedEnablePlayerColor(const bool do_enable) {
     if (m_store_cache.led_enable_player_color != do_enable) {
@@ -101,7 +105,7 @@ void SettingsStore::setLedEnablePlayerColor(const bool do_enable) {
         m_dirty = true;
     }
 }
-bool SettingsStore::getLedEnablePlayerColor() { return m_store_cache.led_enable_player_color; }
+bool SettingsStore::getLedEnablePlayerColor() const { return m_store_cache.led_enable_player_color; }
 
 void SettingsStore::setDebounceDelay(const uint16_t delay) {
     if (m_store_cache.debounce_delay != delay) {
@@ -109,7 +113,7 @@ void SettingsStore::setDebounceDelay(const uint16_t delay) {
         m_dirty = true;
     }
 }
-uint16_t SettingsStore::getDebounceDelay() { return m_store_cache.debounce_delay; }
+uint16_t SettingsStore::getDebounceDelay() const { return m_store_cache.debounce_delay; }
 
 void SettingsStore::store() {
     if (m_dirty) {

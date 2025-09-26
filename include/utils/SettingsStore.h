@@ -46,34 +46,33 @@ class SettingsStore {
     bool m_dirty{true};
     RebootType m_scheduled_reboot{RebootType::None};
 
-  private:
     Storecache read();
 
   public:
     SettingsStore();
 
-    void setUsbMode(const usb_mode_t mode);
-    usb_mode_t getUsbMode();
+    void setUsbMode(usb_mode_t mode);
+    [[nodiscard]] usb_mode_t getUsbMode() const;
 
     void setTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds);
-    Peripherals::Drum::Config::Thresholds getTriggerThresholds();
+    [[nodiscard]] Peripherals::Drum::Config::Thresholds getTriggerThresholds() const;
 
     void setDoubleTriggerMode(const Peripherals::Drum::Config::DoubleTriggerMode &mode);
-    Peripherals::Drum::Config::DoubleTriggerMode getDoubleTriggerMode();
+    [[nodiscard]] Peripherals::Drum::Config::DoubleTriggerMode getDoubleTriggerMode() const;
 
     void setDoubleTriggerThresholds(const Peripherals::Drum::Config::Thresholds &thresholds);
-    Peripherals::Drum::Config::Thresholds getDoubleTriggerThresholds();
+    [[nodiscard]] Peripherals::Drum::Config::Thresholds getDoubleTriggerThresholds() const;
 
-    void setLedBrightness(const uint8_t brightness);
-    uint8_t getLedBrightness();
+    void setLedBrightness(uint8_t brightness);
+    [[nodiscard]] uint8_t getLedBrightness() const;
 
-    void setLedEnablePlayerColor(const bool do_enable);
-    bool getLedEnablePlayerColor();
+    void setLedEnablePlayerColor(bool do_enable);
+    [[nodiscard]] bool getLedEnablePlayerColor() const;
 
-    void setDebounceDelay(const uint16_t delay);
-    uint16_t getDebounceDelay();
+    void setDebounceDelay(uint16_t delay);
+    [[nodiscard]] uint16_t getDebounceDelay() const;
 
-    void scheduleReboot(const bool bootsel = false);
+    void scheduleReboot(bool bootsel = false);
 
     void store();
     void reset();

@@ -23,7 +23,7 @@ void Controller::Button::setState(bool state, uint8_t debounce_delay) {
 Controller::InternalGpio::InternalGpio(const std::map<Id, Button> &buttons) {
     for (const auto &button : buttons) {
         gpio_init(button.second.getGpioPin());
-        gpio_set_dir(button.second.getGpioPin(), GPIO_IN);
+        gpio_set_dir(button.second.getGpioPin(), (bool)GPIO_IN);
         gpio_pull_up(button.second.getGpioPin());
     }
 }
@@ -102,7 +102,7 @@ void Controller::updateInputState(Utils::InputState &input_state) {
     const uint32_t gpio_state = m_gpio->read();
 
     for (auto &button : m_buttons) {
-        button.second.setState(gpio_state & button.second.getGpioMask(), m_config.debounce_delay_ms);
+        button.second.setState((gpio_state & button.second.getGpioMask()) != 0, m_config.debounce_delay_ms);
     }
 
     input_state.controller.dpad.up = m_buttons.at(Id::UP).getState();

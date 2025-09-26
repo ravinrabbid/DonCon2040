@@ -9,7 +9,6 @@ class Mcp3204Dma {
   public:
     static constexpr size_t channel_count = 4;
 
-  public:
     Mcp3204Dma(spi_inst *spi, uint8_t cs_pin);
     Mcp3204Dma(const Mcp3204Dma &) = delete;
     Mcp3204Dma(Mcp3204Dma &&) = default;

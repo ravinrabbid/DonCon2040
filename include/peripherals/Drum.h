@@ -80,11 +80,11 @@ class Drum {
         bool m_active{false};
 
       public:
-        Pad(const uint8_t channel);
+        Pad(uint8_t channel);
 
         [[nodiscard]] uint8_t getChannel() const { return m_channel; };
         [[nodiscard]] bool getState() const { return m_active; };
-        void setState(const bool state, const uint16_t debounce_delay);
+        void setState(bool state, uint16_t debounce_delay);
     };
 
     // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions): Class has no members
@@ -118,8 +118,7 @@ class Drum {
     std::unique_ptr<AdcInterface> m_adc;
     std::map<Id, Pad> m_pads;
 
-  private:
-    void updateRollCounter(Utils::InputState &input_state);
+    void updateRollCounter(Utils::InputState &input_state) const;
     void updateDigitalInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     void updateAnalogInputState(Utils::InputState &input_state, const std::map<Id, uint16_t> &raw_values);
     std::map<Id, uint16_t> readInputs();
@@ -129,10 +128,9 @@ class Drum {
 
     void updateInputState(Utils::InputState &input_state);
 
-    void setDebounceDelay(const uint16_t delay);
+    void setDebounceDelay(uint16_t delay);
     void setTriggerThresholds(const Config::Thresholds &thresholds);
-
-    void setDoubleTriggerMode(const Config::DoubleTriggerMode mode);
+    void setDoubleTriggerMode(Config::DoubleTriggerMode mode);
     void setDoubleThresholds(const Config::Thresholds &thresholds);
 };
 

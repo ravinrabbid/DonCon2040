@@ -136,8 +136,8 @@ class Menu {
 
     void activate();
     void update(const InputState::Controller &controller_state);
-    bool active();
-    State getState();
+    [[nodiscard]] bool active() const;
+    [[nodiscard]] State getState() const;
 };
 } // namespace Doncon::Utils
 

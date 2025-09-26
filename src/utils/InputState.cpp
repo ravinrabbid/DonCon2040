@@ -399,7 +399,7 @@ void InputState::releaseAll() {
     controller = {};
 }
 
-bool InputState::checkHotkey() {
+bool InputState::checkHotkey() const {
     static uint32_t hold_since = 0;
     static bool hold_active = false;
     static const uint32_t hold_timeout = 2000;

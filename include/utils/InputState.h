@@ -43,7 +43,6 @@ struct InputState {
         Buttons buttons;
     };
 
-  public:
     Drum drum{};             // NOLINT
     Controller controller{}; // NOLINT
 
@@ -53,7 +52,6 @@ struct InputState {
         Two,
     };
 
-  private:
     hid_switch_report_t m_switch_report{};
     hid_ps3_report_t m_ps3_report{};
     hid_ps4_report_t m_ps4_report{};
@@ -79,7 +77,7 @@ struct InputState {
 
     void releaseAll();
 
-    bool checkHotkey();
+    [[nodiscard]] bool checkHotkey() const;
 };
 
 } // namespace Doncon::Utils

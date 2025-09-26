@@ -40,8 +40,8 @@ class StatusLed {
   public:
     StatusLed(const Config &config);
 
-    void setBrightness(const uint8_t brightness);
-    void setEnablePlayerColor(const bool do_enable);
+    void setBrightness(uint8_t brightness);
+    void setEnablePlayerColor(bool do_enable);
 
     void setInputState(const Utils::InputState &input_state);
     void setPlayerColor(const Config::Color &color);

@@ -29,7 +29,7 @@ class Display {
     Config m_config;
     State m_state{State::Idle};
 
-    Utils::InputState m_input_state{};
+    Utils::InputState m_input_state;
     usb_mode_t m_usb_mode{USB_MODE_DEBUG};
     uint8_t m_player_id{0};
 

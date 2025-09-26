@@ -42,7 +42,7 @@ std::array<uint16_t, 4> Drum::InternalAdc::read() {
 Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(config.spi_block, config.spi_scsn_pin) {
     // Enable level shifter
     gpio_init(config.spi_level_shifter_enable_pin);
-    gpio_set_dir(config.spi_level_shifter_enable_pin, GPIO_OUT);
+    gpio_set_dir(config.spi_level_shifter_enable_pin, (bool)GPIO_OUT);
     gpio_put(config.spi_level_shifter_enable_pin, true);
 
     // Set up SPI
@@ -52,7 +52,7 @@ Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) : m_mcp3204(co
     spi_init(config.spi_block, config.spi_speed_hz);
 
     gpio_init(config.spi_scsn_pin);
-    gpio_set_dir(config.spi_scsn_pin, GPIO_OUT);
+    gpio_set_dir(config.spi_scsn_pin, (bool)GPIO_OUT);
 
     m_mcp3204.run();
 }
@@ -108,7 +108,7 @@ std::map<Drum::Id, uint16_t> Drum::readInputs() {
     return result;
 }
 
-void Drum::updateRollCounter(Utils::InputState &input_state) {
+void Drum::updateRollCounter(Utils::InputState &input_state) const {
     static uint32_t last_hit_time = 0;
     static bool last_don_left_state = false;
     static bool last_don_right_state = false;

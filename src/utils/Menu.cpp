@@ -6,7 +6,7 @@ namespace Doncon::Utils {
 
 namespace {
 
-static InputState::Controller checkPressed(const InputState::Controller &controller_state) {
+InputState::Controller checkPressed(const InputState::Controller &controller_state) {
     struct ButtonState {
         enum State : uint8_t {
             Idle,
@@ -541,8 +541,6 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
         gotoPage(Page::BootselMsg);
         break;
     }
-
-    return;
 }
 
 void Menu::update(const InputState::Controller &controller_state) {
@@ -560,7 +558,7 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.left) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Toggle:
-            current_state.selected_value = !current_state.selected_value;
+            current_state.selected_value = current_state.selected_value == 0 ? 1 : 0;
             performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             break;
         case Descriptor::Type::Selection:
@@ -586,7 +584,7 @@ void Menu::update(const InputState::Controller &controller_state) {
     } else if (pressed.dpad.right) {
         switch (descriptor_it->second.type) {
         case Descriptor::Type::Toggle:
-            current_state.selected_value = !current_state.selected_value;
+            current_state.selected_value = current_state.selected_value == 0 ? 1 : 0;
             performAction(descriptor_it->second.items.at(0).second, current_state.selected_value);
             break;
         case Descriptor::Type::Selection:
@@ -667,8 +665,8 @@ void Menu::update(const InputState::Controller &controller_state) {
     }
 }
 
-bool Menu::active() { return m_active; }
+bool Menu::active() const { return m_active; }
 
-Menu::State Menu::getState() { return m_state_stack.top(); }
+Menu::State Menu::getState() const { return m_state_stack.top(); }
 
 } // namespace Doncon::Utils

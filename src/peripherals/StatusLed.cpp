@@ -5,9 +5,9 @@
 
 namespace Doncon::Peripherals {
 
-StatusLed::StatusLed(const Config &config) : m_config(config), m_input_state({}), m_player_color(std::nullopt) {
+StatusLed::StatusLed(const Config &config) : m_config(config) {
     gpio_init(m_config.led_enable_pin);
-    gpio_set_dir(m_config.led_enable_pin, GPIO_OUT);
+    gpio_set_dir(m_config.led_enable_pin, (bool)GPIO_OUT);
     gpio_put(m_config.led_enable_pin, true);
 
     ws2812_init(config.led_pin, m_config.is_rgbw);

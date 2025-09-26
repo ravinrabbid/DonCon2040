@@ -31,7 +31,7 @@ PS4AuthProvider::PS4AuthProvider() {
 
     if (mbedtls_pk_parse_key(&m_pk_context,
                              reinterpret_cast<const unsigned char *>(Doncon::Config::PS4Auth::config.key_pem.c_str()),
-                             Doncon::Config::PS4Auth::config.key_pem.size() + 1, nullptr, 0, const_rng, nullptr)) {
+                             Doncon::Config::PS4Auth::config.key_pem.size() + 1, nullptr, 0, const_rng, nullptr) != 0) {
         return;
     }
 
@@ -53,12 +53,12 @@ PS4AuthProvider::sign(const std::array<uint8_t, PS4AuthProvider::SIGNATURE_LENGT
 
     auto *const rsa_context = mbedtls_pk_rsa(m_pk_context);
 
-    if (mbedtls_sha256(challenge.data(), challenge.size(), hashed_challenge.data(), 0)) {
+    if (mbedtls_sha256(challenge.data(), challenge.size(), hashed_challenge.data(), 0) != 0) {
         return std::nullopt;
     }
 
     if (mbedtls_rsa_rsassa_pss_sign(rsa_context, const_rng, nullptr, MBEDTLS_MD_SHA256, hashed_challenge.size(),
-                                    hashed_challenge.data(), signed_challenge.data())) {
+                                    hashed_challenge.data(), signed_challenge.data()) != 0) {
         return std::nullopt;
     }
 
