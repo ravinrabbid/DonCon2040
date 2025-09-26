@@ -22,7 +22,7 @@ SettingsStore::SettingsStore()
                      ._padding = {}}) {
     uint32_t current_page = m_flash_offset + m_flash_size - m_store_size;
     bool found_valid = false;
-    for (uint8_t i = 0; i < m_store_pages; ++i) {
+    for (size_t i = 0; i < m_store_pages; ++i) {
         if (read_byte(current_page) == m_magic_byte) {
             found_valid = true;
             break;
@@ -115,7 +115,7 @@ void SettingsStore::store() {
 
         uint32_t current_page = m_flash_offset;
         bool do_erase = true;
-        for (uint8_t i = 0; i < m_store_pages; ++i) {
+        for (size_t i = 0; i < m_store_pages; ++i) {
             if (read_byte(current_page) == 0xFF) {
                 do_erase = false;
                 break;

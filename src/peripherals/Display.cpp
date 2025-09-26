@@ -135,7 +135,7 @@ void Display::drawMenuScreen() {
     case Utils::Menu::Descriptor::Type::Menu:
     case Utils::Menu::Descriptor::Type::Selection: {
         auto selection_count = descriptor_it->second.items.size();
-        for (uint8_t i = 0; i < selection_count; ++i) {
+        for (size_t i = 0; i < selection_count; ++i) {
             if (i == m_menu_state.selected_value) {
                 ssd1306_draw_square(&m_display, ((127) - ((selection_count - i) * 6)) - 1, 2, 4, 4);
             } else {
@@ -144,7 +144,6 @@ void Display::drawMenuScreen() {
         }
     } break;
     case Utils::Menu::Descriptor::Type::RebootInfo:
-        break;
     case Utils::Menu::Descriptor::Type::Value:
     case Utils::Menu::Descriptor::Type::Toggle:
         break;
