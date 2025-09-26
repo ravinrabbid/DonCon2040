@@ -58,9 +58,9 @@ void StatusLed::update() {
             m_config.enable_player_color ? m_player_color.value_or(m_config.idle_color) : m_config.idle_color;
 
         ws2812_put_pixel(
-            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((idle_color.r) * brightness_factor),
-                                                   static_cast<uint8_t>((idle_color.g) * brightness_factor),
-                                                   static_cast<uint8_t>((idle_color.b) * brightness_factor)));
+            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((float)idle_color.r * brightness_factor),
+                                                   static_cast<uint8_t>((float)idle_color.g * brightness_factor),
+                                                   static_cast<uint8_t>((float)idle_color.b * brightness_factor)));
     }
 }
 

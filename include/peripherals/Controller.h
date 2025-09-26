@@ -119,7 +119,7 @@ class Controller {
     };
 
     Config m_config;
-    SocdState m_socd_state;
+    SocdState m_socd_state{.lastVertical = Id::DOWN, .lastHorizontal = Id::RIGHT};
     std::map<Id, Button> m_buttons;
 
     std::unique_ptr<GpioInterface> m_gpio;

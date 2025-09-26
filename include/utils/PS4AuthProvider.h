@@ -24,11 +24,14 @@ class PS4AuthProvider {
 
   private:
     bool m_key_valid{false};
-
-    mbedtls_pk_context m_pk_context;
+    mbedtls_pk_context m_pk_context{};
 
   public:
     PS4AuthProvider();
+    PS4AuthProvider(const PS4AuthProvider &) = default;
+    PS4AuthProvider(PS4AuthProvider &&) = default;
+    PS4AuthProvider &operator=(PS4AuthProvider &&) = default;
+    PS4AuthProvider &operator=(const PS4AuthProvider &) = default;
     ~PS4AuthProvider();
 
     std::optional<std::array<uint8_t, SIGNATURE_LENGTH>> sign(const std::array<uint8_t, SIGNATURE_LENGTH> &challenge);

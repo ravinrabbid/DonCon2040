@@ -81,7 +81,7 @@ usb_report_t InputState::getSwitchReport() {
     m_switch_report.rx = 0x80;
     m_switch_report.ry = 0x80;
 
-    return {(uint8_t *)&m_switch_report, sizeof(hid_switch_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_switch_report), sizeof(hid_switch_report_t)};
 }
 
 usb_report_t InputState::getPS3InputReport() {
@@ -133,7 +133,7 @@ usb_report_t InputState::getPS3InputReport() {
 
     m_ps3_report.unknown_0x02_2 = 0x02;
 
-    return {(uint8_t *)&m_ps3_report, sizeof(hid_ps3_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_ps3_report), sizeof(hid_ps3_report_t)};
 }
 
 usb_report_t InputState::getPS4InputReport() {
@@ -182,7 +182,7 @@ usb_report_t InputState::getPS4InputReport() {
         report_counter = 0;
     }
 
-    return {(uint8_t *)&m_ps4_report, sizeof(hid_ps4_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_ps4_report), sizeof(hid_ps4_report_t)};
 }
 
 usb_report_t InputState::getKeyboardReport(InputState::Player player) {
@@ -227,7 +227,7 @@ usb_report_t InputState::getKeyboardReport(InputState::Player player) {
     // set_key(controller.buttons.home, );
     // set_key(controller.buttons.share, );
 
-    return {(uint8_t *)&m_keyboard_report, sizeof(hid_nkro_keyboard_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_keyboard_report), sizeof(hid_nkro_keyboard_report_t)};
 }
 
 usb_report_t InputState::getXinputBaseReport() {
@@ -260,7 +260,7 @@ usb_report_t InputState::getXinputBaseReport() {
 
     m_xinput_report.report_size = sizeof(xinput_report_t);
 
-    return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
 usb_report_t InputState::getXinputDigitalReport() {
@@ -272,7 +272,7 @@ usb_report_t InputState::getXinputDigitalReport() {
     m_xinput_report.buttons2 |= (drum.don_right.triggered ? (1 << 4) : 0)   // A
                                 | (drum.ka_right.triggered ? (1 << 5) : 0); // B
 
-    return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
 usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
@@ -281,10 +281,10 @@ usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
     int16_t x = 0;
     int16_t y = 0;
 
-    auto map_to_axis = [](uint16_t raw) -> uint16_t { return raw >> 1; };
+    auto map_to_axis = [](uint16_t raw) { return (int16_t)(raw >> 1); };
 
     if (drum.ka_left.analog > drum.don_left.analog) {
-        x = -map_to_axis(drum.ka_left.analog);
+        x = (int16_t)-map_to_axis(drum.ka_left.analog);
     } else {
         x = map_to_axis(drum.don_left.analog);
     }
@@ -292,7 +292,7 @@ usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
     if (drum.ka_right.analog > drum.don_right.analog) {
         y = map_to_axis(drum.ka_right.analog);
     } else {
-        y = -map_to_axis(drum.don_right.analog);
+        y = (int16_t)-map_to_axis(drum.don_right.analog);
     }
 
     switch (player) {
@@ -306,7 +306,7 @@ usb_report_t InputState::getXinputAnalogReport(InputState::Player player) {
         break;
     }
 
-    return {(uint8_t *)&m_xinput_report, sizeof(xinput_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
 }
 
 usb_report_t InputState::getMidiReport() {
@@ -358,7 +358,7 @@ usb_report_t InputState::getMidiReport() {
     m_midi_report.velocity.drumsticks = convert_range(drumsticks.velocity);
     m_midi_report.velocity.side_stick = convert_range(side_stick.velocity);
 
-    return {(uint8_t *)&m_midi_report, sizeof(midi_report_t)};
+    return {reinterpret_cast<uint8_t *>(&m_midi_report), sizeof(midi_report_t)};
 }
 
 usb_report_t InputState::getDebugReport() {
@@ -380,7 +380,7 @@ usb_report_t InputState::getDebugReport() {
 
     m_debug_report = out.str();
 
-    return {(uint8_t *)m_debug_report.c_str(), static_cast<uint16_t>(m_debug_report.size() + 1)};
+    return {reinterpret_cast<uint8_t *>(m_debug_report.data()), static_cast<uint16_t>(m_debug_report.size() + 1)};
 }
 
 void InputState::releaseAll() {

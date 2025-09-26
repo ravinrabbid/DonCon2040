@@ -101,8 +101,8 @@ std::map<Drum::Id, uint16_t> Drum::readInputs() {
 
     const auto adc_values = m_adc->read();
 
-    for (const auto &pad : m_pads) {
-        result[pad.first] = adc_values[pad.second.getChannel()];
+    for (const auto &[id, pad] : m_pads) {
+        result[id] = adc_values.at(pad.getChannel());
     }
 
     return result;

@@ -29,7 +29,8 @@ PS4AuthProvider::PS4AuthProvider() {
 
     mbedtls_pk_init(&m_pk_context);
 
-    if (mbedtls_pk_parse_key(&m_pk_context, (unsigned char *)Doncon::Config::PS4Auth::config.key_pem.c_str(),
+    if (mbedtls_pk_parse_key(&m_pk_context,
+                             reinterpret_cast<const unsigned char *>(Doncon::Config::PS4Auth::config.key_pem.c_str()),
                              Doncon::Config::PS4Auth::config.key_pem.size() + 1, nullptr, 0, const_rng, nullptr)) {
         return;
     }

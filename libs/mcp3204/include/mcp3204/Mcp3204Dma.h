@@ -11,6 +11,10 @@ class Mcp3204Dma {
 
   public:
     Mcp3204Dma(spi_inst *spi, uint8_t cs_pin);
+    Mcp3204Dma(const Mcp3204Dma &) = delete;
+    Mcp3204Dma(Mcp3204Dma &&) = default;
+    Mcp3204Dma &operator=(Mcp3204Dma &&) = delete;
+    Mcp3204Dma &operator=(const Mcp3204Dma &) = default;
     ~Mcp3204Dma();
 
     void run();

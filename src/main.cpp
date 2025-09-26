@@ -62,11 +62,11 @@ void core1_task() {
     Peripherals::Display display(Config::Default::display_config);
 
     Utils::PS4AuthProvider ps4authprovider;
-    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge;
+    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge{};
 
     Utils::InputState input_state;
-    Utils::Menu::State menu_display_msg;
-    ControlMessage control_msg;
+    Utils::Menu::State menu_display_msg{};
+    ControlMessage control_msg{};
 
     while (true) {
         controller.updateInputState(input_state);
@@ -130,7 +130,7 @@ int main() {
     queue_init(&auth_signed_challenge_queue, sizeof(std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH>), 1);
 
     Utils::InputState input_state;
-    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge_response;
+    std::array<uint8_t, Utils::PS4AuthProvider::SIGNATURE_LENGTH> auth_challenge_response{};
 
     auto settings_store = std::make_shared<Utils::SettingsStore>();
     Utils::Menu menu(settings_store);
