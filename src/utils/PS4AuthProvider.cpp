@@ -51,7 +51,7 @@ PS4AuthProvider::sign(const std::array<uint8_t, PS4AuthProvider::SIGNATURE_LENGT
     std::array<uint8_t, 32> hashed_challenge = {};
     auto signed_challenge = std::array<uint8_t, PS4AuthProvider::SIGNATURE_LENGTH>();
 
-    const auto rsa_context = mbedtls_pk_rsa(m_pk_context);
+    auto *const rsa_context = mbedtls_pk_rsa(m_pk_context);
 
     if (mbedtls_sha256(challenge.data(), challenge.size(), hashed_challenge.data(), 0)) {
         return std::nullopt;

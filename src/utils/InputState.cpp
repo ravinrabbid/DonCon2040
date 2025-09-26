@@ -5,6 +5,39 @@
 
 namespace Doncon::Utils {
 
+namespace {
+
+uint8_t getHidHat(const InputState::Controller::DPad dpad) {
+    if (dpad.up && dpad.right) {
+        return 0x01;
+    }
+    if (dpad.down && dpad.right) {
+        return 0x03;
+    }
+    if (dpad.down && dpad.left) {
+        return 0x05;
+    }
+    if (dpad.up && dpad.left) {
+        return 0x07;
+    }
+    if (dpad.up) {
+        return 0x00;
+    }
+    if (dpad.right) {
+        return 0x02;
+    }
+    if (dpad.down) {
+        return 0x04;
+    }
+    if (dpad.left) {
+        return 0x06;
+    }
+
+    return 0x08;
+}
+
+} // namespace
+
 usb_report_t InputState::getReport(usb_mode_t mode) {
     switch (mode) {
     case USB_MODE_SWITCH_TATACON:
@@ -32,28 +65,6 @@ usb_report_t InputState::getReport(usb_mode_t mode) {
     }
 
     return getDebugReport();
-}
-
-static uint8_t getHidHat(const InputState::Controller::DPad dpad) {
-    if (dpad.up && dpad.right) {
-        return 0x01;
-    } else if (dpad.down && dpad.right) {
-        return 0x03;
-    } else if (dpad.down && dpad.left) {
-        return 0x05;
-    } else if (dpad.up && dpad.left) {
-        return 0x07;
-    } else if (dpad.up) {
-        return 0x00;
-    } else if (dpad.right) {
-        return 0x02;
-    } else if (dpad.down) {
-        return 0x04;
-    } else if (dpad.left) {
-        return 0x06;
-    }
-
-    return 0x08;
 }
 
 usb_report_t InputState::getSwitchReport() {
@@ -349,7 +360,7 @@ usb_report_t InputState::getMidiReport() {
     m_midi_report.status.side_stick = side_stick.on;
 
     auto convert_range = [](uint16_t in) {
-        uint16_t out = in / 256;
+        const uint16_t out = in / 256;
         return uint8_t(out > 127 ? 127 : out);
     };
 
@@ -394,7 +405,7 @@ bool InputState::checkHotkey() {
     static const uint32_t hold_timeout = 2000;
 
     if (controller.buttons.start && controller.buttons.select) {
-        uint32_t now = to_ms_since_boot(get_absolute_time());
+        const uint32_t now = to_ms_since_boot(get_absolute_time());
         if (!hold_active) {
             hold_active = true;
             hold_since = now;

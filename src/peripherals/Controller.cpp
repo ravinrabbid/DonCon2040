@@ -13,7 +13,7 @@ void Controller::Button::setState(bool state, uint8_t debounce_delay) {
     }
 
     // Immediately change the input state, but only allow a change every debounce_delay milliseconds.
-    uint32_t now = to_ms_since_boot(get_absolute_time());
+    const uint32_t now = to_ms_since_boot(get_absolute_time());
     if (m_last_change + debounce_delay <= now) {
         m_active = state;
         m_last_change = now;
@@ -99,7 +99,7 @@ Controller::Controller(const Config &config) : m_config(config) {
 }
 
 void Controller::updateInputState(Utils::InputState &input_state) {
-    uint32_t gpio_state = m_gpio->read();
+    const uint32_t gpio_state = m_gpio->read();
 
     for (auto &button : m_buttons) {
         button.second.setState(gpio_state & button.second.getGpioMask(), m_config.debounce_delay_ms);

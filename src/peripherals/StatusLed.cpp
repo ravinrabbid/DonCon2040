@@ -20,7 +20,7 @@ void StatusLed::setInputState(const Utils::InputState &input_state) { m_input_st
 void StatusLed::setPlayerColor(const Config::Color &color) { m_player_color = color; }
 
 void StatusLed::update() {
-    float brightness_factor = (float)m_config.brightness / static_cast<float>(UINT8_MAX);
+    const float brightness_factor = (float)m_config.brightness / (float)UINT8_MAX;
 
     Config::Color mixed = {};
     bool triggered = false;

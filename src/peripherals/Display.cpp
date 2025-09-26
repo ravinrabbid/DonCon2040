@@ -11,22 +11,9 @@
 
 namespace Doncon::Peripherals {
 
-Display::Display(const Config &config) : m_config(config) {
-    m_display.external_vcc = false;
-    ssd1306_init(&m_display, 128, 64, m_config.i2c_address, m_config.i2c_block);
-    ssd1306_clear(&m_display);
-}
+namespace {
 
-void Display::setInputState(const Utils::InputState &state) { m_input_state = state; }
-void Display::setUsbMode(usb_mode_t mode) { m_usb_mode = mode; };
-void Display::setPlayerId(uint8_t player_id) { m_player_id = player_id; };
-
-void Display::setMenuState(const Utils::Menu::State &menu_state) { m_menu_state = menu_state; }
-
-void Display::showIdle() { m_state = State::Idle; }
-void Display::showMenu() { m_state = State::Menu; }
-
-static std::string modeToString(usb_mode_t mode) {
+std::string modeToString(usb_mode_t mode) {
     switch (mode) {
     case USB_MODE_SWITCH_TATACON:
         return "Switch Tatacon";
@@ -56,9 +43,26 @@ static std::string modeToString(usb_mode_t mode) {
     return "?";
 }
 
+} // namespace
+
+Display::Display(const Config &config) : m_config(config) {
+    m_display.external_vcc = false;
+    ssd1306_init(&m_display, 128, 64, m_config.i2c_address, m_config.i2c_block);
+    ssd1306_clear(&m_display);
+}
+
+void Display::setInputState(const Utils::InputState &state) { m_input_state = state; }
+void Display::setUsbMode(usb_mode_t mode) { m_usb_mode = mode; };
+void Display::setPlayerId(uint8_t player_id) { m_player_id = player_id; };
+
+void Display::setMenuState(const Utils::Menu::State &menu_state) { m_menu_state = menu_state; }
+
+void Display::showIdle() { m_state = State::Idle; }
+void Display::showMenu() { m_state = State::Menu; }
+
 void Display::drawIdleScreen() {
     // Header
-    std::string mode_string = modeToString(m_usb_mode) + " mode";
+    const std::string mode_string = modeToString(m_usb_mode) + " mode";
     ssd1306_draw_string(&m_display, 0, 0, 1, mode_string.c_str());
     ssd1306_draw_line(&m_display, 0, 10, 128, 10);
 

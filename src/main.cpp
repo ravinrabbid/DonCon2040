@@ -19,6 +19,8 @@
 
 using namespace Doncon;
 
+namespace {
+
 queue_t control_queue;
 queue_t menu_display_queue;
 queue_t drum_input_queue;
@@ -120,6 +122,8 @@ void core1_task() {
         display.update();
     }
 }
+
+} // namespace
 
 int main() {
     queue_init(&control_queue, sizeof(ControlMessage), 1);

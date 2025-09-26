@@ -67,7 +67,7 @@ void Drum::Pad::setState(const bool state, const uint16_t debounce_delay) {
     }
 
     // Immediately change the input state, but only allow a change every debounce_delay milliseconds.
-    uint32_t now = to_ms_since_boot(get_absolute_time());
+    const uint32_t now = to_ms_since_boot(get_absolute_time());
     if (m_last_change + debounce_delay <= now) {
         m_active = state;
         m_last_change = now;
@@ -117,7 +117,7 @@ void Drum::updateRollCounter(Utils::InputState &input_state) {
     static uint16_t roll_count = 0;
     static uint16_t previous_roll = 0;
 
-    uint32_t now = to_ms_since_boot(get_absolute_time());
+    const uint32_t now = to_ms_since_boot(get_absolute_time());
     if ((now - last_hit_time) > m_config.roll_counter_timeout_ms) {
         if (roll_count > 1) {
             previous_roll = roll_count;
