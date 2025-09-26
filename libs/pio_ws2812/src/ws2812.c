@@ -8,7 +8,6 @@
 #include "ws2812.pio.h"
 
 #include "hardware/clocks.h"
-#include "hardware/pio.h"
 
 static const uint8_t gamma_correct[] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -24,8 +23,7 @@ static const uint8_t gamma_correct[] = {
     169, 171, 173, 175, 177, 180, 182, 184, 186, 189, 191, 193, 196, 198, 200, 203, 205, 208, 210, 213, 215, 218,
     220, 223, 225, 228, 231, 233, 236, 239, 241, 244, 247, 249, 252, 255};
 
-void ws2812_init(uint8_t pin, bool is_rgbw) {
-    PIO pio = pio0;
+void ws2812_init(PIO pio, uint8_t pin, bool is_rgbw) {
     int sm = 0;
     uint offset = pio_add_program(pio, &ws2812_program);
 
@@ -40,11 +38,15 @@ uint32_t ws2812_rgb_to_gamma_corrected_u32pixel(uint8_t r, uint8_t g, uint8_t b)
     return ((uint32_t)(gamma_correct[r]) << 8) | ((uint32_t)(gamma_correct[g]) << 16) | (uint32_t)(gamma_correct[b]);
 }
 
-void ws2812_put_pixel(uint32_t pixel_grb) { pio_sm_put_blocking(pio0, 0, pixel_grb << 8u); }
+void ws2812_put_pixel(PIO pio, uint32_t pixel_grb) { pio_sm_put_blocking(pio, 0, pixel_grb << 8U); }
 
-void ws2812_put_frame(uint32_t *frame, size_t length) {
-    for (size_t i = 0; i < length; ++i) {
-        ws2812_put_pixel(frame[i]);
+void ws2812_put_frame(PIO pio, uint32_t *frame, size_t length) {
+    // Latch any previous data
+    while (!pio_sm_is_tx_fifo_empty(pio, 0)) {
     }
-    sleep_us(60);
+    sleep_us(100);
+
+    for (size_t i = 0; i < length; ++i) {
+        ws2812_put_pixel(pio, frame[i]);
+    }
 }

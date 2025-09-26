@@ -12,7 +12,7 @@ StatusLed::StatusLed(const Config &config) : m_config(config) {
     gpio_set_dir(m_config.led_enable_pin, (bool)GPIO_OUT);
     gpio_put(m_config.led_enable_pin, true);
 
-    ws2812_init(config.led_pin, m_config.is_rgbw);
+    ws2812_init(pio0, config.led_pin, m_config.is_rgbw);
 }
 
 void StatusLed::setBrightness(const uint8_t brightness) { m_config.brightness = brightness; }
@@ -52,17 +52,17 @@ void StatusLed::update() {
 
     if (triggered) {
         ws2812_put_pixel(
-            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((float)mixed.r * brightness_factor),
-                                                   static_cast<uint8_t>((float)mixed.g * brightness_factor),
-                                                   static_cast<uint8_t>((float)mixed.b * brightness_factor)));
+            pio0, ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((float)mixed.r * brightness_factor),
+                                                         static_cast<uint8_t>((float)mixed.g * brightness_factor),
+                                                         static_cast<uint8_t>((float)mixed.b * brightness_factor)));
     } else {
         const auto idle_color =
             m_config.enable_player_color ? m_player_color.value_or(m_config.idle_color) : m_config.idle_color;
 
-        ws2812_put_pixel(
-            ws2812_rgb_to_gamma_corrected_u32pixel(static_cast<uint8_t>((float)idle_color.r * brightness_factor),
-                                                   static_cast<uint8_t>((float)idle_color.g * brightness_factor),
-                                                   static_cast<uint8_t>((float)idle_color.b * brightness_factor)));
+        ws2812_put_pixel(pio0, ws2812_rgb_to_gamma_corrected_u32pixel(
+                                   static_cast<uint8_t>((float)idle_color.r * brightness_factor),
+                                   static_cast<uint8_t>((float)idle_color.g * brightness_factor),
+                                   static_cast<uint8_t>((float)idle_color.b * brightness_factor)));
     }
 }
 
