@@ -1,0 +1,143 @@
+#ifndef GLOBALCONFIGURATION_H_
+#define GLOBALCONFIGURATION_H_
+
+#include "peripherals/Controller.h"
+#include "peripherals/Display.h"
+#include "peripherals/Drum.h"
+#include "peripherals/StatusLed.h"
+
+#include "hardware/i2c.h"
+#include "hardware/spi.h"
+
+namespace Doncon::Config {
+
+struct I2c {
+    uint8_t sda_pin;
+    uint8_t scl_pin;
+    i2c_inst_t *block;
+    uint speed_hz;
+};
+
+namespace Default {
+
+const usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
+
+const I2c i2c_config = {
+    .sda_pin = 6,
+    .scl_pin = 7,
+    .block = i2c1,
+    .speed_hz = 1000000,
+};
+
+const Peripherals::Drum::Config drum_config = {
+    .trigger_thresholds =
+        {
+            .don_left = 30,
+            .ka_left = 10,
+            .don_right = 30,
+            .ka_right = 10,
+        },
+
+    .double_trigger_mode = Peripherals::Drum::Config::DoubleTriggerMode::Off,
+    .double_trigger_thresholds =
+        {
+            .don_left = 2000,
+            .ka_left = 1500,
+            .don_right = 2000,
+            .ka_right = 1500,
+        },
+
+    .debounce_delay_ms = 25,
+    .roll_counter_timeout_ms = 500,
+
+    .adc_channels =
+        {
+            .don_left = 1,
+            .ka_left = 0,
+            .don_right = 2,
+            .ka_right = 3,
+        },
+
+    // ADC Config, either InternalAdc or ExternalAdc
+    // .adc_config =
+    //     Peripherals::Drum::Config::InternalAdc{
+    //         .sample_count = 16,
+    //     },
+
+    .adc_config =
+        Peripherals::Drum::Config::ExternalAdc{
+            .spi_block = spi0,
+            .spi_speed_hz = 2000000,
+            .spi_mosi_pin = 3,
+            .spi_miso_pin = 4,
+            .spi_sclk_pin = 2,
+            .spi_scsn_pin = 1,
+            .spi_level_shifter_enable_pin = 0,
+        },
+};
+
+const Peripherals::Controller::Config controller_config = {
+    .pins =
+        {
+            .dpad =
+                {
+                    .up = 8,
+                    .down = 9,
+                    .left = 10,
+                    .right = 11,
+                },
+            .buttons =
+                {
+                    .north = 0,
+                    .east = 3,
+                    .south = 1,
+                    .west = 2,
+
+                    .l = 12,
+                    .r = 4,
+
+                    .start = 5,
+                    .select = 13,
+                    .home = 6,
+                    .share = 14,
+                },
+        },
+
+    .debounce_delay_ms = 25,
+
+    // GPIO Config, either InternalGpio or ExternalGpio
+    // .gpio_config = Peripherals::Controller::Config::InternalGpio{},
+    .gpio_config =
+        Peripherals::Controller::Config::ExternalGpio{
+            .i2c =
+                {
+                    .block = i2c_config.block,
+                    .address = 0x20,
+                },
+        },
+};
+
+const Peripherals::StatusLed::Config led_config = {
+    .idle_color = {.r = 128, .g = 128, .b = 128},
+    .don_left_color = {.r = 255, .g = 0, .b = 0},
+    .ka_left_color = {.r = 0, .g = 0, .b = 255},
+    .don_right_color = {.r = 255, .g = 255, .b = 0},
+    .ka_right_color = {.r = 0, .g = 255, .b = 255},
+
+    .led_enable_pin = 11,
+    .led_pin = 12,
+    .is_rgbw = false,
+
+    .brightness = 255,
+    .enable_player_color = true,
+};
+
+const Peripherals::Display::Config display_config = {
+    .i2c_block = i2c_config.block,
+    .i2c_address = 0x3C,
+};
+
+} // namespace Default
+} // namespace Doncon::Config
+
+#endif // GLOBALCONFIGURATION_H_
