@@ -28,10 +28,10 @@ You can also try your luck with any generic piezo, in this case you might have t
 | PS1                                                   |              +/-12V DC to DC Converter               |        811-3205-ND        |                                              |
 | C1, C3, C5, C7                                        |                  1nF Film Capacitor                  |       399-11751-ND        |                                              |
 | C2, C4, C6, C8                                        |            0.47µF SMD Tantalum Capacitor             |       399-8287-1-ND       |                                              |
-| C9-C16, C20, C22, C24, C25                            |             0.1µF SMD Ceramic Capacitor              |      1276-1003-1-ND       |                                              |
-| C17                                                   |             4.7µF Electrolytic Capacitor             |       1189-1421-ND        |                                              |
-| C18, C19                                              |              1µF Electrolytic Capacitor              |     50YXJ4.7M5X11-ND      |                                              |
-| C21, C23, C26                                         |              10µF SMD Ceramic Capacitor              |      1276-6454-1-ND       |                                              |
+| C9, C10, C13, C14, C20, C22, C24, C25                 |             0.1µF SMD Ceramic Capacitor              |      1276-1003-1-ND       |                                              |
+| C17                                                   |             4.7µF Electrolytic Capacitor             |     50YXJ4.7M5X11-ND      |                                              |
+| C18, C19                                              |              1µF Electrolytic Capacitor              |       1189-1421-ND        |                                              |
+| C21                                                   |              10µF SMD Ceramic Capacitor              |      1276-6454-1-ND       |                                              |
 | D1, D2, D5, D7, D8, D11, D13, D14, D17, D19, D20, D23 |                  1N4148WS SMD Diode                  |     1N4148WS-FDICT-ND     |                                              |
 | D3, D4, D9, D10, D15, D16, D21, D22                   |               BAT43 SMD Schottky Diode               |  112-BAT43WS-E3-08CT-ND   |        1N4148 will probably work too         |
 | D6, D12, D18, D24                                     |              4.3V 400mW SMD Zener Diode              |    1727-PDZ4.3BZCT-ND     |                                              |
