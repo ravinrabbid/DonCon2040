@@ -16,6 +16,7 @@ A 3D-printable case can be found in the [case subdirectory](./Case/). Print the 
 | **Reference**          |       **Description**       |       **Digikey Part**       |                                 **Notes**                                 |
 | ---------------------- | :-------------------------: | :--------------------------: | :-----------------------------------------------------------------------: |
 | J1                     | SSD1306 OLED Display Module |              -               | Dimension wise 128x64 or 128x32 should fit. Make sure the pinout matches. |
+| J2                     |  5Pin S5B-PH-K-S Connector  |         455-1722-ND          | PHR-5 plus SPH-002T-P0.5L is the counterpart                              |
 | U1                     |    MCP23017 IO Expander     |       MCP23017-E/SO-ND       |                                                                           |
 | SW1-14                 |    6x6mm Tactile Switch     | e.g. TS02-66-60-BK-100-LCR-D |                                                                           |
 | C1                     | 0.1µF SMD Ceramic Capacitor |        1276-1003-1-ND        |                                                                           |
