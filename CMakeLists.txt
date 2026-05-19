@@ -49,12 +49,17 @@ target_link_libraries(
          hardware_i2c
          hardware_spi
          pico_multicore
-         pico_rand
          pico_mbedtls
          pio_ws2812
          pico_ssd1306
          mcp23017
          mcp3204)
+
+set_source_files_properties(
+    ${CMAKE_BINARY_DIR}/_deps/pico_sdk-src/src/rp2_common/pico_mbedtls/pico_mbedtls.c
+    PROPERTIES
+    COMPILE_OPTIONS "-Wno-error=array-parameter"
+)
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)
