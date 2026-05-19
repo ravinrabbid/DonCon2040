@@ -1,6 +1,6 @@
 # DonConIOmini - Signal Conditioning for the DonCon2040
 
-This board hosts a Waveshare RP2040-Zero microcontroller unit and provides signal conditioning for the piezo drum triggers. The conditioning circuit is reverse engineered from the *V260 SIF PCB* found in the original arcades. In contrast to the original [DonConIO](/pcb/DonConIO) this board uses mainly SMD parts... less authentic but way better noise characteristics.
+This board hosts a Waveshare RP2040-Zero or RP2350-Zero microcontroller unit and provides signal conditioning for the piezo drum triggers. The conditioning circuit is reverse engineered from the *V260 SIF PCB* found in the original arcades. In contrast to the original [DonConIO](/pcb/DonConIO) this board uses mainly SMD parts... less authentic but way better noise characteristics.
 
 ![DonConIO PCB](board.jpg)
 
@@ -20,7 +20,7 @@ You can also try your luck with any generic piezo, in this case you might have t
 
 | **Reference**                                         |                   **Description**                    |     **Digikey Part**      |                  **Notes**                   |
 | ----------------------------------------------------- | :--------------------------------------------------: | :-----------------------: | :------------------------------------------: |
-| U3                                                    |                Waveshare RP2040-Zero                 |             -             |                                              |
+| U3                                                    |    Waveshare RP2040-Zero or Waveshare RP2350-Zero    |             -             |                                              |
 | U1, U2                                                |                 TL072CDR JFET OpAmp                  |       296-1283-1-ND       |                                              |
 | U5                                                    |                MCP3204 12bit SPI ADC                 |     MCP3204-CI/SL-ND      |                                              |
 | U6                                                    |           MCP1541 4.09V Voltage Reference            |    MCP1541T-I/TTCT-ND     |                                              |

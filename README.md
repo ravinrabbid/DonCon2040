@@ -41,10 +41,25 @@ See [pico-sdk readme](https://github.com/raspberrypi/pico-sdk/blob/master/README
 Use the environment variables `PICO_SDK_PATH` to use a local pico-sdk, and `PICO_BOARD` to select another target board.
 By default the pico-sdk will be fetched from Github and the target board will be "pico".
 
+For DonConIOmini with RP2040:
+
 ```sh
-mkdir build && cd build
-cmake ..
-make
+cmake -B build -DPICO_BOARD="waveshare_rp2040_zero"
+cmake --build build
+```
+
+For DonConIOmini with RP2350:
+
+```sh
+cmake -B build -DPICO_BOARD="waveshare_rp2350_zero"
+cmake --build build
+```
+
+For legacy DonConIO:
+
+```sh
+cmake -B build -DPICO_BOARD="seeed_xiao_rp2040"
+cmake --build build
 ```
 
 ## Configuration
@@ -84,7 +99,8 @@ DonCon2040 can sign those challenges, but you will need to obtain some data from
 
 To build the firmware run `scripts/generateAuthConfig.py` in the folder where you placed the required files. Copy the resulting `PS4AuthConfiguration.h` to the `include` directory, replacing the existing header. Then build the firmware as described in [Building](#building).
 
-Signing the challenge will block the second core of the rp2040 for 2-3 seconds, so the display, external controller and LED will appear stuck from time to time. Input handling of the drum is unaffected.
+Signing the challenge will block the second core of the RP2040 for 2-3 seconds, so the display, external controller and LED will appear stuck from time to time. Input handling of the drum is unaffected.
+On the RP2350 SHA256 is hardware accelerated, so signing time is reduced to about 1 second.
 
 ## Hardware
 
@@ -92,7 +108,7 @@ Signing the challenge will block the second core of the rp2040 for 2-3 seconds, 
 
 The [DonConIOmini](/pcb/DonConIOmini) board in the pcb subfolder is designed to be close to the original arcade hardware. It hosts a Waveshare RP2040-Zero and provides signal conditioning for Sensatec GSS-4S* piezo impact sensors. See its [README](/pcb/DonConIOmini/README.md) for details.
 
-If you don't want to use this board, the firmware should be usable on most RP2040 boards with appropriate configuration. You may also use a more simple trigger solution, it only has to provide an analog trigger level to the ADC inputs to be compatible.
+If you don't want to use this board, the firmware should be usable on most RP2040/RP2350 boards with appropriate configuration. You may also use a more simple trigger solution, it only has to provide an analog trigger level to the ADC inputs to be compatible.
 
 ### Controller Buttons and Display
 
