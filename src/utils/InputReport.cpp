@@ -323,4 +323,14 @@ usb_report_t InputReport::getReport(const InputState &state, usb_mode_t mode) {
     return getDebugReport(state);
 }
 
+uint8_t InputReport::getWiiExtensionReport(const InputState &state) {
+    const auto &drum = state.drum;
+
+    return ~(0                                           //
+             | (drum.don_left.triggered ? (1 << 6) : 0)  //
+             | (drum.ka_left.triggered ? (1 << 5) : 0)   //
+             | (drum.don_right.triggered ? (1 << 4) : 0) //
+             | (drum.ka_right.triggered ? (1 << 3) : 0));
+}
+
 } // namespace Doncon::Utils

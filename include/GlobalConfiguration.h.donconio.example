@@ -5,24 +5,20 @@
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
+#include "utils/I2c.h"
 
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
 
-namespace Doncon::Config {
+#include <optional>
 
-struct I2c {
-    uint8_t sda_pin;
-    uint8_t scl_pin;
-    i2c_inst_t *block;
-    uint speed_hz;
-};
+namespace Doncon::Config {
 
 namespace Default {
 
-const usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
+constexpr usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
 
-const I2c i2c_config = {
+constexpr Utils::I2c::Config pad_i2c_config = {
     .sda_pin = 6,
     .scl_pin = 7,
     .block = i2c1,
@@ -76,7 +72,7 @@ const Peripherals::Drum::Config drum_config = {
         },
 };
 
-const Peripherals::Controller::Config controller_config = {
+constexpr Peripherals::Controller::Config controller_config = {
     .pins =
         {
             .dpad =
@@ -111,13 +107,13 @@ const Peripherals::Controller::Config controller_config = {
         Peripherals::Controller::Config::ExternalGpio{
             .i2c =
                 {
-                    .block = i2c_config.block,
+                    .block = pad_i2c_config.block,
                     .address = 0x20,
                 },
         },
 };
 
-const Peripherals::StatusLed::Config led_config = {
+constexpr Peripherals::StatusLed::Config led_config = {
     .idle_color = {.r = 128, .g = 128, .b = 128},
     .don_left_color = {.r = 255, .g = 0, .b = 0},
     .ka_left_color = {.r = 0, .g = 0, .b = 255},
@@ -132,10 +128,12 @@ const Peripherals::StatusLed::Config led_config = {
     .enable_player_color = true,
 };
 
-const Peripherals::Display::Config display_config = {
-    .i2c_block = i2c_config.block,
+constexpr Peripherals::Display::Config display_config = {
+    .i2c_block = pad_i2c_config.block,
     .i2c_address = 0x3C,
 };
+
+constexpr std::optional<Utils::I2c::Config> wii_extension_config = std::nullopt;
 
 } // namespace Default
 } // namespace Doncon::Config

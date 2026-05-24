@@ -33,7 +33,8 @@ file(
   src/usb/device/hid/*.c
   src/usb/device/vendor/*.c
   src/utils/*.cpp
-  src/peripherals/*.cpp)
+  src/peripherals/*.cpp
+  src/extensions/wii/*.cpp)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 
@@ -49,6 +50,7 @@ target_link_libraries(
          hardware_i2c
          hardware_spi
          pico_multicore
+         pico_i2c_slave
          pico_mbedtls
          pio_ws2812
          pico_ssd1306

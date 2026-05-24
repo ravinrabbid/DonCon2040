@@ -12,6 +12,7 @@ If you have any questions about the project in general or need hints how to buil
 - Various controller emulation modes
   - HORI PS4-095 Taiko Drum for PS4 (will work on PS4, see [PS4 Authentication](#ps4-authentication) for details)
   - HORI NSW-079 Taiko Drum for Switch (compatible with Taiko no Tatsujin Rhythm Festival / Drum'n'Fun on Switch)
+  - Bandai NC-110 Taiko Drum for Wii (needs to be connected to Wii Remote, see [Wii Support](#wii-support))
   - Dualshock 4 (Only for PC/Steam, will not work on an actual PS4!)
   - Dualshock 3
   - Switch Pro Controller
@@ -101,6 +102,20 @@ To build the firmware run `scripts/generateAuthConfig.py` in the folder where yo
 
 Signing the challenge will block the second core of the RP2040 for 2-3 seconds, so the display, external controller and LED will appear stuck from time to time. Input handling of the drum is unaffected.
 On the RP2350 SHA256 is hardware accelerated, so signing time is reduced to about 1 second.
+
+### Wii Support
+
+To use the DonCon2040 with the Wii, it needs to be connected to the Wii Remote's extension port. This is only supported on boards exposing two I²C interfaces (i.e. the Waveshare RP2040/RP2350-Zero on the DonConIOmini).
+
+See [the consolemods.org wiki](https://consolemods.org/wiki/Wii:Connector_Pinouts#Wii_Remote_Extension_Controller) for the pinout of the Wii Remote expansion port.
+In the default configuration connect *SDA* to pin 0 and *SCL* to pin 1 of the RP2040/RP2350-Zero. Bridge *Sense* and *VCC* of the Wii Remote.
+
+Since the Wii Remote is battery powered and the DonCon2040 needs to be powered externally because the Wii Remote does not provide enough power on the extension port,
+I highly recommend to isolate the I²C bus (e.g. using an ISO1540 or ISO1640).
+While it does work when connecting the I²C signals directly, there is no guarantee there won't be any damage to the Wii Remote, its batteries or the DonCon2040 in the long run.
+At least **DO NOT** connect both *VCC*s to avoid feeding power to the Wii Remote through the expansion port directly.
+
+There is no dedicated mode for Wii support, it will be active if `wii_extension_config` is configured in `include/GlobalConfiguration.h`.
 
 ## Hardware
 

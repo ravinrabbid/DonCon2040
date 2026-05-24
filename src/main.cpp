@@ -1,3 +1,4 @@
+#include "extensions/wii/I2cSlave.h"
 #include "peripherals/Controller.h"
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
@@ -56,11 +57,8 @@ void core1_task() {
 
     // Init i2c port here because Controller and Display share it and
     // therefore can't init it themself.
-    gpio_set_function(Config::Default::i2c_config.sda_pin, GPIO_FUNC_I2C);
-    gpio_set_function(Config::Default::i2c_config.scl_pin, GPIO_FUNC_I2C);
-    gpio_pull_up(Config::Default::i2c_config.sda_pin);
-    gpio_pull_up(Config::Default::i2c_config.scl_pin);
-    i2c_init(Config::Default::i2c_config.block, Config::Default::i2c_config.speed_hz);
+    Utils::I2c::initGpio(Config::Default::pad_i2c_config);
+    i2c_init(Config::Default::pad_i2c_config.block, Config::Default::pad_i2c_config.speed_hz);
 
     Peripherals::Controller controller(Config::Default::controller_config);
     Peripherals::StatusLed led(Config::Default::led_config);
@@ -202,6 +200,10 @@ int main() {
         queue_try_add(&control_queue, &ctrl_message);
     });
 
+    if constexpr (Config::Default::wii_extension_config.has_value()) {
+        Extensions::Wii::init(*Config::Default::wii_extension_config);
+    }
+
     readSettings();
 
     while (true) {
@@ -234,6 +236,10 @@ int main() {
 
         usbd_driver_send_report(input_report.getReport(input_state, mode));
         usbd_driver_task();
+
+        if constexpr (Config::Default::wii_extension_config.has_value()) {
+            Extensions::Wii::setReport(input_report.getWiiExtensionReport(input_state));
+        };
 
         queue_try_add(&drum_input_queue, &drum_message);
 
