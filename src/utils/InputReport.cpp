@@ -60,7 +60,7 @@ usb_report_t InputReport::getSwitchReport(const InputState &state) {
 
     m_switch_report.hat = getHidHat(controller.dpad);
 
-    return {reinterpret_cast<uint8_t *>(&m_switch_report), sizeof(hid_switch_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_switch_report), .size = sizeof(hid_switch_report_t)};
 }
 
 usb_report_t InputReport::getPS3Report(const InputState &state) {
@@ -89,7 +89,7 @@ usb_report_t InputReport::getPS3Report(const InputState &state) {
     m_ps3_report.lt = (drum.ka_left.triggered ? 0xff : 0);
     m_ps3_report.rt = (drum.ka_right.triggered ? 0xff : 0);
 
-    return {reinterpret_cast<uint8_t *>(&m_ps3_report), sizeof(hid_ps3_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_ps3_report), .size = sizeof(hid_ps3_report_t)};
 }
 
 usb_report_t InputReport::getPS4Report(const InputState &state) {
@@ -124,7 +124,7 @@ usb_report_t InputReport::getPS4Report(const InputState &state) {
         m_ps4_report_counter = 0;
     }
 
-    return {reinterpret_cast<uint8_t *>(&m_ps4_report), sizeof(hid_ps4_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_ps4_report), .size = sizeof(hid_ps4_report_t)};
 }
 
 usb_report_t InputReport::getKeyboardReport(const InputState &state, InputReport::Player player) {
@@ -172,7 +172,7 @@ usb_report_t InputReport::getKeyboardReport(const InputState &state, InputReport
     // set_key(controller.buttons.home, );
     // set_key(controller.buttons.share, );
 
-    return {reinterpret_cast<uint8_t *>(&m_keyboard_report), sizeof(hid_nkro_keyboard_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_keyboard_report), .size = sizeof(hid_nkro_keyboard_report_t)};
 }
 
 usb_report_t InputReport::getXinputBaseReport(const InputState &state) {
@@ -196,7 +196,7 @@ usb_report_t InputReport::getXinputBaseReport(const InputState &state) {
                                | (controller.buttons.west ? (1 << 6) : 0)   // X
                                | (controller.buttons.north ? (1 << 7) : 0); // Y
 
-    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_xinput_report), .size = sizeof(xinput_report_t)};
 }
 
 usb_report_t InputReport::getXinputDigitalReport(const InputState &state) {
@@ -210,7 +210,7 @@ usb_report_t InputReport::getXinputDigitalReport(const InputState &state) {
     m_xinput_report.buttons2 |= (drum.don_right.triggered ? (1 << 4) : 0)   // A
                                 | (drum.ka_right.triggered ? (1 << 5) : 0); // B
 
-    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_xinput_report), .size = sizeof(xinput_report_t)};
 }
 
 usb_report_t InputReport::getXinputAnalogReport(const InputState &state, InputReport::Player player) {
@@ -221,10 +221,10 @@ usb_report_t InputReport::getXinputAnalogReport(const InputState &state, InputRe
     int16_t x = 0;
     int16_t y = 0;
 
-    auto map_to_axis = [](uint16_t raw) { return (int16_t)(raw >> 1); };
+    auto map_to_axis = [](uint16_t raw) { return static_cast<int16_t>(raw >> 1); };
 
     if (drum.ka_left.analog > drum.don_left.analog) {
-        x = (int16_t)-map_to_axis(drum.ka_left.analog);
+        x = static_cast<int16_t>(-map_to_axis(drum.ka_left.analog));
     } else {
         x = map_to_axis(drum.don_left.analog);
     }
@@ -232,7 +232,7 @@ usb_report_t InputReport::getXinputAnalogReport(const InputState &state, InputRe
     if (drum.ka_right.analog > drum.don_right.analog) {
         y = map_to_axis(drum.ka_right.analog);
     } else {
-        y = (int16_t)-map_to_axis(drum.don_right.analog);
+        y = static_cast<int16_t>(-map_to_axis(drum.don_right.analog));
     }
 
     switch (player) {
@@ -246,7 +246,7 @@ usb_report_t InputReport::getXinputAnalogReport(const InputState &state, InputRe
         break;
     }
 
-    return {reinterpret_cast<uint8_t *>(&m_xinput_report), sizeof(xinput_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_xinput_report), .size = sizeof(xinput_report_t)};
 }
 
 usb_report_t InputReport::getMidiReport(const InputState &state) {
@@ -259,7 +259,7 @@ usb_report_t InputReport::getMidiReport(const InputState &state) {
 
     auto convert_range = [](uint16_t in) {
         const uint16_t out = in / 256;
-        return uint8_t(out > 127 ? 127 : out);
+        return static_cast<uint8_t>(out > 127 ? 127 : out);
     };
 
     m_midi_report.velocity.acoustic_bass_drum = convert_range(drum.don_left.analog);
@@ -267,7 +267,7 @@ usb_report_t InputReport::getMidiReport(const InputState &state) {
     m_midi_report.velocity.drumsticks = convert_range(drum.ka_left.analog);
     m_midi_report.velocity.side_stick = convert_range(drum.ka_right.analog);
 
-    return {reinterpret_cast<uint8_t *>(&m_midi_report), sizeof(midi_report_t)};
+    return {.data = reinterpret_cast<uint8_t *>(&m_midi_report), .size = sizeof(midi_report_t)};
 }
 
 usb_report_t InputReport::getDebugReport(const InputState &state) {
@@ -291,7 +291,8 @@ usb_report_t InputReport::getDebugReport(const InputState &state) {
 
     m_debug_report = out.str();
 
-    return {reinterpret_cast<uint8_t *>(m_debug_report.data()), static_cast<uint16_t>(m_debug_report.size() + 1)};
+    return {.data = reinterpret_cast<uint8_t *>(m_debug_report.data()),
+            .size = static_cast<uint16_t>(m_debug_report.size() + 1)};
 }
 
 usb_report_t InputReport::getReport(const InputState &state, usb_mode_t mode) {

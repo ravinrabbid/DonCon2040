@@ -23,7 +23,7 @@ void Controller::Button::setState(bool state, uint8_t debounce_delay) {
 Controller::InternalGpio::InternalGpio(const std::map<Id, Button> &buttons) {
     for (const auto &button : buttons) {
         gpio_init(button.second.getGpioPin());
-        gpio_set_dir(button.second.getGpioPin(), (bool)GPIO_IN);
+        gpio_set_dir(button.second.getGpioPin(), static_cast<bool>(GPIO_IN));
         gpio_pull_up(button.second.getGpioPin());
     }
 }

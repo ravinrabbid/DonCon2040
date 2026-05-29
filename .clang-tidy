@@ -9,16 +9,16 @@ Checks: >
   readability-*,
 
   -bugprone-easily-swappable-parameters,
-  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -clang-analyzer-core.FixedAddressDereference,
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-avoid-non-const-global-variables,
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-pro-type-union-access,
+  -llvm-prefer-static-over-anonymous-namespace,
   -misc-include-cleaner,
   -modernize-use-trailing-return-type,
   -readability-magic-numbers,
   -readability-identifier-length,
-  -readability-static-accessed-through-instance,
   -readability-function-cognitive-complexity,
 
 CheckOptions:

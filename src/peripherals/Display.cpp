@@ -77,9 +77,9 @@ void Display::drawIdleScreen() {
     if (m_player_id != 0) {
         for (uint8_t i = 0; i < 4; ++i) {
             if ((m_player_id & (1 << i)) == 0) {
-                ssd1306_draw_square(&m_display, (127) - ((4 - i) * 6), 3, 2, 2);
+                ssd1306_draw_square(&m_display, 127 - ((4 - i) * 6), 3, 2, 2);
             } else {
-                ssd1306_draw_square(&m_display, ((127) - ((4 - i) * 6)) - 1, 2, 4, 4);
+                ssd1306_draw_square(&m_display, (127 - ((4 - i) * 6)) - 1, 2, 4, 4);
             }
         }
     }
@@ -147,9 +147,9 @@ void Display::drawMenuScreen() {
         auto selection_count = descriptor_it->second.items.size();
         for (size_t i = 0; i < selection_count; ++i) {
             if (i == m_menu_state.selected_value) {
-                ssd1306_draw_square(&m_display, ((127) - ((selection_count - i) * 6)) - 1, 2, 4, 4);
+                ssd1306_draw_square(&m_display, (127 - ((selection_count - i) * 6)) - 1, 2, 4, 4);
             } else {
-                ssd1306_draw_square(&m_display, (127) - ((selection_count - i) * 6), 3, 2, 2);
+                ssd1306_draw_square(&m_display, 127 - ((selection_count - i) * 6), 3, 2, 2);
             }
         }
     } break;

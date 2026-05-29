@@ -12,9 +12,7 @@
 
 #include <optional>
 
-namespace Doncon::Config {
-
-namespace Default {
+namespace Doncon::Config::Default {
 
 constexpr usb_mode_t usb_mode = USB_MODE_SWITCH_TATACON;
 
@@ -140,7 +138,6 @@ constexpr std::optional<Utils::I2c::Config> wii_extension_config = Utils::I2c::C
     .speed_hz = 400000,
 };
 
-} // namespace Default
-} // namespace Doncon::Config
+} // namespace Doncon::Config::Default
 
 #endif // GLOBALCONFIGURATION_H_

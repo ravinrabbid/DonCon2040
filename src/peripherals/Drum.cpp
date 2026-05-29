@@ -42,7 +42,7 @@ std::array<uint16_t, 4> Drum::InternalAdc::read() {
 Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) {
     // Enable level shifter
     gpio_init(config.spi_level_shifter_enable_pin);
-    gpio_set_dir(config.spi_level_shifter_enable_pin, (bool)GPIO_OUT);
+    gpio_set_dir(config.spi_level_shifter_enable_pin, static_cast<bool>(GPIO_OUT));
     gpio_put(config.spi_level_shifter_enable_pin, true);
 
     // Set up SPI
@@ -52,7 +52,7 @@ Drum::ExternalAdc::ExternalAdc(const Config::ExternalAdc &config) {
     spi_init(config.spi_block, config.spi_speed_hz);
 
     gpio_init(config.spi_scsn_pin);
-    gpio_set_dir(config.spi_scsn_pin, (bool)GPIO_OUT);
+    gpio_set_dir(config.spi_scsn_pin, static_cast<bool>(GPIO_OUT));
 
     Mcp3204Dma::run(config.spi_block, config.spi_scsn_pin);
 }
@@ -90,7 +90,7 @@ void Drum::Pad::setAnalog(uint16_t value, uint16_t debounce_delay) {
         m_analog_buffer.pop_front();
     }
 
-    m_analog_buffer.push_back({value, now});
+    m_analog_buffer.push_back({.value = value, .timestamp = now});
 }
 
 Drum::RollCounter::RollCounter(uint32_t timeout_ms) : m_timeout_ms(timeout_ms) {};
@@ -180,7 +180,7 @@ void Drum::updateDigitalInputState(Utils::InputState &input_state, const std::ma
                     return thresholds.ka_right;
                 }
                 assert(false);
-                return (uint16_t)0;
+                return uint16_t();
             };
             return (raw_values.at(target) > get_threshold(target));
         };

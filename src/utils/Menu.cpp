@@ -277,7 +277,7 @@ uint16_t Menu::getCurrentValue(Menu::Page page) {
 void Menu::gotoPage(Menu::Page page) {
     const auto current_value = getCurrentValue(page);
 
-    m_state_stack.push({page, current_value, current_value});
+    m_state_stack.push({.page = page, .selected_value = current_value, .original_value = current_value});
 }
 
 void Menu::gotoParent(bool do_restore) {
@@ -502,7 +502,7 @@ void Menu::performAction(Descriptor::Action action, uint16_t value) {
         m_store->setLedEnablePlayerColor(static_cast<bool>(value));
         break;
     case Descriptor::Action::DoReset:
-        m_store->reset();
+        (*m_store).reset();
         break;
     case Descriptor::Action::DoRebootToBootsel:
         m_store->scheduleReboot(true);

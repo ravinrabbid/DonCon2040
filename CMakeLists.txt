@@ -9,9 +9,11 @@ if((NOT DEFINED ENV{PICO_BOARD}) AND (NOT PICO_BOARD))
   set(PICO_BOARD "waveshare_rp2040_zero")
 endif()
 
-include(pico_sdk_import.cmake)
+include(cmake/pico_sdk_import.cmake)
 
 project(DonCon2040 VERSION 0.39.0)
+
+include(cmake/clang-tidy.cmake)
 
 set(PICO_USE_FASTEST_SUPPORTED_CLOCK 1)
 
@@ -62,6 +64,8 @@ set_source_files_properties(
     PROPERTIES
     COMPILE_OPTIONS "-Wno-error=array-parameter"
 )
+
+enable_clang_tidy(${PROJECT_NAME})
 
 pico_enable_stdio_usb(${PROJECT_NAME} 1)
 pico_enable_stdio_uart(${PROJECT_NAME} 0)

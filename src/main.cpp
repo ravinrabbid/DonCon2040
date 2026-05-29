@@ -238,7 +238,7 @@ int main() {
         usbd_driver_task();
 
         if constexpr (Config::Default::wii_extension_config.has_value()) {
-            Extensions::Wii::setReport(input_report.getWiiExtensionReport(input_state));
+            Extensions::Wii::setReport(Doncon::Utils::InputReport::getWiiExtensionReport(input_state));
         };
 
         queue_try_add(&drum_input_queue, &drum_message);
