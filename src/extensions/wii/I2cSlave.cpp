@@ -3,11 +3,14 @@
 #include "extensions/wii/Crypto.h"
 
 #include "pico/i2c_slave.h"
+#include "pico/time.h"
 
 namespace {
 
 constexpr uint8_t WII_EXTENSION_I2C_ADDR = 0x52;
 constexpr uint8_t WII_EXTENSION_ENCRYPTION_MODE_ENCRYPTED = 0xAA;
+
+constexpr absolute_time_t I2C_IDLE_TIMEOUT_MS = 1000;
 
 struct __attribute((packed, aligned(1))) Registers {
     std::array<uint8_t, 5> report_static = {0xA0, 0x20, 0x50, 0x10, 0xFF};
@@ -42,11 +45,21 @@ Registers registers{};
 
 // This runs within an ISR!
 void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
+    static absolute_time_t last_event = get_absolute_time();
+
     static bool key_dirty = true;
     static Doncon::Extensions::Wii::Crypto crypto;
 
     static bool address_written = false;
     static uint8_t address = 0x00;
+
+    const auto now = get_absolute_time();
+    const auto elapsed = absolute_time_diff_us(last_event, now);
+    if (us_to_ms(elapsed) > I2C_IDLE_TIMEOUT_MS) {
+        key_dirty = true;
+        address_written = false;
+    }
+    last_event = now;
 
     switch (event) {
     case I2C_SLAVE_RECEIVE:
