@@ -33,6 +33,7 @@ class StatusLed {
 
   private:
     Config m_config;
+    unsigned int m_pio_sm;
 
     Utils::InputState m_input_state;
     std::optional<Config::Color> m_player_color;
