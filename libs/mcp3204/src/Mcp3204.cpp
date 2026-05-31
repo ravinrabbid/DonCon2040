@@ -21,5 +21,5 @@ uint16_t Mcp3204::read(uint8_t channel) {
     gpio_put(m_cs_pin, true);
 
     // The 12 result bits are at the end of the ADC's output.
-    return (static_cast<uint16_t>(data_in[1] & 0x0F) << 8) | data_in[2];
+    return (static_cast<uint16_t>(data_in.at(1) & 0x0F) << 8) | data_in.at(2);
 }

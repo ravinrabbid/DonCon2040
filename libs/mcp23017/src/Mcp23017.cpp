@@ -263,7 +263,7 @@ uint16_t Mcp23017::readRegister16(Mcp23017::Register reg) {
     i2c_write_blocking(m_i2c, m_address, &reg_addr, 1, true);
     i2c_read_blocking(m_i2c, m_address, result.data(), 2, false);
 
-    return static_cast<uint16_t>(result[1]) << 8 | static_cast<uint16_t>(result[0]);
+    return static_cast<uint16_t>(result.at(1)) << 8 | static_cast<uint16_t>(result.at(0));
 }
 
 void Mcp23017::writeRegister8(Mcp23017::Register reg, uint8_t value) {

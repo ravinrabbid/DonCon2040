@@ -52,14 +52,14 @@ void Mcp3204Dma::triggerDmaRead() {
 
 void Mcp3204Dma::dmaReadHandler() {
     // The 12 result bits are at the end of the ADC's output.
-    const uint16_t value = (static_cast<uint16_t>(m_rx_buffer[1] & 0x0F) << 8) | m_rx_buffer[2];
+    const uint16_t value = (static_cast<uint16_t>(m_rx_buffer.at(1) & 0x0F) << 8) | m_rx_buffer.at(2);
 
     // We only care for the maximum value since the last read
     m_current_max_readings.at(m_current_channel) = std::max(m_current_max_readings.at(m_current_channel), value);
 
     // Advance to the next channel
     m_current_channel = (m_current_channel + 1) % CHANNEL_COUNT;
-    m_tx_buffer[1] = static_cast<uint8_t>(m_current_channel << 6);
+    m_tx_buffer.at(1) = static_cast<uint8_t>(m_current_channel << 6);
 
     dma_channel_acknowledge_irq0(m_rx_channel);
 
