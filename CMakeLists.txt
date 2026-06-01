@@ -36,7 +36,8 @@ file(
   src/usb/device/vendor/*.c
   src/utils/*.cpp
   src/peripherals/*.cpp
-  src/extensions/wii/*.cpp)
+  src/proprietary/*.cpp
+  src/proprietary/device/*.cpp)
 
 add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SOURCES})
 
@@ -57,7 +58,8 @@ target_link_libraries(
          pio_ws2812
          pico_ssd1306
          mcp23017
-         mcp3204)
+         mcp3204
+         pio_psx)
 
 set_source_files_properties(
     ${CMAKE_BINARY_DIR}/_deps/pico_sdk-src/src/rp2_common/pico_mbedtls/pico_mbedtls.c

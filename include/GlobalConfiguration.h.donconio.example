@@ -5,12 +5,11 @@
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
+#include "proprietary/DeviceConfig.h"
 #include "utils/I2c.h"
 
 #include "hardware/i2c.h"
 #include "hardware/spi.h"
-
-#include <optional>
 
 namespace Doncon::Config::Default {
 
@@ -131,7 +130,16 @@ constexpr Peripherals::Display::Config display_config = {
     .i2c_address = 0x3C,
 };
 
-constexpr std::optional<Utils::I2c::Config> wii_extension_config = std::nullopt;
+constexpr Proprietary::DeviceConfig proprietary_device_config = std::monostate{};
+// constexpr Proprietary::DeviceConfig proprietary_device_config = Proprietary::WiimoteExtensionDriver::Config{
+//     .sda_pin = 0,
+//     .scl_pin = 1,
+//     .block = i2c0,
+//     .speed_hz = 400000,
+// };
+// constexpr Proprietary::DeviceConfig proprietary_device_config = Proprietary::PsxDigitalPadDriver::Config{
+//     .base_pin = 4,
+// };
 
 } // namespace Doncon::Config::Default
 

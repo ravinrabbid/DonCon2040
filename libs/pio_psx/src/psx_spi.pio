@@ -1,0 +1,77 @@
+.define PUBLIC OFFSET_DAT 0
+.define PUBLIC OFFSET_CMD 1
+.define PUBLIC OFFSET_ATT 2
+.define PUBLIC OFFSET_CLK 3
+.define PUBLIC OFFSET_ACK 4
+
+.define BUS_CLK_MIN_HZ 250000;
+.define PUBLIC PIO_CLK_HZ BUS_CLK_MIN_HZ * 10;
+
+; ACK length should be at least half a bus clock cycle
+.define ACK_LENGTH (PIO_CLK_HZ / BUS_CLK_MIN_HZ / 2);
+
+.program psx_spi_read
+
+    wait 0 pin (OFFSET_ATT - OFFSET_CMD)    ; Do not start before ATT is asserted
+.wrap_target
+    wait 0 pin (OFFSET_CLK - OFFSET_CMD)
+    wait 1 pin (OFFSET_CLK - OFFSET_CMD)
+    in pins 1                               ; Read one bit every clock cycle
+.wrap
+
+.program psx_spi_write
+.side_set 1 pindirs
+
+    wait 0 pin OFFSET_ATT   side 0              ; Do not start before ATT is asserted
+.wrap_target
+    pull                    side 0              ; Wait for new data to write
+    nop                     side 1 [ACK_LENGTH] ; ACK any previous transfer
+    set x, 7 side 0                             ; Send 8 bits
+bitloop:
+    wait 1 pin OFFSET_CLK   side 0
+    wait 0 pin OFFSET_CLK   side 0
+    out pindirs 1           side 0              ; Write one bit every clock cycle
+    jmp x-- bitloop         side 0
+.wrap
+
+% c-sdk {
+#include "hardware/clocks.h"
+
+static inline void psx_spi_read_program_init(PIO pio, uint sm, uint offset, uint base_pin) {
+    pio_sm_set_consecutive_pindirs(pio, sm, base_pin + OFFSET_CMD, 3, false);
+
+    pio_sm_config c = psx_spi_read_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, base_pin + OFFSET_CMD);
+    sm_config_set_in_shift(&c, true, true, 8);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    float div = clock_get_hz(clk_sys) / PIO_CLK_HZ;
+    sm_config_set_clkdiv(&c, div);
+
+    pio_sm_init(pio, sm, offset, &c);
+}
+
+static inline void psx_spi_write_program_init(PIO pio, uint sm, uint offset, uint base_pin) {
+    pio_gpio_init(pio, base_pin + OFFSET_DAT);
+    pio_gpio_init(pio, base_pin + OFFSET_ACK);
+    pio_sm_set_consecutive_pindirs(pio, sm, base_pin + OFFSET_DAT, 1, false);
+    pio_sm_set_consecutive_pindirs(pio, sm, base_pin + OFFSET_ATT, 3, false);
+
+    pio_sm_config c = psx_spi_write_program_get_default_config(offset);
+    sm_config_set_in_pins(&c, base_pin + OFFSET_DAT);
+    sm_config_set_out_pins(&c, base_pin + OFFSET_DAT, 1);
+    sm_config_set_set_pins(&c, base_pin + OFFSET_DAT, 1);
+    sm_config_set_sideset_pins(&c, base_pin + OFFSET_ACK);
+    sm_config_set_out_shift(&c, true, true, 8);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    // Output pins are open collector, so output is fixed to LOW and the pin is
+    // toggled between open and LOW by setting the pin direction.
+    pio_sm_set_pins_with_mask(pio, sm, 0, (1 << (base_pin + OFFSET_DAT)) | (1 << (base_pin + OFFSET_ACK)));
+
+    float div = clock_get_hz(clk_sys) / PIO_CLK_HZ;
+    sm_config_set_clkdiv(&c, div);
+
+    pio_sm_init(pio, sm, offset, &c);
+}
+%}

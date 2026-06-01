@@ -9,10 +9,11 @@ If you have any questions about the project in general or need hints how to buil
 
 ## Features
 
-- Various controller emulation modes
-  - HORI PS4-095 Taiko Drum for PS4 (will work on PS4, see [PS4 Authentication](#ps4-authentication) for details)
+- Various controller emulations
+  - HORI PS4-095 Taiko Drum for Playstation 4 (will work on PS4, see [PS4 Authentication](#ps4-authentication) for details)
   - HORI NSW-079 Taiko Drum for Switch (compatible with Taiko no Tatsujin Rhythm Festival / Drum'n'Fun on Switch)
   - Bandai NC-110 Taiko Drum for Wii (needs to be connected to Wii Remote, see [Wii Support](#wii-support))
+  - Namco NPC-107 Taiko Drum for Playstation 2 (needs to be connected to PS2 controller port, see [PS2 Support](#ps2-support))
   - Dualshock 4 (Only for PC/Steam, will not work on an actual PS4!)
   - Dualshock 3
   - Switch Pro Controller
@@ -111,11 +112,35 @@ See [the consolemods.org wiki](https://consolemods.org/wiki/Wii:Connector_Pinout
 In the default configuration connect *SDA* to pin 0 and *SCL* to pin 1 of the RP2040/RP2350-Zero. Bridge *Sense* and *VCC* of the Wii Remote.
 
 Since the Wii Remote is battery powered and the DonCon2040 needs to be powered externally because the Wii Remote does not provide enough power on the extension port,
-I highly recommend to isolate the I²C bus (e.g. using an ISO1540 or ISO1640).
+I highly recommend to isolate the I²C bus (e.g. using an ISO1540 or ISO1640 I²C isolator).
 While it does work when connecting the I²C signals directly, there is no guarantee there won't be any damage to the Wii Remote, its batteries or the DonCon2040 in the long run.
 At least **DO NOT** connect both *VCC*s to avoid feeding power to the Wii Remote through the expansion port directly.
 
-There is no dedicated mode for Wii support, it will be active if `wii_extension_config` is configured in `include/GlobalConfiguration.h`.
+There is no dedicated mode for Wii support, it will be active in addition to the USB mode if `proprietary_device_config` is configured for Wii in `include/GlobalConfiguration.h`.
+
+### PS2 Support
+
+To use the DonCon2040 with the PS2, it needs to be connected to the PS2's controller port. This needs five consecutive GPIO pins on the RP2040/RP2350. The DonCon2040 still needs to be powered externally.
+
+See [the consolemods.org wiki](https://consolemods.org/wiki/PS1:Connector_Pinouts#Controller_and_memory_card) for the pinout of the PS2 controller port.
+The order of the signals lines is: Data, Command, Attention, Clock, Acknowledge.
+In the default configuration, the base GPIO pin is 4, so the connection is as follows:
+
+```txt
+PS2 Controller Port     DonCon2040
+----------------------------------
+[1] (Data)          <-- GPIO4
+[2] (Command)       --> GPIO5
+[3] -
+[4] GND             --- GND
+[5] -
+[6] (Attention)     --> GPIO6
+[7] (Clock)         --> GPIO7
+[8] -
+[9] (Attention)     <-- GPIO8
+```
+
+There is no dedicated mode for PS2 support, it will be active in addition to the USB mode if `proprietary_device_config` is configured for PS2 in `include/GlobalConfiguration.h`.
 
 ## Hardware
 

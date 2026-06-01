@@ -1,4 +1,4 @@
-#include "extensions/wii/Crypto.h"
+#include "utils/WiiCryptoProvider.h"
 
 #include <algorithm>
 #include <ranges>
@@ -173,9 +173,9 @@ constexpr std::array<std::array<uint8_t, 6>, 7> expected_answers = {{
 
 } // namespace
 
-namespace Doncon::Extensions::Wii {
+namespace Doncon::Utils {
 
-bool Crypto::setKey(std::span<uint8_t, KEY_DATA_LENGTH> key_data) {
+bool WiiCryptoProvider::setKey(std::span<uint8_t, KEY_DATA_LENGTH> key_data) {
     auto rand = key_data.subspan(0, RAND_LENGTH) | std::views::reverse;
     auto key = key_data.subspan(RAND_LENGTH, KEY_LENGTH) | std::views::reverse;
 
@@ -244,12 +244,12 @@ bool Crypto::setKey(std::span<uint8_t, KEY_DATA_LENGTH> key_data) {
     return false;
 }
 
-uint8_t Crypto::encrypt(uint8_t data, uint8_t address) {
+uint8_t WiiCryptoProvider::encrypt(uint8_t data, uint8_t address) {
     return (data - forward_table.at(address % 8)) ^ sbox_indices.at(address % 8);
 }
 
-uint8_t Crypto::decrypt(uint8_t data, uint8_t address) {
+uint8_t WiiCryptoProvider::decrypt(uint8_t data, uint8_t address) {
     return (data ^ sbox_indices.at(address % 8)) + forward_table.at(address % 8);
 }
 
-} // namespace Doncon::Extensions::Wii
+} // namespace Doncon::Utils

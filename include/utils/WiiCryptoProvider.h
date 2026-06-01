@@ -1,13 +1,13 @@
-#ifndef EXTENSIONS_WII_CRYPTO_H_
-#define EXTENSIONS_WII_CRYPTO_H_
+#ifndef UTILS_WIICRYPTOPROVIDER_H_
+#define UTILS_WIICRYPTOPROVIDER_H_
 
 #include <array>
 #include <cstdint>
 #include <span>
 
-namespace Doncon::Extensions::Wii {
+namespace Doncon::Utils {
 
-class Crypto {
+class WiiCryptoProvider {
   public:
     static constexpr uint8_t KEY_DATA_LENGTH = 16;
 
@@ -25,6 +25,6 @@ class Crypto {
     uint8_t decrypt(uint8_t data, uint8_t address);
 };
 
-} // namespace Doncon::Extensions::Wii
+} // namespace Doncon::Utils
 
-#endif // EXTENSIONS_WII_CRYPTO_H_
+#endif // UTILS_WIICRYPTOPROVIDER_H_

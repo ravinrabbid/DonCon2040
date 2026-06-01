@@ -125,7 +125,6 @@ struct InputReport {
     InputReport() = default;
 
     usb_report_t getReport(const InputState &state, usb_mode_t mode);
-    static uint8_t getWiiExtensionReport(const InputState &state);
 };
 
 } // namespace Doncon::Utils

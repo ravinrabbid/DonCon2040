@@ -1,8 +1,8 @@
-#include "extensions/wii/I2cSlave.h"
 #include "peripherals/Controller.h"
 #include "peripherals/Display.h"
 #include "peripherals/Drum.h"
 #include "peripherals/StatusLed.h"
+#include "proprietary/DeviceConfig.h"
 #include "usb/device/hid/ps4_auth.h"
 #include "usb/device_driver.h"
 #include "utils/InputReport.h"
@@ -200,9 +200,7 @@ int main() {
         queue_try_add(&control_queue, &ctrl_message);
     });
 
-    if constexpr (Config::Default::wii_extension_config.has_value()) {
-        Extensions::Wii::init(*Config::Default::wii_extension_config);
-    }
+    auto proprietary_driver = Proprietary::createDevice(Config::Default::proprietary_device_config);
 
     readSettings();
 
@@ -234,12 +232,12 @@ int main() {
             queue_add_blocking(&control_queue, &ctrl_message);
         }
 
+        if (proprietary_driver) {
+            proprietary_driver->setInputState(input_state);
+        }
+
         usbd_driver_send_report(input_report.getReport(input_state, mode));
         usbd_driver_task();
-
-        if constexpr (Config::Default::wii_extension_config.has_value()) {
-            Extensions::Wii::setReport(Doncon::Utils::InputReport::getWiiExtensionReport(input_state));
-        };
 
         queue_try_add(&drum_input_queue, &drum_message);
 

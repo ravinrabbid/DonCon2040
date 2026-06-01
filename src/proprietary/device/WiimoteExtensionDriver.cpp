@@ -1,6 +1,6 @@
-#include "extensions/wii/I2cSlave.h"
+#include "proprietary/device/WiimoteExtensionDriver.h"
 
-#include "extensions/wii/Crypto.h"
+#include "utils/WiiCryptoProvider.h"
 
 #include "pico/i2c_slave.h"
 #include "pico/time.h"
@@ -44,11 +44,11 @@ static_assert(sizeof(Registers) == UINT8_MAX + 1);
 Registers registers{};
 
 // This runs within an ISR!
-void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
+void __time_critical_func(i2c_slave_handler)(i2c_inst_t *i2c, i2c_slave_event_t event) {
     static absolute_time_t last_event = get_absolute_time();
 
     static bool key_dirty = true;
-    static Doncon::Extensions::Wii::Crypto crypto;
+    static Doncon::Utils::WiiCryptoProvider crypto;
 
     static bool address_written = false;
     static uint8_t address = 0x00;
@@ -104,17 +104,23 @@ void i2c_slave_handler(i2c_inst_t *i2c, i2c_slave_event_t event) {
 
 } // namespace
 
-namespace Doncon::Extensions::Wii {
+namespace Doncon::Proprietary {
 
-void init(const Utils::I2c::Config &config) {
+WiimoteExtensionDriver::WiimoteExtensionDriver(const WiimoteExtensionDriver::Config &config) {
     Utils::I2c::initGpio(config);
     i2c_init(config.block, config.speed_hz);
     i2c_slave_init(config.block, WII_EXTENSION_I2C_ADDR, &i2c_slave_handler);
 }
 
-void setReport(uint8_t report) {
+void WiimoteExtensionDriver::setInputState(const Utils::InputState &state) {
+    const auto &drum = state.drum;
+
     // one byte writes/reads are atomic on cortex-m
-    registers.report_buttons = report;
+    registers.report_buttons = ~(0                                           //
+                                 | (drum.don_left.triggered ? (1 << 6) : 0)  //
+                                 | (drum.ka_left.triggered ? (1 << 5) : 0)   //
+                                 | (drum.don_right.triggered ? (1 << 4) : 0) //
+                                 | (drum.ka_right.triggered ? (1 << 3) : 0));
 }
 
-} // namespace Doncon::Extensions::Wii
+} // namespace Doncon::Proprietary

@@ -28,6 +28,6 @@ CheckOptions:
 WarningsAsErrors: "*"
 
 HeaderFilterRegex: ".*"
-ExcludeHeaderFilterRegex: "^.*/((tinyusb|usb|generated)/.*|ssd1306\\.h)$"
+ExcludeHeaderFilterRegex: "^.*/((tinyusb|usb|generated)/.*|ssd1306\\.h|psx_spi\\.h)$"
 
 FormatStyle: "file"
