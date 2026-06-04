@@ -98,6 +98,8 @@ bool send_debug_report(usb_report_t report) {
 
 static void debug_init(void) {}
 
+static bool debug_deinit(void) { return true; }
+
 static void debug_reset(uint8_t rhport) {
     (void)rhport;
     itf_num = 0;
@@ -159,6 +161,7 @@ static usbd_class_driver_t const debug_app_driver = {
     .name = "DEBUG",
 #endif
     .init = debug_init,
+    .deinit = debug_deinit,
     .reset = debug_reset,
     .open = debug_open,
     .control_xfer_cb = debug_control_xfer_cb,

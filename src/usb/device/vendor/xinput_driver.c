@@ -180,6 +180,8 @@ static void xinput_reset(uint8_t rhport) {
 
 static void xinput_init(void) { xinput_reset(0); }
 
+static bool xinput_deinit(void) { return true; }
+
 static uint16_t xinput_open(uint8_t rhport, tusb_desc_interface_t const *desc_itf, uint16_t max_len) {
     TU_VERIFY(TUSB_CLASS_VENDOR_SPECIFIC == desc_itf->bInterfaceClass, 0);
 
@@ -245,6 +247,7 @@ static const usbd_class_driver_t xinput_app_driver = {
     .name = "XINPUT",
 #endif
     .init = xinput_init,
+    .deinit = xinput_deinit,
     .reset = xinput_reset,
     .open = xinput_open,
     .control_xfer_cb = xinput_control_xfer_cb,

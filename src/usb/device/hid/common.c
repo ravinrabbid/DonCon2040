@@ -93,6 +93,7 @@ const usbd_class_driver_t hid_app_driver = {
     .name = "HID",
 #endif
     .init = hidd_init,
+    .deinit = hidd_deinit,
     .reset = hidd_reset,
     .open = hidd_open,
     .control_xfer_cb = hid_control_xfer_cb,

@@ -95,6 +95,7 @@ static const usbd_class_driver_t midi_app_driver = {
     .name = "MIDI",
 #endif
     .init = midid_init,
+    .deinit = midid_deinit,
     .reset = midid_reset,
     .open = midid_open,
     .control_xfer_cb = midid_control_xfer_cb,
